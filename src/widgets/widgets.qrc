@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/anitools/icons">
+        <file alias="closedEye">resources/icons/closedEye.png</file>
+        <file alias="close">resources/icons/close.png</file>
+        <file alias="openEye">resources/icons/openEye.png</file>
+        <file alias="expandCollapseArrowDown">resources/icons/expandCollapseArrowDown.png</file>
+        <file alias="expandCollapseArrowRight">resources/icons/expandCollapseArrowRight.png</file>
+        <file alias="lock">resources/icons/lock.png</file>
+    </qresource>
+    <qresource prefix="/anitools/other">
+        <file alias="cmykProfile">resources/other/ISOcoated_v2_eci.icc</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/batchprocessor/icons">
+        <file alias="hSplitter">resources/icons/hSplitter.png</file>
+        <file alias="loadImageFilters">resources/icons/loadImageFilters.png</file>
+        <file alias="loadImage">resources/icons/loadImage.png</file>
+        <file alias="resetImageFilters">resources/icons/resetImageFilters.png</file>
+        <file alias="saveImageFilters">resources/icons/saveImageFilters.png</file>
+        <file alias="saveImage">resources/icons/saveImage.png</file>
+        <file alias="vSplitter">resources/icons/vSplitter.png</file>
+        <file alias="addImageFilter">resources/icons/addImageFilter.png</file>
+        <file alias="batchProcessing">resources/icons/batchProcessing.png</file>
+        <file alias="saveImageDisabled">resources/icons/saveImageDisabled.png</file>
+        <file alias="addImageFilterDisabled">resources/icons/addImageFilterDisabled.png</file>
+        <file alias="loadImageFiltersDisabled">resources/icons/loadImageFiltersDisabled.png</file>
+        <file alias="saveImageFiltersDisabled">resources/icons/saveImageFiltersDisabled.png</file>
+        <file alias="edit">resources/icons/edit.png</file>
+    </qresource>
+</RCC>
