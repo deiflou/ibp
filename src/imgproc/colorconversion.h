@@ -8,44 +8,41 @@ namespace imgproc {
 
 void initColorProfiles();
 
-extern void (* convertColor[5][5])(const unsigned char * inputColor, unsigned char * outputColor);
+extern void (* convertColors[5][5])(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertBGRToHSV(const unsigned char * inputColor, unsigned char * outputColor);
-void convertBGRToHSL(const unsigned char * inputColor, unsigned char * outputColor);
-void convertBGRToLab(const unsigned char * inputColor, unsigned char * outputColor);
-void convertBGRToCMYK(const unsigned char * inputColor, unsigned char * outputColor);
+void convertBGRToHSV(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertBGRToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertBGRToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertBGRToCMYK(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertHSVToBGR(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSVToHSL(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSVToLab(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSVToCMYK(const unsigned char * inputColor, unsigned char * outputColor);
+void convertHSVToBGR(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSVToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSVToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSVToCMYK(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertHSLToBGR(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSLToHSV(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSLToLab(const unsigned char * inputColor, unsigned char * outputColor);
-void convertHSLToCMYK(const unsigned char * inputColor, unsigned char * outputColor);
+void convertHSLToBGR(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSLToHSV(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSLToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertHSLToCMYK(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertLabToBGR(const unsigned char * inputColor, unsigned char * outputColor);
-void convertLabToHSV(const unsigned char * inputColor, unsigned char * outputColor);
-void convertLabToHSL(const unsigned char * inputColor, unsigned char * outputColor);
-void convertLabToCMYK(const unsigned char * inputColor, unsigned char * outputColor);
+void convertLabToBGR(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertLabToHSV(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertLabToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertLabToCMYK(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertCMYKToBGR(const unsigned char * inputColor, unsigned char * outputColor);
-void convertCMYKToHSV(const unsigned char * inputColor, unsigned char * outputColor);
-void convertCMYKToHSL(const unsigned char * inputColor, unsigned char * outputColor);
-void convertCMYKToLab(const unsigned char * inputColor, unsigned char * outputColor);
+void convertCMYKToBGR(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertCMYKToHSV(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertCMYKToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
+void convertCMYKToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-void convertIdentity(const unsigned char * inputColor, unsigned char * outputColor);
+extern void (* swapChannels[4][4])(unsigned char * inputBuffer);
 
-extern void (* swapChannels[4][4])(unsigned char * inputColor);
-
-inline void swapChannels01(unsigned char * inputColor);
-inline void swapChannels02(unsigned char * inputColor);
-inline void swapChannels03(unsigned char * inputColor);
-inline void swapChannels12(unsigned char * inputColor);
-inline void swapChannels13(unsigned char * inputColor);
-inline void swapChannels23(unsigned char * inputColor);
-inline void swapChannelsIdentity(unsigned char * inputColor);
+inline void swapChannels01(unsigned char * inputBuffer);
+inline void swapChannels02(unsigned char * inputBuffer);
+inline void swapChannels03(unsigned char * inputBuffer);
+inline void swapChannels12(unsigned char * inputBuffer);
+inline void swapChannels13(unsigned char * inputBuffer);
+inline void swapChannels23(unsigned char * inputBuffer);
 
 }}
 

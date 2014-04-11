@@ -6,6 +6,8 @@
 #include "../imgproc/lut.h"
 #include "../imgproc/types.h"
 
+#define MAX_IMAGE_SIZE 512
+
 Filter::Filter() :
     mMode(0),
     mImage()
@@ -44,11 +46,34 @@ QImage Filter::process(const QImage &inputImage)
     switch (mMode)
     {
     case 0:
-        bg = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-        msrc = cv::Mat(inputImage.height(), inputImage.width(), CV_8UC4, (void*)inputImage.bits());
-        mdst = cv::Mat(bg.height(), bg.width(), CV_8UC4, bg.bits());
-        cv::morphologyEx(msrc, mdst, cv::MORPH_CLOSE,
-                         cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(10, 10)));
+        int h, w;
+        if (inputImage.width() > MAX_IMAGE_SIZE || inputImage.height() > MAX_IMAGE_SIZE)
+        {
+            if (inputImage.width() > inputImage.height())
+            {
+                w = MAX_IMAGE_SIZE;
+                h = inputImage.height() * MAX_IMAGE_SIZE / inputImage.width();
+            }
+            else
+            {
+                h = MAX_IMAGE_SIZE;
+                w = inputImage.width() * MAX_IMAGE_SIZE / inputImage.height();
+            }
+            i = inputImage.scaled(w, h);
+        }
+        else
+        {
+            i = inputImage;
+            w = inputImage.width();
+            h = inputImage.height();
+        }
+        bg = QImage(w, h, QImage::Format_ARGB32);
+        msrc = cv::Mat(h, w, CV_8UC4, i.bits());
+        mdst = cv::Mat(h, w, CV_8UC4, bg.bits());
+        cv::medianBlur(msrc, mdst, 5);
+        cv::morphologyEx(mdst, msrc, cv::MORPH_CLOSE,
+                         cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(30, 30)));
+        bg = i.scaled(inputImage.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         break;
     case 1:
         if (mImage.isNull())
