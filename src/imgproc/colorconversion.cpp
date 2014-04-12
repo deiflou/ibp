@@ -70,14 +70,14 @@ void convertBGRToHSV(const unsigned char *inputBuffer, unsigned char *outputBuff
 
         dMaxOver2 = dMax >> 1;
         if (max == inputBuffer[ColorChannel_Red])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][max];
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax];
         else if (max == inputBuffer[ColorChannel_Green])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][max] + 85;
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] + 85;
         else
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][max] + 170;
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] + 170;
 
         outputBuffer[ColorChannel_Hue] = h < 0 ? h + 256 : h > 255 ? h - 256 : h;
         outputBuffer[ColorChannel_Saturation] = s;
@@ -116,14 +116,14 @@ void convertBGRToHSL(const unsigned char *inputBuffer, unsigned char *outputBuff
 
         dMaxOver2 = dMax >> 1;
         if (max == inputBuffer[ColorChannel_Red])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][max];
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax];
         else if (max == inputBuffer[ColorChannel_Green])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][max] + 85;
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] + 85;
         else
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][max] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][max] + 170;
+            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax] -
+                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] + 170;
 
         outputBuffer[ColorChannel_Hue] = h < 0 ? h + 256 : h > 255 ? h - 256 : h;
         outputBuffer[ColorChannel_Saturation] = s;

@@ -31,12 +31,14 @@ void ColorButton::On_Clicked()
     dlg.setFixedSize(dlg.minimumSizeHint());
     dlg.setWindowFlags((dlg.windowFlags() & ~Qt::WindowContextHelpButtonHint) | Qt::MSWindowsFixedSizeDialogHint);
 
+    QColor clr = color();
+    cp->setColor(clr);
 
-    //connect(&dlg, SIGNAL(colorChanged(QColor)), this, SLOT(setColor(QColor)));
+    connect(cp, SIGNAL(colorChanged(QColor)), this, SLOT(setColor(QColor)));
 
     if (dlg.exec() == QDialog::Rejected)
     {
-        //setColor(color);
+        setColor(clr);
     }
 }
 

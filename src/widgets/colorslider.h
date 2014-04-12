@@ -22,7 +22,7 @@ public:
     void color(unsigned int *c) const;
     unsigned char value() const;
     ColorModel colorModel() const;
-    ColorChannel Colorchannel() const;
+    ColorChannel colorChannel() const;
     Qt::Orientation orientation() const;
 
 private:
@@ -33,6 +33,8 @@ private:
 
     BGRA mBGRAImageData[256];
     unsigned char mRealImageData[1024];
+
+    QImage mBackgroundImage;
 
     void updateImageData();
     void updateImageDataAndPaint();
@@ -53,7 +55,7 @@ public slots:
     void setColor(unsigned char x, unsigned char y, unsigned char z, unsigned char w = 0);
     void setColor(unsigned int c);
     void setColor(const QColor & c);
-    void setValue(unsigned char v);
+    void setValue(int v);
     void setColorModel(ColorModel cm);
     void setColorChannel(ColorChannel cc);
     void setOrientation(Qt::Orientation o);

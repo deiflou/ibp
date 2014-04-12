@@ -11,15 +11,18 @@ TEMPLATE = lib
 TARGET = anitools.widgets
 
 win32 {
+    QT += winextras
     DEFINES += WIN_AERO
     CONFIG(debug, debug|release) {
         DESTDIR = ../../lib/win32/widgets/debug
         DLLDESTDIR = ../../bin/win32/debug
         LIBS += -L../../lib/win32/imgproc/debug -lanitools.imgproc
+        LIBS += -L../../lib/win32/misc/debug -lanitools.misc
     } else {
         DESTDIR = ../../lib/win32/widgets/release
         DLLDESTDIR = ../../bin/win32/release
         LIBS += -L../../lib/win32/imgproc/release -lanitools.imgproc
+        LIBS += -L../../lib/win32/misc/release -lanitools.misc
     }
 }
 

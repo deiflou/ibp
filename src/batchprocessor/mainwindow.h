@@ -8,15 +8,18 @@
 #include "../imgproc/freeimage.h"
 #include "../imgproc/imagefilterlist.h"
 #include "../plugins/imagefilterpluginloader.h"
-#if defined(Q_OS_WIN32) && defined(WIN_AERO)
+#ifdef Q_OS_WIN32
 #include "../misc/nativeeventfilter.h"
 #endif
 
 #include "imagefolderlistpopup.h"
 #include "widgetlist.h"
 
+#ifdef Q_OS_WIN32
 using namespace anitools::misc;
+#endif
 using namespace anitools::plugins;
+using namespace anitools::imgproc;
 
 namespace Ui {
 class MainWindow;

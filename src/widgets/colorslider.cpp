@@ -15,7 +15,8 @@ ColorSlider::ColorSlider(QWidget *parent) :
     QWidget(parent),
     mColorModel(ColorModel_BGR),
     mColorchannel(ColorChannel_Red),
-    mOrientation(Qt::Horizontal)
+    mOrientation(Qt::Horizontal),
+    mBackgroundImage(2, 2, QImage::Format_RGB888)
 {
     setFocusPolicy(Qt::StrongFocus);
 
@@ -29,11 +30,16 @@ ColorSlider::ColorSlider(QWidget *parent) :
 
 QColor ColorSlider::color() const
 {
-    BGRA bgra;
-    convertColors[mColorModel][ColorModel_BGR](mColor, (unsigned char*)&bgra, 1);
-    if (mColorModel != ColorModel_BGR)
-        bgra.a = 255;
-    return QColor(bgra.r, bgra.g, bgra.b, bgra.a);
+    if (mColorModel == ColorModel_BGR)
+        return QColor(mColor[ColorChannel_Red], mColor[ColorChannel_Green],
+                      mColor[ColorChannel_Blue], mColor[ColorChannel_Alpha]);
+    else
+    {
+        BGRA bgra;
+        convertColors[mColorModel][ColorModel_BGR](mColor, (unsigned char*)&bgra, 1);
+        return QColor(bgra.r, bgra.g, bgra.b, 255);
+    }
+
 }
 
 void ColorSlider::color(unsigned char *x, unsigned char *y, unsigned char *z, unsigned char *w) const
@@ -65,7 +71,7 @@ ColorModel ColorSlider::colorModel() const
     return mColorModel;
 }
 
-ColorChannel ColorSlider::Colorchannel() const
+ColorChannel ColorSlider::colorChannel() const
 {
     return mColorchannel;
 }
@@ -270,6 +276,20 @@ void ColorSlider::paintEvent(QPaintEvent *e)
     p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.setRenderHint(QPainter::Antialiasing);
 
+    // Background
+    if (mColorModel == ColorModel_BGR)
+    {
+        p.setBrushOrigin(1, 1);
+        int checkerboardColor1 = palette().color(QPalette::Light).rgb();
+        int checkerboardColor2 = palette().color(QPalette::Midlight).rgb();
+        mBackgroundImage.setPixel(0, 0, checkerboardColor1);
+        mBackgroundImage.setPixel(1, 1, checkerboardColor1);
+        mBackgroundImage.setPixel(0, 1, checkerboardColor2);
+        mBackgroundImage.setPixel(1, 0, checkerboardColor2);
+        QBrush checkerboardBrush = QBrush(mBackgroundImage);
+        checkerboardBrush.setTransform(QTransform(6, 0, 0, 0, 6, 0, 0, 0, 1));
+        p.fillRect(this->rect().adjusted(1, 1, -1, -1), checkerboardBrush);
+    }
     // Color
     QImage img((unsigned char *)mBGRAImageData,
                mOrientation == Qt::Horizontal ? 256 : 1,
@@ -397,9 +417,11 @@ void ColorSlider::setColor(const QColor &c)
     updateImageDataAndPaint();
 }
 
-void ColorSlider::setValue(unsigned char v)
+void ColorSlider::setValue(int v)
 {
     if (v == mColor[mColorchannel])
+        return;
+    if (v < 0 || v > 255)
         return;
     mColor[mColorchannel] = v;
     update();
