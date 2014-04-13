@@ -11,6 +11,7 @@ enum ColorModel
 
 enum ColorChannel
 {
+    ColorChannel_0 = 0, ColorChannel_1 = 1, ColorChannel_2 = 2, ColorChannel_3 = 3,
     ColorChannel_Blue = 0, ColorChannel_Green = 1, ColorChannel_Red = 2, ColorChannel_Alpha = 3,
     ColorChannel_Hue = 0, ColorChannel_Saturation = 1, ColorChannel_Value = 2, ColorChannel_Lightness = 2,
     ColorChannel_CIEL = 0, ColorChannel_CIEa = 1, ColorChannel_CIEb = 2,

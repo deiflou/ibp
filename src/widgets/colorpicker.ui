@@ -7,11 +7,18 @@
     <x>0</x>
     <y>0</y>
     <width>636</width>
-    <height>314</height>
+    <height>376</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Color Picker</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">.colorChannelButton:checked
+{
+	background-color: palette(highlight);
+	color: palette(highlight-text);
+}</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
    <property name="spacing">
@@ -31,8 +38,24 @@
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>10</number>
+     </property>
      <item>
-      <widget class="QWidget" name="widget_2" native="true">
+      <spacer name="verticalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="anitools::widgets::ColorBox" name="mBoxColor" native="true">
        <property name="minimumSize">
         <size>
          <width>256</width>
@@ -62,6 +85,19 @@
         </size>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -102,6 +138,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -179,6 +218,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -254,6 +296,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -341,6 +386,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -417,6 +465,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -492,6 +543,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -576,6 +630,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -652,6 +709,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -727,6 +787,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -811,6 +874,9 @@
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
            </attribute>
@@ -886,6 +952,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -965,6 +1034,9 @@
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -1050,7 +1122,7 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QToolButton" name="mButtonCyan">
            <property name="minimumSize">
             <size>
              <width>20</width>
@@ -1066,9 +1138,18 @@
            <property name="text">
             <string>C</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -1120,7 +1201,7 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QToolButton" name="mButtonMagenta">
            <property name="minimumSize">
             <size>
              <width>20</width>
@@ -1136,9 +1217,18 @@
            <property name="text">
             <string>M</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -1190,7 +1280,7 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QToolButton" name="mButtonYellow">
            <property name="minimumSize">
             <size>
              <width>20</width>
@@ -1206,9 +1296,18 @@
            <property name="text">
             <string>Y</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>colorChannelButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -1425,6 +1524,12 @@
    <class>anitools::widgets::ColorSlider</class>
    <extends>QWidget</extends>
    <header>colorslider.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>anitools::widgets::ColorBox</class>
+   <extends>QWidget</extends>
+   <header>colorbox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

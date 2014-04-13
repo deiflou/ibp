@@ -91,6 +91,11 @@ private slots:
     void on_mButtonCIEL_toggled(bool c);
     void on_mButtonCIEa_toggled(bool c);
     void on_mButtonCIEb_toggled(bool c);
+    void on_mButtonCyan_toggled(bool c);
+    void on_mButtonMagenta_toggled(bool c);
+    void on_mButtonYellow_toggled(bool c);
+
+    void on_mBoxColor_colorChanged();
 };
 
 }}

@@ -14,7 +14,7 @@ namespace widgets {
 ColorSlider::ColorSlider(QWidget *parent) :
     QWidget(parent),
     mColorModel(ColorModel_BGR),
-    mColorchannel(ColorChannel_Red),
+    mColorChannel(ColorChannel_Red),
     mOrientation(Qt::Horizontal),
     mBackgroundImage(2, 2, QImage::Format_RGB888)
 {
@@ -63,7 +63,7 @@ void ColorSlider::color(unsigned int *c) const
 
 unsigned char ColorSlider::value() const
 {
-    return mColor[mColorchannel];
+    return mColor[mColorChannel];
 }
 
 ColorModel ColorSlider::colorModel() const
@@ -73,7 +73,7 @@ ColorModel ColorSlider::colorModel() const
 
 ColorChannel ColorSlider::colorChannel() const
 {
-    return mColorchannel;
+    return mColorChannel;
 }
 
 Qt::Orientation ColorSlider::orientation() const
@@ -89,7 +89,7 @@ void ColorSlider::updateImageData()
     switch (mColorModel)
     {
     case ColorModel_HSV:
-        switch (mColorchannel)
+        switch (mColorChannel)
         {
         case ColorChannel_Hue:
             for (i = 0; i < 256; i++, realImageData += 3)
@@ -119,7 +119,7 @@ void ColorSlider::updateImageData()
         convertHSVToBGR(mRealImageData, (unsigned char *)mBGRAImageData, 256);
         break;
     case ColorModel_HSL:
-        switch (mColorchannel)
+        switch (mColorChannel)
         {
         case ColorChannel_Hue:
             for (i = 0; i < 256; i++, realImageData += 3)
@@ -149,7 +149,7 @@ void ColorSlider::updateImageData()
         convertHSLToBGR(mRealImageData, (unsigned char *)mBGRAImageData, 256);
         break;
     case ColorModel_Lab:
-        switch (mColorchannel)
+        switch (mColorChannel)
         {
         case ColorChannel_CIEL:
             for (i = 0; i < 256; i++, realImageData += 3)
@@ -179,7 +179,7 @@ void ColorSlider::updateImageData()
         convertLabToBGR(mRealImageData, (unsigned char *)mBGRAImageData, 256);
         break;
     case ColorModel_CMYK:
-        switch (mColorchannel)
+        switch (mColorChannel)
         {
         case ColorChannel_Cyan:
             for (i = 0; i < 256; i++, realImageData += 4)
@@ -221,7 +221,7 @@ void ColorSlider::updateImageData()
         convertCMYKToBGR(mRealImageData, (unsigned char *)mBGRAImageData, 256);
         break;
     default:
-        switch (mColorchannel)
+        switch (mColorChannel)
         {
         case ColorChannel_Red:
             for (i = 0; i < 256; i++, BGRAImageData++)
@@ -287,7 +287,7 @@ void ColorSlider::paintEvent(QPaintEvent *e)
         mBackgroundImage.setPixel(0, 1, checkerboardColor2);
         mBackgroundImage.setPixel(1, 0, checkerboardColor2);
         QBrush checkerboardBrush = QBrush(mBackgroundImage);
-        checkerboardBrush.setTransform(QTransform(6, 0, 0, 0, 6, 0, 0, 0, 1));
+        checkerboardBrush.setTransform(QTransform(4, 0, 0, 0, 4, 0, 0, 0, 1));
         p.fillRect(this->rect().adjusted(1, 1, -1, -1), checkerboardBrush);
     }
     // Color
@@ -316,7 +316,7 @@ void ColorSlider::paintEvent(QPaintEvent *e)
     p.setRenderHint(QPainter::Antialiasing, false);
     if (mOrientation == Qt::Horizontal)
     {
-        hPos = qRound(mColor[mColorchannel] * (width() - 3) / 255.0) + 1;
+        hPos = qRound(mColor[mColorChannel] * (width() - 3) / 255.0) + 1;
         poly.append(QPoint(hPos, height() - 4));
         poly.append(QPoint(hPos - 4, height()));
         poly.append(QPoint(hPos + 4, height()));
@@ -324,7 +324,7 @@ void ColorSlider::paintEvent(QPaintEvent *e)
     }
     else
     {
-        hPos = qRound(mColor[mColorchannel] * (height() - 3) / 255.0) + 1;
+        hPos = qRound(mColor[mColorChannel] * (height() - 3) / 255.0) + 1;
         poly.append(QPoint(4, hPos));
         poly.append(QPoint(0, hPos - 4));
         poly.append(QPoint(0, hPos + 4));
@@ -419,11 +419,11 @@ void ColorSlider::setColor(const QColor &c)
 
 void ColorSlider::setValue(int v)
 {
-    if (v == mColor[mColorchannel])
+    if (v == mColor[mColorChannel])
         return;
     if (v < 0 || v > 255)
         return;
-    mColor[mColorchannel] = v;
+    mColor[mColorChannel] = v;
     update();
     emit valueChanged(v);
 }
@@ -437,21 +437,21 @@ void ColorSlider::setColorModel(ColorModel cm)
 
     convertColors[mColorModel][cm](mColor, mColor, 1);
     mColorModel = cm;
-    mColorchannel = (ColorChannel)0;
+    mColorChannel = (ColorChannel)0;
     updateImageDataAndPaint();
     emit valueChanged(mColor[0]);
 }
 
 void ColorSlider::setColorChannel(ColorChannel cc)
 {
-    if (cc == mColorchannel)
+    if (cc == mColorChannel)
         return;
     if (cc < 0 || cc > 3)
         return;
     if (cc == 3 && (mColorModel != ColorModel_BGR && mColorModel != ColorModel_CMYK))
         return;
 
-    mColorchannel = cc;
+    mColorChannel = cc;
     updateImageDataAndPaint();
 }
 

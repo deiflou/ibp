@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "colorpicker.h"
 #include "ui_colorpicker.h"
 #include "../imgproc/types.h"
@@ -18,6 +20,8 @@ ColorPicker::ColorPicker(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->mBoxColor->setColorModel(ColorModel_HSV);
+    ui->mBoxColor->setColorChannel(ColorChannel_Hue);
     INIT_WIDGETS(Big, ColorChannel_Hue, ColorModel_HSV)
 
     INIT_WIDGETS(Blue, ColorChannel_Blue, ColorModel_BGR)
@@ -46,7 +50,6 @@ ColorPicker::ColorPicker(QWidget *parent) :
 
     setColor(QColor(255, 0, 0, 255));
 
-
     mCanUpdate = true;
 }
 
@@ -70,10 +73,15 @@ void ColorPicker::setColor(const QColor &color)
     ui->mSliderGreen->setColor(srcColor2);
     ui->mSliderBlue->setColor(srcColor2);
     ui->mSliderAlpha->setColor(srcColor);
+    ui->mSpinRed->setValue(ui->mSliderRed->value());
+    ui->mSpinGreen->setValue(ui->mSliderGreen->value());
+    ui->mSpinBlue->setValue(ui->mSliderBlue->value());
+    ui->mSpinAlpha->setValue(ui->mSliderAlpha->value());
     rgbChanged(srcColor);
     unsigned int mainSliderColor;
     mMainSlider->color(&mainSliderColor);
     ui->mSliderBig->setColor(mainSliderColor);
+    ui->mBoxColor->setColor(mainSliderColor);
     mCanUpdate = true;
 }
 
@@ -161,6 +169,7 @@ void ColorPicker::on_mSlider##arg1##_valueChanged(int v) \
     unsigned int mainSliderColor; \
     mMainSlider->color(&mainSliderColor); \
     ui->mSliderBig->setColor(mainSliderColor); \
+    ui->mBoxColor->setColor(mainSliderColor); \
     mCanUpdate = true; \
     QColor c = ui->mSliderRed->color(); \
     c.setAlpha(ui->mSliderAlpha->value()); \
@@ -184,6 +193,7 @@ void ColorPicker::on_mSlider##arg1##_valueChanged(int v) \
     unsigned int mainSliderColor; \
     mMainSlider->color(&mainSliderColor); \
     ui->mSliderBig->setColor(mainSliderColor); \
+    ui->mBoxColor->setColor(mainSliderColor); \
     mCanUpdate = true; \
     QColor c = ui->mSliderRed->color(); \
     c.setAlpha(ui->mSliderAlpha->value()); \
@@ -253,10 +263,13 @@ void ColorPicker::on_mButton##arg1##_toggled(bool c) \
     mCanUpdate = false; \
     ui->mSliderBig->setColorModel(ui->mSlider##arg1->colorModel()); \
     ui->mSliderBig->setColorChannel(ui->mSlider##arg1->colorChannel()); \
+    ui->mBoxColor->setColorModel(ui->mSlider##arg1->colorModel()); \
+    ui->mBoxColor->setColorChannel(ui->mSlider##arg1->colorChannel()); \
     mMainSlider = ui->mSlider##arg1; \
     unsigned int mainSliderColor; \
     mMainSlider->color(&mainSliderColor); \
     ui->mSliderBig->setColor(mainSliderColor); \
+    ui->mBoxColor->setColor(mainSliderColor); \
     mCanUpdate = true; \
 }
 
@@ -272,5 +285,60 @@ BUTTON_CODE(Lightness)
 BUTTON_CODE(CIEL)
 BUTTON_CODE(CIEa)
 BUTTON_CODE(CIEb)
+BUTTON_CODE(Cyan)
+BUTTON_CODE(Magenta)
+BUTTON_CODE(Yellow)
+
+#define BOX_CODE(arg1, arg2, arg3, arg4, arg5, arg6, arg7) \
+    { \
+        ui->mSlider##arg1->setColor(*colorUInt); \
+        ui->mSlider##arg2->setColor(*colorUInt); \
+        ui->mSlider##arg3->setColor(*colorUInt); \
+        ui->mSpin##arg1->setValue(qRound((double)ui->mSlider##arg1->value() arg5)); \
+        ui->mSpin##arg2->setValue(qRound((double)ui->mSlider##arg2->value() arg6)); \
+        ui->mSpin##arg3->setValue(qRound((double)ui->mSlider##arg3->value() arg7)); \
+        arg4##Changed(*colorUInt); \
+    }
+
+void ColorPicker::on_mBoxColor_colorChanged()
+{
+    if (!mCanUpdate)
+        return;
+
+    unsigned char color[4] = { 0 };
+    unsigned int * colorUInt = (unsigned int *)color;
+    ui->mBoxColor->color(colorUInt);
+
+    mCanUpdate = false;
+
+    if (mMainSlider == ui->mSliderRed || mMainSlider == ui->mSliderGreen || mMainSlider == ui->mSliderBlue)
+
+    BOX_CODE(Red, Green, Blue, rgb, , , )
+
+    else if (mMainSlider == ui->mSliderHue1 || mMainSlider == ui->mSliderSaturation1 ||
+             mMainSlider == ui->mSliderValue)
+
+    BOX_CODE(Hue1, Saturation1, Value, hsv, * 359 / 255, * 100 / 255, * 100 / 255)
+
+    else if (mMainSlider == ui->mSliderHue2 || mMainSlider == ui->mSliderSaturation2 ||
+             mMainSlider == ui->mSliderLightness)
+
+    BOX_CODE(Hue2, Saturation2, Lightness, hsl, * 359 / 255, * 100 / 255, * 100 / 255)
+
+    else if (mMainSlider == ui->mSliderCIEL || mMainSlider == ui->mSliderCIEa || mMainSlider == ui->mSliderCIEb)
+
+    BOX_CODE(CIEL, CIEa, CIEb, lab, * 100 / 255, - 128, - 128)
+
+    else
+
+    BOX_CODE(Cyan, Magenta, Yellow, cmyk, * 100 / 255, * 100 / 255, * 100 / 255)
+
+    unsigned int mainSliderColor;
+    mMainSlider->color(&mainSliderColor);
+    ui->mSliderBig->setColor(mainSliderColor);
+    ui->mSliderAlpha->setColor(ui->mSliderBlue->value(), ui->mSliderGreen->value(),
+                               ui->mSliderRed->value(), ui->mSliderAlpha->value());
+    mCanUpdate = true;
+}
 
 }}

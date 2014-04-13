@@ -17,12 +17,10 @@ win32 {
         DESTDIR = ../../lib/win32/widgets/debug
         DLLDESTDIR = ../../bin/win32/debug
         LIBS += -L../../lib/win32/imgproc/debug -lanitools.imgproc
-        LIBS += -L../../lib/win32/misc/debug -lanitools.misc
     } else {
         DESTDIR = ../../lib/win32/widgets/release
         DLLDESTDIR = ../../bin/win32/release
         LIBS += -L../../lib/win32/imgproc/release -lanitools.imgproc
-        LIBS += -L../../lib/win32/misc/release -lanitools.misc
     }
 }
 
@@ -37,7 +35,8 @@ SOURCES += \
     ../../src/widgets/imageviewer.cpp \
     ../../src/widgets/toolbuttonex.cpp \
     ../../src/widgets/genericdialog.cpp \
-    ../../src/widgets/colorpicker.cpp
+    ../../src/widgets/colorpicker.cpp \
+    ../../src/widgets/colorbox.cpp
 
 HEADERS += \
     ../../src/widgets/blendmodecombobox.h \
@@ -47,7 +46,8 @@ HEADERS += \
     ../../src/widgets/imageviewer.h \
     ../../src/widgets/toolbuttonex.h \
     ../../src/widgets/genericdialog.h \
-    ../../src/widgets/colorpicker.h
+    ../../src/widgets/colorpicker.h \
+    ../../src/widgets/colorbox.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
