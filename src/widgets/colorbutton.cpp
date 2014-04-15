@@ -21,18 +21,28 @@
 
 #include "colorbutton.h"
 #include "genericdialog.h"
-#include "colorpicker.h"
 
 namespace anitools {
 namespace widgets {
 
 ColorButton::ColorButton(QWidget *parent) :
-    ToolButtonEx(parent)
+    ToolButtonEx(parent),
+    mColorPickerFlags(ColorPicker::None)
 {
     setExtraDataType(Color);
     setExtraDataFlags(CheckerboardBackground);
 
     connect(this, SIGNAL(clicked()), this, SLOT(On_Clicked()));
+}
+
+ColorPicker::ColorPickerFlags ColorButton::colorPickerFlags() const
+{
+    return mColorPickerFlags;
+}
+
+void ColorButton::setColorPickerFlags(ColorPicker::ColorPickerFlags f)
+{
+    mColorPickerFlags = f;
 }
 
 void ColorButton::setColor(const QColor &c)
@@ -54,6 +64,7 @@ void ColorButton::On_Clicked()
 
     QColor clr = color();
     cp->setColor(clr);
+    cp->setFlags(mColorPickerFlags);
 
     connect(cp, SIGNAL(colorChanged(QColor)), this, SLOT(setColor(QColor)));
 

@@ -38,22 +38,40 @@ class ColorPicker : public QWidget
     Q_OBJECT
 
 public:
+    enum ColorPickerFlag
+    {
+        None = 0,
+        HideAlpha = 1
+    };
+    Q_DECLARE_FLAGS(ColorPickerFlags, ColorPickerFlag)
+
     explicit ColorPicker(QWidget *parent = 0);
     ~ColorPicker();
 
     QColor color() const;
+    ColorPickerFlags flags() const;
+
+    void setFlags(ColorPickerFlags f);
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e);
 
 private:
     Ui::ColorPicker *ui;
 
     bool mCanUpdate;
     ColorSlider * mMainSlider;
+    QColor mReferenceColor;
+    QImage mBackgroundImage;
+    ColorPickerFlags mFlags;
 
     void rgbChanged(unsigned int srcColor);
     void hsvChanged(unsigned int srcColor);
     void hslChanged(unsigned int srcColor);
     void labChanged(unsigned int srcColor);
     void cmykChanged(unsigned int srcColor);
+
+    void setWidgetReferenceColor();
 
 signals:
     void colorChanged(const QColor & color);
@@ -63,6 +81,7 @@ public slots:
 
 private slots:
     void on_mSliderBig_valueChanged(int v);
+    void on_mBoxColor_colorChanged();
 
     void on_mSliderRed_valueChanged(int v);
     void on_mSliderGreen_valueChanged(int v);
@@ -116,7 +135,7 @@ private slots:
     void on_mButtonMagenta_toggled(bool c);
     void on_mButtonYellow_toggled(bool c);
 
-    void on_mBoxColor_colorChanged();
+    void on_mLineEditHex_textEdited(const QString & s);
 };
 
 }}

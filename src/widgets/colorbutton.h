@@ -23,6 +23,7 @@
 #define ANITOOLS_WIDGETS_COLORBUTTON_H
 
 #include "toolbuttonex.h"
+#include "colorpicker.h"
 
 namespace anitools {
 namespace widgets {
@@ -33,7 +34,12 @@ class ColorButton : public ToolButtonEx
 public:
     explicit ColorButton(QWidget *parent = 0);
 
+    ColorPicker::ColorPickerFlags colorPickerFlags() const;
+    void setColorPickerFlags(ColorPicker::ColorPickerFlags f);
+
 private:
+    ColorPicker::ColorPickerFlags mColorPickerFlags;
+
     inline void setPopupMode(ToolButtonPopupMode mode)
     {
         ToolButtonEx::setPopupMode(mode);

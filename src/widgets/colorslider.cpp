@@ -330,27 +330,17 @@ void ColorSlider::paintEvent(QPaintEvent *e)
         p.drawRoundedRect(this->rect(), 2, 2);
     }
     // Handle
-    int hPos;
-    QPolygon poly;
-    p.setBrush(palette().color(QPalette::Dark));
-    p.setPen(Qt::NoPen);
-    p.setRenderHint(QPainter::Antialiasing, false);
+    QPointF hPos;
     if (mOrientation == Qt::Horizontal)
-    {
-        hPos = qRound(mColor[mColorChannel] * (width() - 3) / 255.0) + 1;
-        poly.append(QPoint(hPos, height() - 4));
-        poly.append(QPoint(hPos - 4, height()));
-        poly.append(QPoint(hPos + 4, height()));
-        p.drawPolygon(poly);
-    }
+        hPos = QPointF((mColor[mColorChannel] * (width() - 3) / 255.0) + 1, height() / 2.);
     else
-    {
-        hPos = qRound(mColor[mColorChannel] * (height() - 3) / 255.0) + 1;
-        poly.append(QPoint(4, hPos));
-        poly.append(QPoint(0, hPos - 4));
-        poly.append(QPoint(0, hPos + 4));
-        p.drawPolygon(poly);
-    }
+        hPos = QPointF(width() / 2., (mColor[mColorChannel] * (height() - 3) / 255.0) + 1);
+    p.setBrush(Qt::NoBrush);
+    p.setPen(QColor(0, 0, 0, 128));
+    p.drawEllipse(hPos, 5, 5);
+    p.setBrush(color());
+    p.setPen(QColor(255, 255, 255, 128));
+    p.drawEllipse(hPos, 4, 4);
 
     e->accept();
 }

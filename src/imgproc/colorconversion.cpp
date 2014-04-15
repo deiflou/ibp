@@ -183,6 +183,8 @@ void convertHSVToBGR(const unsigned char *inputBuffer, unsigned char *outputBuff
         }
 
         i = (inputBuffer[ColorChannel_Hue] + 1) * 6;
+        if (i == 1536)
+            i = 0;
         v0 = i - (i >> 8 << 8);
         v1 = lut01[inputBuffer[ColorChannel_Value]][255 - inputBuffer[ColorChannel_Saturation]];
         v2 = lut01[inputBuffer[ColorChannel_Value]][255 - lut01[inputBuffer[ColorChannel_Saturation]][v0]];

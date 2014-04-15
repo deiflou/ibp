@@ -23,13 +23,17 @@
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"
+#include "../widgets/colorpicker.h"
+
+using namespace anitools::widgets;
 
 FilterWidget::FilterWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::FilterWidget),
+    ui(new ::Ui::FilterWidget),
     mEmitSignals(true)
 {
     ui->setupUi(this);
+    ui->mButtonColor->setColorPickerFlags(ColorPicker::HideAlpha);
 }
 
 FilterWidget::~FilterWidget()

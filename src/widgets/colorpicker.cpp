@@ -19,6 +19,8 @@
 **
 ****************************************************************************/
 
+#include <QPainter>
+#include <QMouseEvent>
 #include <QDebug>
 
 #include "colorpicker.h"
@@ -37,7 +39,9 @@ using namespace anitools::imgproc;
 ColorPicker::ColorPicker(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ColorPicker),
-    mCanUpdate(false)
+    mCanUpdate(false),
+    mBackgroundImage(2, 2, QImage::Format_RGB888),
+    mFlags(None)
 {
     ui->setupUi(this);
 
@@ -72,6 +76,11 @@ ColorPicker::ColorPicker(QWidget *parent) :
     setColor(QColor(255, 0, 0, 255));
 
     mCanUpdate = true;
+
+    ui->mWidgetReferenceColor->installEventFilter(this);
+    ui->mWidgetReferenceColor->setMouseTracking(true);
+
+    ui->mLineEditHex->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-fA-F0-9]*"), this));
 }
 
 ColorPicker::~ColorPicker()
@@ -79,9 +88,75 @@ ColorPicker::~ColorPicker()
     delete ui;
 }
 
+bool ColorPicker::eventFilter(QObject *o, QEvent *e)
+{
+    if (o == ui->mWidgetReferenceColor)
+    {
+        QWidget * w = qobject_cast<QWidget*>(o);
+        QMouseEvent * me;
+
+        if (e->type() == QEvent::Paint)
+        {
+            QPainter p(w);
+            p.setRenderHint(QPainter::SmoothPixmapTransform);
+            p.setRenderHint(QPainter::Antialiasing);
+
+            QRectF r = QRectF(w->rect()).adjusted(.5, .5, -.5, -.5);
+
+            // Background
+            int checkerboardColor1 = palette().color(QPalette::Light).rgb();
+            int checkerboardColor2 = palette().color(QPalette::Midlight).rgb();
+            mBackgroundImage.setPixel(0, 0, checkerboardColor1);
+            mBackgroundImage.setPixel(1, 1, checkerboardColor1);
+            mBackgroundImage.setPixel(0, 1, checkerboardColor2);
+            mBackgroundImage.setPixel(1, 0, checkerboardColor2);
+            QBrush checkerboardBrush = QBrush(mBackgroundImage);
+            checkerboardBrush.setTransform(QTransform(4, 0, 0, 0, 4, 0, 0, 0, 1));
+            p.setBrush(checkerboardBrush);
+            p.setPen(Qt::NoPen);
+            p.drawRoundedRect(r, 2, 2);
+            // Colors
+            p.setClipRect(0, 0, w->width() >> 1, w->height());
+            p.setBrush(mReferenceColor);
+            p.drawRoundedRect(r, 2, 2);
+            p.setClipRect(w->width() >> 1, 0, w->width() - (w->width() >> 1), w->height());
+            p.setBrush(ui->mSliderAlpha->color());
+            p.drawRoundedRect(r, 2, 2);
+            // Border
+            p.setClipping(false);
+            p.setBrush(Qt::NoBrush);
+            p.setPen(w->palette().color(QPalette::Mid));
+            p.drawRoundedRect(r, 2, 2);
+
+            return true;
+        }
+        else if (e->type() == QEvent::MouseMove)
+        {
+            me = (QMouseEvent *)e;
+            if (me->x() < w->width() >> 1)
+                w->setCursor(Qt::PointingHandCursor);
+            else
+                w->unsetCursor();
+
+            return true;
+        }
+        else if (e->type() == QEvent::MouseButtonRelease)
+        {
+            me = (QMouseEvent *)e;
+            if (me->button() == Qt::LeftButton)
+                if (me->x() < w->width() >> 1)
+                {
+                    setColor(mReferenceColor);
+                    return true;
+                }
+        }
+    }
+    return QWidget::eventFilter(o, e);
+}
+
 QColor ColorPicker::color() const
 {
-    return ui->mSliderRed->color();
+    return ui->mSliderAlpha->color();
 }
 
 void ColorPicker::setColor(const QColor &color)
@@ -103,7 +178,28 @@ void ColorPicker::setColor(const QColor &color)
     mMainSlider->color(&mainSliderColor);
     ui->mSliderBig->setColor(mainSliderColor);
     ui->mBoxColor->setColor(mainSliderColor);
+    setWidgetReferenceColor();
+    QString sn = color.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb);
+    ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper());
     mCanUpdate = true;
+}
+
+ColorPicker::ColorPickerFlags ColorPicker::flags() const
+{
+    return mFlags;
+}
+
+void ColorPicker::setFlags(ColorPickerFlags f)
+{
+    mFlags = f;
+    ui->mContainerAlpha->setVisible(!(f & HideAlpha));
+    ui->mLineEditHex->setMaxLength(f & HideAlpha ? 6 : 8);
+}
+
+void ColorPicker::setWidgetReferenceColor()
+{
+    mReferenceColor = ui->mSliderAlpha->color();
+    ui->mWidgetReferenceColor->update();
 }
 
 void ColorPicker::on_mSliderBig_valueChanged(int v)
@@ -187,13 +283,16 @@ void ColorPicker::on_mSlider##arg1##_valueChanged(int v) \
     arg4##Changed(srcColor); \
     ui->mSliderAlpha->setColor(ui->mSliderBlue->value(), ui->mSliderGreen->value(), \
                                ui->mSliderRed->value(), ui->mSliderAlpha->value()); \
+    ui->mWidgetReferenceColor->update(); \
     unsigned int mainSliderColor; \
     mMainSlider->color(&mainSliderColor); \
     ui->mSliderBig->setColor(mainSliderColor); \
     ui->mBoxColor->setColor(mainSliderColor); \
-    mCanUpdate = true; \
     QColor c = ui->mSliderRed->color(); \
     c.setAlpha(ui->mSliderAlpha->value()); \
+    QString sn = c.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb); \
+    ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper()); \
+    mCanUpdate = true; \
     emit colorChanged(c); \
 }
 #define SLIDER_CODE2(arg1, arg2, arg3, arg4, arg5, arg6) \
@@ -211,13 +310,16 @@ void ColorPicker::on_mSlider##arg1##_valueChanged(int v) \
     arg5##Changed(srcColor); \
     ui->mSliderAlpha->setColor(ui->mSliderBlue->value(), ui->mSliderGreen->value(), \
                                ui->mSliderRed->value(), ui->mSliderAlpha->value()); \
+    ui->mWidgetReferenceColor->update(); \
     unsigned int mainSliderColor; \
     mMainSlider->color(&mainSliderColor); \
     ui->mSliderBig->setColor(mainSliderColor); \
     ui->mBoxColor->setColor(mainSliderColor); \
-    mCanUpdate = true; \
     QColor c = ui->mSliderRed->color(); \
     c.setAlpha(ui->mSliderAlpha->value()); \
+    QString sn = c.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb); \
+    ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper()); \
+    mCanUpdate = true; \
     emit colorChanged(c); \
 }
 
@@ -246,9 +348,12 @@ void ColorPicker::on_mSliderAlpha_valueChanged(int v)
     unsigned int srcColor;
     ui->mSliderAlpha->color(&srcColor);
     ui->mSpinAlpha->setValue(v);
-    mCanUpdate = true;
+    ui->mWidgetReferenceColor->update();
     QColor c = ui->mSliderRed->color();
     c.setAlpha(v);
+    QString sn = c.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb);
+    ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper());
+    mCanUpdate = true;
     emit colorChanged(c);
 }
 
@@ -359,7 +464,55 @@ void ColorPicker::on_mBoxColor_colorChanged()
     ui->mSliderBig->setColor(mainSliderColor);
     ui->mSliderAlpha->setColor(ui->mSliderBlue->value(), ui->mSliderGreen->value(),
                                ui->mSliderRed->value(), ui->mSliderAlpha->value());
+    ui->mWidgetReferenceColor->update();
+    QColor c = ui->mSliderRed->color();
+    c.setAlpha(ui->mSliderAlpha->value());
+
+    QString sn = c.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb);
+    ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper());
+
     mCanUpdate = true;
+    emit colorChanged(c);
+}
+
+void ColorPicker::on_mLineEditHex_textEdited(const QString & s)
+{
+    QColor c;
+    if (mFlags & HideAlpha)
+    {
+         if (s.length() == 3 || s.length() == 6)
+             c = QColor("#" + s);
+    }
+    else
+    {
+        if (s.length() == 4)
+        {
+            QString ns = QString("#") + s[0] + s[0] + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+            c = QColor(ns);
+        }
+        else if (s.length() == 3 || s.length() == 6 || s.length() == 8)
+            c = QColor("#" + s);
+    }
+    if (!c.isValid())
+        return;
+
+    mCanUpdate = false;
+    unsigned int c1 = c.rgb(), c2 = c.rgba();
+    ui->mSliderRed->setColor(c1);
+    ui->mSliderGreen->setColor(c1);
+    ui->mSliderBlue->setColor(c1);
+    ui->mSpinRed->setValue(ui->mSliderRed->value());
+    ui->mSpinGreen->setValue(ui->mSliderGreen->value());
+    ui->mSpinBlue->setValue(ui->mSliderBlue->value());
+    rgbChanged(c1);
+    ui->mSliderAlpha->setColor(c2);
+    ui->mWidgetReferenceColor->update();
+    unsigned int mainSliderColor;
+    mMainSlider->color(&mainSliderColor);
+    ui->mSliderBig->setColor(mainSliderColor);
+    ui->mBoxColor->setColor(mainSliderColor);
+    mCanUpdate = true;
+    emit colorChanged(c2);
 }
 
 }}
