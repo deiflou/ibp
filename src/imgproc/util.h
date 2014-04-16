@@ -30,6 +30,24 @@
 namespace anitools {
 namespace imgproc {
 
+#define AT_premultiplyBGRAWithAlpha(src, alpha) \
+(src).b = lut01[(src).b][(alpha)]; \
+(src).g = lut01[(src).g][(alpha)]; \
+(src).r = lut01[(src).r][(alpha)];
+
+#define AT_premultiplyBGRA(src) \
+(src).b = lut01[(src).b][(src).a]; \
+(src).g = lut01[(src).g][(src).a]; \
+(src).r = lut01[(src).r][(src).a];
+
+#define AT_postmultiplyBGRA(src) \
+(src).b = lut02[(src).b][(src).a]; \
+(src).g = lut02[(src).g][(src).a]; \
+(src).r = lut02[(src).r][(src).a];
+
+#define AT_pixelIntensity(src) \
+    (lut01[(src).r][54] + lut01[(src).g][183] + lut02[(src).b][18])
+
 extern QStringList blendModeStrings;
 inline BlendMode blendModeStringToEnum(const QString & mode)
 {

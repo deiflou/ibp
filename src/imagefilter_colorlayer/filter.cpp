@@ -22,6 +22,7 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/util.h"
+#include "../imgproc/pixelblending.h"
 
 Filter::Filter() :
     mColor(255, 0, 0),
@@ -57,8 +58,59 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
+    QImage i(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
 
-    return inputImage;
+    BGRA src;
+    src.b = mColor.blue();
+    src.g = mColor.green();
+    src.r = mColor.red();
+    src.a = qRound(mOpacity * 255 / 100.);
+    register BGRA * dst = (BGRA *)inputImage.bits(), * blend = (BGRA *)i.bits();
+
+    register int totalPixels = i.width() * i.height();
+
+    if (mPosition == Front)
+    {
+        while (totalPixels--)
+        {
+            blendColors[mBlendMode](src, *dst, *blend);
+            dst++;
+            blend++;
+        }
+    }
+    else if (mPosition == Inside)
+    {
+        if (mBlendMode == BlendMode_Normal)
+        {
+            while (totalPixels--)
+            {
+                alphaBlendColors[AlphaBlendMode_SourceAtopDestination](src, *dst, *blend);
+                dst++;
+                blend++;
+            }
+        }
+        else
+        {
+            while (totalPixels--)
+            {
+                blendColors[mBlendMode](src, *dst, *blend);
+                alphaBlendColors[AlphaBlendMode_SourceAtopDestination](*blend, *dst, *blend);
+                dst++;
+                blend++;
+            }
+        }
+    }
+    else
+    {
+        while (totalPixels--)
+        {
+            alphaBlendColors[AlphaBlendMode_DestinationOverSource](src, *dst, *blend);
+            dst++;
+            blend++;
+        }
+    }
+
+    return i;
 }
 
 bool Filter::loadParameters(QSettings &s)

@@ -29,8 +29,6 @@ namespace imgproc {
 
 void initColorProfiles();
 
-extern void (* convertColors[5][5])(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
-
 void convertBGRToHSV(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 void convertBGRToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 void convertBGRToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
@@ -56,7 +54,7 @@ void convertCMYKToHSV(const unsigned char * inputBuffer, unsigned char * outputB
 void convertCMYKToHSL(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 void convertCMYKToLab(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
-extern void (* swapChannels[4][4])(unsigned char * inputBuffer);
+extern void (* convertColors[5][5])(const unsigned char * inputBuffer, unsigned char * outputBuffer, int nPixels);
 
 inline void swapChannels01(unsigned char * inputBuffer);
 inline void swapChannels02(unsigned char * inputBuffer);
@@ -64,6 +62,8 @@ inline void swapChannels03(unsigned char * inputBuffer);
 inline void swapChannels12(unsigned char * inputBuffer);
 inline void swapChannels13(unsigned char * inputBuffer);
 inline void swapChannels23(unsigned char * inputBuffer);
+
+extern void (* swapChannels[4][4])(unsigned char * inputBuffer);
 
 }}
 

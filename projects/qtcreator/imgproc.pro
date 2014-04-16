@@ -42,7 +42,8 @@ SOURCES += \
     ../../src/imgproc/lut01.cpp \
     ../../src/imgproc/lut02.cpp \
     ../../src/imgproc/lut03.cpp \
-    ../../src/imgproc/util.cpp
+    ../../src/imgproc/util.cpp \
+    ../../src/imgproc/pixelblending.cpp
 
 HEADERS += \
     ../../src/imgproc/colorconversion.h \
@@ -51,4 +52,5 @@ HEADERS += \
     ../../src/imgproc/imagefilterlist.h \
     ../../src/imgproc/lut.h \
     ../../src/imgproc/types.h \
-    ../../src/imgproc/util.h
+    ../../src/imgproc/util.h \
+    ../../src/imgproc/pixelblending.h

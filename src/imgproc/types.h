@@ -39,6 +39,22 @@ enum ColorChannel
     ColorChannel_Cyan = 0, ColorChannel_Magenta = 1, ColorChannel_Yellow = 2, ColorChannel_Black = 3
 };
 
+enum AlphaBlendMode
+{
+    AlphaBlendMode_Source = 0,
+    AlphaBlendMode_Destination,
+    AlphaBlendMode_SourceOverDestination,
+    AlphaBlendMode_DestinationOverSource,
+    AlphaBlendMode_SourceInDestination,
+    AlphaBlendMode_DestinationInSource,
+    AlphaBlendMode_SourceOutDestination,
+    AlphaBlendMode_DestinationOutSource,
+    AlphaBlendMode_SourceAtopDestination,
+    AlphaBlendMode_DestinationAtopSource,
+    AlphaBlendMode_SourceClearDestination,
+    AlphaBlendMode_SourceXorDestination
+};
+
 enum BlendMode
 {
     BlendMode_Normal = 0,
