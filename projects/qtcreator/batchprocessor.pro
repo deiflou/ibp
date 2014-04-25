@@ -49,12 +49,10 @@ SOURCES += ../../src/batchprocessor/main.cpp \
            ../../src/batchprocessor/mainwindow.toolbar.batch.cpp \
            ../../src/batchprocessor/mainwindow.view.batch.cpp \
            ../../src/batchprocessor/mainwindow.view.edit.cpp \
-           ../../src/batchprocessor/imagefolderlistpopup.cpp \
-           ../../src/batchprocessor/widgetlist.cpp
+           ../../src/batchprocessor/imagefolderlistpopup.cpp
 
 HEADERS += ../../src/batchprocessor/mainwindow.h \
-           ../../src/batchprocessor/imagefolderlistpopup.h \
-           ../../src/batchprocessor/widgetlist.h
+           ../../src/batchprocessor/imagefolderlistpopup.h
 
 FORMS += ../../src/batchprocessor/mainwindow.ui \
          ../../src/batchprocessor/imagefolderlistpopup.ui

@@ -19,49 +19,57 @@
 **
 ****************************************************************************/
 
-#ifndef FILTERWIDGET_H
-#define FILTERWIDGET_H
+#ifndef FILTER_H
+#define FILTER_H
 
+#include <QObject>
+#include <QHash>
+#include <QString>
+#include <QImage>
+#include <QSettings>
 #include <QWidget>
 
-#include "filter.h"
+#include "../imgproc/imagefilter.h"
+#include "../imgproc/types.h"
 
-namespace Ui {
-class FilterWidget;
-}
+using namespace anitools::imgproc;
 
-class FilterWidget : public QWidget
+class Filter : public ImageFilter
 {
     Q_OBJECT
 
 public:
-    explicit FilterWidget(QWidget *parent = 0);
-    ~FilterWidget();
+    enum Position
+    {
+        Front, Behind, Inside
+    };
+
+    Filter();
+    ~Filter();
+    ImageFilter * clone();
+    QHash<QString, QString> info();
+    QImage process(const QImage & inputImage);
+    bool loadParameters(QSettings & s);
+    bool saveParameters(QSettings & s);
+    QWidget * widget(QWidget *parent = 0);
 
 private:
-    Ui::FilterWidget *ui;
-    bool mEmitSignals;
+    QImage mImage;
+    Position mPosition;
+    ColorCompositionMode mColorCompositionMode;
+    int mOpacity;
 
 signals:
-    void colorChanged(const QColor & c);
+    void imageChanged(const QImage & i);
     void positionChanged(Filter::Position v);
     void colorCompositionModeChanged(ColorCompositionMode v);
     void opacityChanged(int v);
 
 public slots:
-    void setColor(const QColor & c);
+    void setImage(const QImage & i);
     void setPosition(Filter::Position v);
     void setColorCompositionMode(ColorCompositionMode v);
     void setOpacity(int v);
-
-private slots:
-    void on_mButtonColor_colorChanged(const QColor & c);
-    void on_mButtonPositionFront_toggled(bool c);
-    void on_mButtonPositionBehind_toggled(bool c);
-    void on_mButtonPositionInside_toggled(bool c);
-    void on_mComboColorCompositionMode_colorCompositionModeChanged(ColorCompositionMode m);
-    void on_mSliderOpacity_valueChanged(int value);
-    void on_mSpinOpacity_valueChanged(int arg1);
 };
 
-#endif // FILTERWIDGET_H
+#endif // FILTER_H

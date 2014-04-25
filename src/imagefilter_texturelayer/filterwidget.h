@@ -43,19 +43,19 @@ private:
     bool mEmitSignals;
 
 signals:
-    void colorChanged(const QColor & c);
+    void imageChanged(const QImage & i);
     void positionChanged(Filter::Position v);
     void colorCompositionModeChanged(ColorCompositionMode v);
     void opacityChanged(int v);
 
 public slots:
-    void setColor(const QColor & c);
+    void setImage(const QImage & i);
     void setPosition(Filter::Position v);
     void setColorCompositionMode(ColorCompositionMode v);
     void setOpacity(int v);
 
 private slots:
-    void on_mButtonColor_colorChanged(const QColor & c);
+    void on_mButtonImage_imageChanged(const QImage & i);
     void on_mButtonPositionFront_toggled(bool c);
     void on_mButtonPositionBehind_toggled(bool c);
     void on_mButtonPositionInside_toggled(bool c);

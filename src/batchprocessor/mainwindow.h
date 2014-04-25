@@ -34,13 +34,14 @@
 #endif
 
 #include "imagefolderlistpopup.h"
-#include "widgetlist.h"
+#include "../widgets/widgetlist.h"
 
 #ifdef Q_OS_WIN32
 using namespace anitools::misc;
 #endif
 using namespace anitools::plugins;
 using namespace anitools::imgproc;
+using namespace anitools::widgets;
 
 namespace Ui {
 class MainWindow;

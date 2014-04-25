@@ -50,7 +50,7 @@
         <number>10</number>
        </property>
        <item>
-        <widget class="anitools::widgets::ColorButton" name="mButtonColor" native="true">
+        <widget class="anitools::widgets::ImageButton" name="mButtonImage" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -60,7 +60,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>32</height>
+           <height>64</height>
           </size>
          </property>
         </widget>
@@ -165,7 +165,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Color Composition Mode:</string>
+        <string>Blend Mode:</string>
        </property>
       </widget>
      </item>
@@ -225,6 +225,26 @@
        </item>
       </layout>
      </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Geometric Transformations:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="anitools::widgets::AffineTransformationList" name="mWidgetAffineTransformationsList" native="true"/>
+       </item>
+      </layout>
+     </item>
     </layout>
    </item>
    <item>
@@ -244,15 +264,21 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>anitools::widgets::ImageButton</class>
+   <extends>QWidget</extends>
+   <header>imagebutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>anitools::widgets::ColorCompositionModeComboBox</class>
    <extends>QWidget</extends>
    <header>colorcompositionmodecombobox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>anitools::widgets::ColorButton</class>
+   <class>anitools::widgets::AffineTransformationList</class>
    <extends>QWidget</extends>
-   <header>colorbutton.h</header>
+   <header>affinetransformationlist.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

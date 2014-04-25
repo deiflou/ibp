@@ -19,18 +19,35 @@
 **
 ****************************************************************************/
 
-#include "util.h"
+#include <QHash>
 
-namespace anitools {
-namespace imgproc {
+#include "filter.h"
+#include "../imgproc/imagefilter.h"
 
-QStringList colorCompositionModeStrings = QStringList() <<
-     "normal" <<
-     "darken" << "multiply" << "colorburn" << "linearburn" << "darkercolor" <<
-     "lighten" << "screen" << "colordodge" << "lineardodge" << "lightercolor" <<
-     "overlay" << "softlight" << "hardlight" << "vividlight" << "linearlight" << "pinlight" << "hardmix" <<
-     "difference" << "exclusion" <<
-     "hue" << "saturation" << "color" << "luminosity" <<
-     "unsupported";
+using namespace anitools::imgproc;
 
-}}
+#ifdef Q_OS_WIN32
+#define ANITOOLS_EXPORT __declspec(dllexport)
+#else
+#define ANITOOLS_EXPORT
+#endif
+
+extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
+{
+    QHash<QString, QString> info;
+
+    info.insert("id", "anitools.imagefilter.texturelayer");
+    info.insert("version", "0.1.0");
+    info.insert("name", QObject::tr("Texture Layer"));
+    info.insert("description", QObject::tr("Adds a texture layer to the image"));
+    info.insert("tags", QObject::tr("Composition"));
+    info.insert("author", QObject::tr("Deif Lou"));
+    info.insert("copyright", QObject::tr(""));
+    info.insert("url", QObject::tr(""));
+    return info;
+}
+
+extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
+{
+    return new Filter();
+}

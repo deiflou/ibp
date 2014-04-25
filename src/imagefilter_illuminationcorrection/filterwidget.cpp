@@ -19,9 +19,6 @@
 **
 ****************************************************************************/
 
-#include <QFileDialog>
-#include <QMessageBox>
-
 #include <math.h>
 
 #include "filterwidget.h"
@@ -38,7 +35,6 @@ FilterWidget::FilterWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->mContainerImage->hide();
-    ui->mButtonImage->setExtraDataType(ToolButtonEx::Image);
     ui->mButtonImage->setExtraDataFlags(ToolButtonEx::ExtraDataFlags(ToolButtonEx::ImageStretched |
                                                                      ToolButtonEx::ImageKeepAspectRatio |
                                                                      ToolButtonEx::ImageStretchOnlyIfBiggerThanButton |
@@ -91,18 +87,7 @@ void FilterWidget::on_mButtonFromImage_toggled(bool c)
         emit modeChanged(1);
 }
 
-void FilterWidget::on_mButtonImage_clicked()
+void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)
 {
-    QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, QString(), QString(), freeimageGetOpenFilterString());
-    if (fileName.isEmpty()) return;
-
-    QImage img = freeimageLoadAs32Bits(fileName, true);
-    if (img.isNull())
-    {
-        QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
-        return;
-    }
-
-    setImage(img);
+    emit imageChanged(i);
 }

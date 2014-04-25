@@ -19,18 +19,34 @@
 **
 ****************************************************************************/
 
-#include "util.h"
+
+#ifndef ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H
+#define ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H
+
+#include <QWidget>
 
 namespace anitools {
-namespace imgproc {
+namespace widgets {
 
-QStringList colorCompositionModeStrings = QStringList() <<
-     "normal" <<
-     "darken" << "multiply" << "colorburn" << "linearburn" << "darkercolor" <<
-     "lighten" << "screen" << "colordodge" << "lineardodge" << "lightercolor" <<
-     "overlay" << "softlight" << "hardlight" << "vividlight" << "linearlight" << "pinlight" << "hardmix" <<
-     "difference" << "exclusion" <<
-     "hue" << "saturation" << "color" << "luminosity" <<
-     "unsupported";
+namespace Ui {
+class AffineTransformationList;
+}
+
+class AffineTransformationList : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit AffineTransformationList(QWidget *parent = 0);
+    ~AffineTransformationList();
+
+private slots:
+    void on_mButtonAppend_clicked();
+
+private:
+    Ui::AffineTransformationList *ui;
+};
 
 }}
+
+#endif // ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H

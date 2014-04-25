@@ -48,18 +48,18 @@ namespace imgproc {
 #define AT_pixelIntensity(src) \
     (lut01[(src).r][54] + lut01[(src).g][183] + lut02[(src).b][18])
 
-extern QStringList blendModeStrings;
-inline BlendMode blendModeStringToEnum(const QString & mode)
+extern QStringList colorCompositionModeStrings;
+inline ColorCompositionMode colorCompositionModeStringToEnum(const QString & mode)
 {
-    if (!blendModeStrings.contains(mode))
-        return BlendMode_Unsupported;
-    return (BlendMode)blendModeStrings.indexOf(mode.toLower());
+    if (!colorCompositionModeStrings.contains(mode))
+        return ColorCompositionMode_Unsupported;
+    return (ColorCompositionMode)colorCompositionModeStrings.indexOf(mode.toLower());
 }
-inline QString blendModeEnumToString(BlendMode mode)
+inline QString colorCompositionModeEnumToString(ColorCompositionMode mode)
 {
-    if (mode < BlendMode_Normal || mode > BlendMode_Unsupported)
+    if (mode < ColorCompositionMode_Normal || mode > ColorCompositionMode_Unsupported)
         return QString();
-    return blendModeStrings.at(mode);
+    return colorCompositionModeStrings.at(mode);
 }
 
 }}

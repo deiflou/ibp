@@ -56,19 +56,19 @@ public:
 private:
     QColor mColor;
     Position mPosition;
-    BlendMode mBlendMode;
+    ColorCompositionMode mColorCompositionMode;
     int mOpacity;
 
 signals:
-    void colorChanged(const QColor & v);
+    void colorChanged(const QColor & c);
     void positionChanged(Filter::Position v);
-    void blendModeChanged(BlendMode v);
+    void colorCompositionModeChanged(ColorCompositionMode v);
     void opacityChanged(int v);
 
 public slots:
-    void setColor(const QColor & v);
+    void setColor(const QColor & c);
     void setPosition(Filter::Position v);
-    void setBlendMode(BlendMode v);
+    void setColorCompositionMode(ColorCompositionMode v);
     void setOpacity(int v);
 };
 

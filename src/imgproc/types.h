@@ -39,49 +39,49 @@ enum ColorChannel
     ColorChannel_Cyan = 0, ColorChannel_Magenta = 1, ColorChannel_Yellow = 2, ColorChannel_Black = 3
 };
 
-enum AlphaBlendMode
+enum AlphaCompositionMode
 {
-    AlphaBlendMode_Source = 0,
-    AlphaBlendMode_Destination,
-    AlphaBlendMode_SourceOverDestination,
-    AlphaBlendMode_DestinationOverSource,
-    AlphaBlendMode_SourceInDestination,
-    AlphaBlendMode_DestinationInSource,
-    AlphaBlendMode_SourceOutDestination,
-    AlphaBlendMode_DestinationOutSource,
-    AlphaBlendMode_SourceAtopDestination,
-    AlphaBlendMode_DestinationAtopSource,
-    AlphaBlendMode_SourceClearDestination,
-    AlphaBlendMode_SourceXorDestination
+    AlphaCompositionMode_Source = 0,
+    AlphaCompositionMode_Destination,
+    AlphaCompositionMode_SourceOverDestination,
+    AlphaCompositionMode_DestinationOverSource,
+    AlphaCompositionMode_SourceInDestination,
+    AlphaCompositionMode_DestinationInSource,
+    AlphaCompositionMode_SourceOutDestination,
+    AlphaCompositionMode_DestinationOutSource,
+    AlphaCompositionMode_SourceAtopDestination,
+    AlphaCompositionMode_DestinationAtopSource,
+    AlphaCompositionMode_SourceClearDestination,
+    AlphaCompositionMode_SourceXorDestination
 };
 
-enum BlendMode
+enum ColorCompositionMode
 {
-    BlendMode_Normal = 0,
-    BlendMode_Darken,
-    BlendMode_Multiply,
-    BlendMode_ColorBurn,
-    BlendMode_LinearBurn,
-    BlendMode_DarkerColor,
-    BlendMode_Lighten,
-    BlendMode_Screen,
-    BlendMode_ColorDodge,
-    BlendMode_LinearDodge,
-    BlendMode_LighterColor,
-    BlendMode_Overlay,
-    BlendMode_softLight,
-    BlendMode_HardLight,
-    BlendMode_VividLight,
-    BlendMode_LinearLight,
-    BlendMode_PinLight,
-    BlendMode_HardMix,
-    BlendMode_Difference,
-    BlendMode_Exclusion,
-    BlendMode_Hue,
-    BlendMode_Saturation,
-    BlendMode_Color,
-    BlendMode_Luminosity,
-    BlendMode_Unsupported
+    ColorCompositionMode_Normal = 0,
+    ColorCompositionMode_Darken,
+    ColorCompositionMode_Multiply,
+    ColorCompositionMode_ColorBurn,
+    ColorCompositionMode_LinearBurn,
+    ColorCompositionMode_DarkerColor,
+    ColorCompositionMode_Lighten,
+    ColorCompositionMode_Screen,
+    ColorCompositionMode_ColorDodge,
+    ColorCompositionMode_LinearDodge,
+    ColorCompositionMode_LighterColor,
+    ColorCompositionMode_Overlay,
+    ColorCompositionMode_softLight,
+    ColorCompositionMode_HardLight,
+    ColorCompositionMode_VividLight,
+    ColorCompositionMode_LinearLight,
+    ColorCompositionMode_PinLight,
+    ColorCompositionMode_HardMix,
+    ColorCompositionMode_Difference,
+    ColorCompositionMode_Exclusion,
+    ColorCompositionMode_Hue,
+    ColorCompositionMode_Saturation,
+    ColorCompositionMode_Color,
+    ColorCompositionMode_Luminosity,
+    ColorCompositionMode_Unsupported
 };
 
 struct RGB

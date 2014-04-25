@@ -54,7 +54,7 @@ public slots:
 private slots:
     void on_mButtonAuto_toggled(bool c);
     void on_mButtonFromImage_toggled(bool c);
-    void on_mButtonImage_clicked();
+    void on_mButtonImage_imageChanged(const QImage &i);
 };
 
 #endif // FILTERWIDGET_H

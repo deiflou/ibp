@@ -39,7 +39,6 @@ INCLUDEPATH += ../../src/widgets
 
 SOURCES += \
     ../../src/widgets/resinit.cpp \
-    ../../src/widgets/blendmodecombobox.cpp \
     ../../src/widgets/colorbutton.cpp \
     ../../src/widgets/colorslider.cpp \
     ../../src/widgets/histogramviewer.cpp \
@@ -47,10 +46,13 @@ SOURCES += \
     ../../src/widgets/toolbuttonex.cpp \
     ../../src/widgets/genericdialog.cpp \
     ../../src/widgets/colorpicker.cpp \
-    ../../src/widgets/colorbox.cpp
+    ../../src/widgets/colorbox.cpp \
+    ../../src/widgets/imagebutton.cpp \
+    ../../src/widgets/colorcompositionmodecombobox.cpp \
+    ../../src/widgets/widgetlist.cpp \
+    ../../src/widgets/affinetransformationlist.cpp
 
 HEADERS += \
-    ../../src/widgets/blendmodecombobox.h \
     ../../src/widgets/colorbutton.h \
     ../../src/widgets/colorslider.h \
     ../../src/widgets/histogramviewer.h \
@@ -58,11 +60,16 @@ HEADERS += \
     ../../src/widgets/toolbuttonex.h \
     ../../src/widgets/genericdialog.h \
     ../../src/widgets/colorpicker.h \
-    ../../src/widgets/colorbox.h
+    ../../src/widgets/colorbox.h \
+    ../../src/widgets/imagebutton.h \
+    ../../src/widgets/colorcompositionmodecombobox.h \
+    ../../src/widgets/widgetlist.h \
+    ../../src/widgets/affinetransformationlist.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
 
 FORMS += \
     ../../src/widgets/genericdialog.ui \
-    ../../src/widgets/colorpicker.ui
+    ../../src/widgets/colorpicker.ui \
+    ../../src/widgets/affinetransformationlist.ui

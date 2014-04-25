@@ -23,7 +23,6 @@
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"
-#include "../widgets/colorpicker.h"
 
 using namespace anitools::widgets;
 
@@ -33,7 +32,6 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
-    ui->mButtonColor->setColorPickerFlags(ColorPicker::HideAlpha);
 }
 
 FilterWidget::~FilterWidget()
@@ -41,14 +39,14 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setColor(const QColor & v)
+void FilterWidget::setImage(const QImage & i)
 {
-    if (ui->mButtonColor->color() == v)
+    if (ui->mButtonImage->image() == i)
         return;
     mEmitSignals = false;
-    ui->mButtonColor->setColor(v);
+    ui->mButtonImage->setImage(i);
     mEmitSignals = true;
-    emit colorChanged(v);
+    emit imageChanged(i);
 }
 
 void FilterWidget::setPosition(Filter::Position v)
@@ -89,10 +87,10 @@ void FilterWidget::setOpacity(int v)
     emit opacityChanged(v);
 }
 
-void FilterWidget::on_mButtonColor_colorChanged(const QColor & c)
+void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)
 {
     if (mEmitSignals)
-        emit colorChanged(c);
+        emit imageChanged(i);
 }
 
 void FilterWidget::on_mButtonPositionFront_toggled(bool c)

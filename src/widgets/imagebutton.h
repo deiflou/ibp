@@ -19,26 +19,21 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_WIDGETS_COLORBUTTON_H
-#define ANITOOLS_WIDGETS_COLORBUTTON_H
+#ifndef ANITOOLS_WIDGETS_IMAGEBUTTON_H
+#define ANITOOLS_WIDGETS_IMAGEBUTTON_H
 
 #include "toolbuttonex.h"
-#include "colorpicker.h"
 
 namespace anitools {
 namespace widgets {
 
-class ColorButton : public ToolButtonEx
+class ImageButton : public ToolButtonEx
 {
     Q_OBJECT
 public:
-    explicit ColorButton(QWidget *parent = 0);
-
-    ColorPicker::ColorPickerFlags colorPickerFlags() const;
-    void setColorPickerFlags(ColorPicker::ColorPickerFlags f);
+    explicit ImageButton(QWidget *parent = 0);
 
 private:
-    ColorPicker::ColorPickerFlags mColorPickerFlags;
 
     inline void setPopupMode(ToolButtonPopupMode mode)
     {
@@ -68,9 +63,9 @@ private:
     {
         return ToolButtonEx::gradientStops();
     }
-    inline QImage image() const
+    inline QColor color() const
     {
-        return ToolButtonEx::image();
+        return ToolButtonEx::color();
     }
     inline void initStyleOption(QStyleOptionToolButton * o) const
     {
@@ -78,10 +73,10 @@ private:
     }
 
 signals:
-    void colorChanged(const QColor & c);
+    void imageChanged(const QImage & i);
 
 public slots:
-    void setColor(const QColor &c);
+    void setImage(const QImage & i);
 
 private slots:
     inline void setText(const QString & text)
@@ -108,9 +103,9 @@ private slots:
     {
         ToolButtonEx::setGradientStops(s);
     }
-    inline void setImage(const QImage & i)
+    inline void setColor(const QColor & c)
     {
-        ToolButtonEx::setImage(i);
+        ToolButtonEx::setColor(c);
     }
 
     void On_Clicked();
@@ -118,4 +113,4 @@ private slots:
 
 }}
 
-#endif // ANITOOLS_WIDGETS_COLORBUTTON_H
+#endif // ANITOOLS_WIDGETS_IMAGEBUTTON_H

@@ -19,14 +19,17 @@
 **
 ****************************************************************************/
 
-#ifndef WIDGETLIST_H
-#define WIDGETLIST_H
+#ifndef ANITOOLS_WIDGETS_WIDGETLIST_H
+#define ANITOOLS_WIDGETS_WIDGETLIST_H
 
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QLabel>
 #include <QParallelAnimationGroup>
+
+namespace anitools {
+namespace widgets {
 
 class WidgetList : public QWidget
 {
@@ -38,8 +41,8 @@ public:
     explicit WidgetList(QWidget *parent = 0);
 
     QWidget * at(int index) const;
-    void append(QWidget * w, const QString & title = QString());
-    void insert(int index, QWidget * w, const QString & title = QString());
+    void append(QWidget * w);
+    void insert(int index, QWidget * w);
     int count() const;
     bool isEmpty() const;
     void move(int from, int to);
@@ -67,7 +70,10 @@ private:
 
     QParallelAnimationGroup * mAnimation;
 
-    QWidget * createWidgetContainer(const QString & title = QString());
+    QMargins mItemMargins, mItemWidgetMargins;
+    bool mIsPlaceholderVisible, mIsItemContentsFrameVisible;
+
+    QWidget * createWidgetContainer();
 
 signals:
     void widgetInserted(int i);
@@ -83,6 +89,12 @@ public slots:
     void setWidgetExpanded(int i, bool e);
     void setWidgetBypass(int i, bool b);
     void setAnimate(bool a);
+    void setTitle(int i, const QString & title, const QString & tooltip = QString());
+    void setItemMargins(const QMargins & margins);
+    void setItemWidgetMargins(const QMargins & margins);
+    void setEmptyMessage(const QString & text);
+    void setPlaceholderVisible(bool v);
+    void setItemContentsFrameVisible(bool v);
 
 private slots:
     void On_WidgetContainerExpandCheck_toggled(bool c);
@@ -94,4 +106,6 @@ private slots:
     void On_mAnimation_valueChanged(const QVariant & v);
 };
 
-#endif // WIDGETLIST_H
+}}
+
+#endif // ANITOOLS_WIDGETS_WIDGETLIST_H

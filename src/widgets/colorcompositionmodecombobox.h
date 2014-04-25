@@ -33,12 +33,12 @@ namespace widgets {
 using namespace anitools::misc;
 using namespace anitools::imgproc;
 
-class BlendModeComboBox : public QComboBox
+class ColorCompositionModeComboBox : public QComboBox
 {
     Q_OBJECT
 public:
-    explicit BlendModeComboBox(QWidget *parent = 0);
-    BlendMode blendMode() const;
+    explicit ColorCompositionModeComboBox(QWidget *parent = 0);
+    ColorCompositionMode colorCompositionMode() const;
 
 private:
     inline void addItem(const QString & text, const QVariant & userData = QVariant())
@@ -139,10 +139,10 @@ private:
     }
 
 signals:
-    void blendModeChanged(BlendMode v);
+    void colorCompositionModeChanged(ColorCompositionMode v);
 
 public slots:
-    void setBlendMode(BlendMode v);
+    void setColorCompositionMode(ColorCompositionMode v);
 
 private slots:
     void On_currentIndexChanged(int i);

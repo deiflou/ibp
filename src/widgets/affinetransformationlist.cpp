@@ -19,18 +19,34 @@
 **
 ****************************************************************************/
 
-#include "util.h"
+
+#include "affinetransformationlist.h"
+#include "ui_affinetransformationlist.h"
 
 namespace anitools {
-namespace imgproc {
+namespace widgets {
 
-QStringList colorCompositionModeStrings = QStringList() <<
-     "normal" <<
-     "darken" << "multiply" << "colorburn" << "linearburn" << "darkercolor" <<
-     "lighten" << "screen" << "colordodge" << "lineardodge" << "lightercolor" <<
-     "overlay" << "softlight" << "hardlight" << "vividlight" << "linearlight" << "pinlight" << "hardmix" <<
-     "difference" << "exclusion" <<
-     "hue" << "saturation" << "color" << "luminosity" <<
-     "unsupported";
+AffineTransformationList::AffineTransformationList(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::AffineTransformationList)
+{
+    ui->setupUi(this);
+    ui->mWidgetList->setItemMargins(QMargins(0, 0, 0, 0));
+    ui->mWidgetList->setItemWidgetMargins(QMargins(5, 0, 5, 5));
+    ui->mWidgetList->setEmptyMessage("");
+    ui->mWidgetList->setPlaceholderVisible(false);
+    ui->mWidgetList->setItemContentsFrameVisible(false);
+}
+
+AffineTransformationList::~AffineTransformationList()
+{
+    delete ui;
+}
+
+void AffineTransformationList::on_mButtonAppend_clicked()
+{
+    ui->mWidgetList->append(new QLabel("hola", ui->mWidgetList));
+}
 
 }}
+

@@ -25,7 +25,7 @@
 #include "../imgproc/pixelblending.h"
 
 Filter::Filter() :
-    mColor(255, 0, 0),
+    mImage(),
     mPosition(Front),
     mColorCompositionMode(ColorCompositionMode_Normal),
     mOpacity(100)
@@ -40,7 +40,7 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
-    f->mColor = mColor;
+    f->mImage = mImage;
     f->mPosition = mPosition;
     f->mColorCompositionMode = mColorCompositionMode;
     f->mOpacity = mOpacity;
@@ -58,77 +58,27 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    QImage i(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-
-    BGRA src;
-    src.b = mColor.blue();
-    src.g = mColor.green();
-    src.r = mColor.red();
-    src.a = qRound(mOpacity * 255 / 100.);
-    register BGRA * dst = (BGRA *)inputImage.bits(), * blend = (BGRA *)i.bits();
-
-    register int totalPixels = i.width() * i.height();
-
-    if (mPosition == Front)
-    {
-        while (totalPixels--)
-        {
-            blendColors[mColorCompositionMode](src, *dst, *blend);
-            dst++;
-            blend++;
-        }
-    }
-    else if (mPosition == Inside)
-    {
-        if (mColorCompositionMode == ColorCompositionMode_Normal)
-        {
-            while (totalPixels--)
-            {
-                alphaBlendColors[AlphaCompositionMode_SourceAtopDestination](src, *dst, *blend);
-                dst++;
-                blend++;
-            }
-        }
-        else
-        {
-            while (totalPixels--)
-            {
-                blendColors[mColorCompositionMode](src, *dst, *blend);
-                alphaBlendColors[AlphaCompositionMode_SourceAtopDestination](*blend, *dst, *blend);
-                dst++;
-                blend++;
-            }
-        }
-    }
-    else
-    {
-        while (totalPixels--)
-        {
-            alphaBlendColors[AlphaCompositionMode_DestinationOverSource](src, *dst, *blend);
-            dst++;
-            blend++;
-        }
-    }
+    QImage i = inputImage;
 
     return i;
 }
 
 bool Filter::loadParameters(QSettings &s)
 {
-    QString colorStr;
+    QVariant v;
     QString positionStr;
     QString colorCompositionModeStr;
-    QColor color(255, 0, 0);
+    QImage image;
     Position position;
     ColorCompositionMode colorCompositionMode;
     int opacity;
     bool ok;
 
-    colorStr = s.value("color", "#FF0000").toString();
-    color = QColor(colorStr);
-    if (!color.isValid())
-        return false;
-    color.setAlpha(255);
+    v = s.value("image", QImage());
+    if (!v.isValid() || !v.canConvert<QImage>())
+        image = QImage();
+    else
+        image = v.value<QImage>();
 
     positionStr = s.value("position", "front").toString();
     if (positionStr == "front")
@@ -149,7 +99,7 @@ bool Filter::loadParameters(QSettings &s)
     if (!ok || opacity < 0 || opacity > 100)
         return false;
 
-    setColor(color);
+    setImage(image);
     setPosition(position);
     setColorCompositionMode(colorCompositionMode);
     setOpacity(opacity);
@@ -159,7 +109,7 @@ bool Filter::loadParameters(QSettings &s)
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("color", mColor.name(QColor::HexRgb));
+    s.setValue("image", mImage);
     s.setValue("position", mPosition == Front ? "front" : (mPosition == Behind ? "behind" : "inside"));
     s.setValue("colorcompositionmode", colorCompositionModeEnumToString(mColorCompositionMode));
     s.setValue("opacity", mOpacity);
@@ -169,16 +119,16 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setColor(mColor);
+    fw->setImage(mImage);
     fw->setPosition(mPosition);
     fw->setColorCompositionMode(mColorCompositionMode);
     fw->setOpacity(mOpacity);
-    connect(this, SIGNAL(colorChanged(QColor)), fw, SLOT(setColor(QColor)));
+    connect(this, SIGNAL(imageChanged(QImage)), fw, SLOT(setImage(QImage)));
     connect(this, SIGNAL(positionChanged(Filter::Position)), fw, SLOT(setPosition(Filter::Position)));
     connect(this, SIGNAL(colorCompositionModeChanged(ColorCompositionMode)),
             fw, SLOT(setColorCompositionMode(ColorCompositionMode)));
     connect(this, SIGNAL(opacityChanged(int)), fw, SLOT(setOpacity(int)));
-    connect(fw, SIGNAL(colorChanged(QColor)), this, SLOT(setColor(QColor)));
+    connect(fw, SIGNAL(imageChanged(QImage)), this, SLOT(setImage(QImage)));
     connect(fw, SIGNAL(positionChanged(Filter::Position)), this, SLOT(setPosition(Filter::Position)));
     connect(fw, SIGNAL(colorCompositionModeChanged(ColorCompositionMode)),
             this, SLOT(setColorCompositionMode(ColorCompositionMode)));
@@ -186,12 +136,12 @@ QWidget *Filter::widget(QWidget *parent)
     return fw;
 }
 
-void Filter::setColor(const QColor & v)
+void Filter::setImage(const QImage &i)
 {
-    if (v == mColor)
+    if (i == mImage)
         return;
-    mColor = v;
-    emit colorChanged(v);
+    mImage = i;
+    emit imageChanged(i);
     emit parametersChanged();
 }
 

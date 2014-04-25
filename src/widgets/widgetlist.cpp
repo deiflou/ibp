@@ -34,6 +34,9 @@
 #include "widgetlist.h"
 #include "../misc/util.h"
 
+namespace anitools {
+namespace widgets {
+
 using namespace anitools::misc;
 
 WidgetList::WidgetList(QWidget *parent) :
@@ -51,7 +54,11 @@ WidgetList::WidgetList(QWidget *parent) :
     mScrolligNeeded(0),
     mWorkingWidget(0),
     mLabelEmpty(0),
-    mAnimation(0)
+    mAnimation(0),
+    mItemMargins(10, 5, 10, 5),
+    mItemWidgetMargins(10, 10, 10, 10),
+    mIsPlaceholderVisible(true),
+    mIsItemContentsFrameVisible(true)
 {
     mLayout = new QVBoxLayout(this);
     mLayout->addStretch(1);
@@ -72,6 +79,31 @@ WidgetList::WidgetList(QWidget *parent) :
 
     mAnimation = new QParallelAnimationGroup(this);
     connect(mAnimation, SIGNAL(finished()), this, SLOT(On_mAnimation_finished()));
+
+    this->setStyleSheet(""
+    ".cViewEditWidgetListItemCheckBypass, .cViewEditWidgetListItemCheckExpand"
+    "{"
+        "padding:0;"
+        "margin:0;"
+        "spacing:0;"
+    "}"
+    ".cViewEditWidgetListItemCheckBypass::indicator:!checked"
+    "{"
+        "image: url(\":/anitools/icons/openEye\");"
+    "}"
+    ".cViewEditWidgetListItemCheckBypass::indicator:checked"
+    "{"
+        "image: url(\":/anitools/icons/closedEye\");"
+    "}"
+    ".cViewEditWidgetListItemCheckExpand::indicator:!checked"
+    "{"
+        "image: url(\":/anitools/icons/expandCollapseArrowRight\");"
+    "}"
+    ".cViewEditWidgetListItemCheckExpand::indicator:checked"
+    "{"
+        "image: url(\":/anitools/icons/expandCollapseArrowDown\");"
+    "}"
+    );
 }
 
 QWidget *WidgetList::at(int index) const
@@ -83,12 +115,12 @@ QWidget *WidgetList::at(int index) const
     return w;
 }
 
-void WidgetList::append(QWidget *w, const QString &title)
+void WidgetList::append(QWidget *w)
 {
-    insert(count(), w, title);
+    insert(count(), w);
 }
 
-void WidgetList::insert(int index, QWidget *w, const QString &title)
+void WidgetList::insert(int index, QWidget *w)
 {
     if (mIsEmpty)
     {
@@ -104,13 +136,8 @@ void WidgetList::insert(int index, QWidget *w, const QString &title)
             return;
     }
 
-    QString filterName;
-    if (!title.isEmpty())
-        filterName = title;
-    else
-        filterName = "<i>[" + tr("Unnamed Filter") + "]</i>";
-
     bool mustCollapse = false;
+    QString title, tooltip;
     if (!w)
     {
         QLabel * l = new QLabel(tr("No interface available."));
@@ -120,7 +147,7 @@ void WidgetList::insert(int index, QWidget *w, const QString &title)
         w = l;
     }
 
-    QWidget * w1 = createWidgetContainer(filterName);
+    QWidget * w1 = createWidgetContainer();
     QWidget * w4 = w1->layout()->itemAt(0)->widget()->layout()->itemAt(1)->widget();
     QVBoxLayout * w4Layout = (QVBoxLayout *)(w4->layout());
 
@@ -206,8 +233,11 @@ void WidgetList::removeAt(int i)
 
         if (mLayout->count() == 1)
         {
-            mLayout->insertWidget(0, mLabelEmpty);
-            mLabelEmpty->show();
+            if (!mLabelEmpty->text().isEmpty())
+            {
+                mLayout->insertWidget(0, mLabelEmpty);
+                mLabelEmpty->show();
+            }
             mIsEmpty = true;
         }
 
@@ -371,7 +401,7 @@ bool WidgetList::eventFilter(QObject *o, QEvent *e)
         }
         else
         {
-            if (euclideanDistance(mAnchorPoint, me->pos()) < QApplication::startDragDistance())
+            if (euclideanDistance(mAnchorPoint, me->pos()) < QApplication::startDragDistance() || count() < 2)
                 return true;
 
             i = mLayout->indexOf(w1);
@@ -380,16 +410,23 @@ bool WidgetList::eventFilter(QObject *o, QEvent *e)
             mLayout->removeWidget(w1);
             double so = 10.0 / w1->height();
             QString c = palette().color(QPalette::Mid).darker(120).name();
-            mWidgetPlaceholder->setStyleSheet("QWidget{"
-                                              "background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
-                                              "stop: 0 " + c + ", "
-                                              "stop: " + QString::number(so) + " palette(mid), "
-                                              "stop: " + QString::number(1.0 - so) + " palette(mid), "
-                                              "stop: 1 " + c + ");"
-                                              "margin: 0 0; "
-                                              "border-top: 1px solid palette(midlight); "
-                                              "border-bottom: 1px solid palette(midlight);"
-                                              "}");
+            if (mIsPlaceholderVisible)
+            {
+                mWidgetPlaceholder->setStyleSheet("QWidget{"
+                                                  "background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
+                                                  "stop: 0 " + c + ", "
+                                                  "stop: " + QString::number(so) + " palette(mid), "
+                                                  "stop: " + QString::number(1.0 - so) + " palette(mid), "
+                                                  "stop: 1 " + c + ");"
+                                                  "margin: 0 0; "
+                                                  "border-top: 1px solid palette(midlight); "
+                                                  "border-bottom: 1px solid palette(midlight);"
+                                                  "}");
+            }
+            else
+            {
+                mWidgetPlaceholder->setStyleSheet("");
+            }
             mWidgetPlaceholder->show();
             w1->raise();
 
@@ -508,10 +545,6 @@ void WidgetList::On_mAnimation_finished()
         mLayout->insertWidget(mLayout->indexOf(mWidgetPlaceholder), w1);
         mLayout->removeWidget(mWidgetPlaceholder);
         mWidgetPlaceholder->hide();
-//        w1->setGraphicsEffect(0);
-//        w2->setStyleSheet("");
-//        w2->setGraphicsEffect(0);
-
 
         mIsHolded = false;
         mIsMooving = false;
@@ -531,8 +564,11 @@ void WidgetList::On_mAnimation_finished()
 
         if (mLayout->count() == 1)
         {
-            mLayout->insertWidget(0, mLabelEmpty);
-            mLabelEmpty->show();
+            if (!mLabelEmpty->text().isEmpty())
+            {
+                mLayout->insertWidget(0, mLabelEmpty);
+                mLabelEmpty->show();
+            }
             mIsEmpty = true;
         }
 
@@ -567,7 +603,7 @@ void WidgetList::On_mAnimation_valueChanged(const QVariant &v)
     }
 }
 
-QWidget *WidgetList::createWidgetContainer(const QString &title)
+QWidget *WidgetList::createWidgetContainer()
 {
     QWidget * w1 = new QWidget(this);
     QWidget * w2 = new QWidget(w1);
@@ -579,28 +615,44 @@ QWidget *WidgetList::createWidgetContainer(const QString &title)
     QVBoxLayout * w4Layout = new QVBoxLayout();
     QCheckBox * expandCheckBox = new QCheckBox(w3);
     QCheckBox * bypassCheckBox = new QCheckBox(w3);
-    QLabel * titleLabel = new QLabel(title, w3);
+    QLabel * titleLabel = new QLabel(w3);
     QToolButton * closeButton = new QToolButton(w3);
 
     w1Layout->setContentsMargins(0, 0, 0, 0);
-    w2Layout->setContentsMargins(10, 5, 10, 5);
+    w2Layout->setContentsMargins(mItemMargins);
     w2Layout->setSpacing(0);
     w3Layout->setContentsMargins(0, 0, 0, 0);
     w3Layout->setSpacing(5);
-    w4Layout->setContentsMargins(10, 10, 10, 10);
+    w4Layout->setContentsMargins(mItemWidgetMargins);
 
     w2->setAutoFillBackground(true);
     w2->setProperty("class", "cViewEditWidgetListItemContainer");
     w3->setProperty("class", "cViewEditWidgetListItemCaptionContainer");
     w4->setProperty("class", "cViewEditWidgetListItemWidgetContainer");
+    if (mIsItemContentsFrameVisible)
+        w4->setStyleSheet(
+            ".cViewEditWidgetListItemWidgetContainer"
+            "{"
+                "border:1px solid palette(midlight);"
+                "border-radius:2px;"
+            "}"
+            );
+    else
+        w4->setStyleSheet(
+            ".cViewEditWidgetListItemWidgetContainer"
+            "{"
+                "border:0px;"
+                "border-radius:0px;"
+            "}"
+            );
     expandCheckBox->setChecked(true);
-    expandCheckBox->setToolTip(tr("Expand/collapse filter controls."));
+    expandCheckBox->setToolTip(tr("Expand/collapse."));
     expandCheckBox->setProperty("class", "cViewEditWidgetListItemCheckExpand");
     bypassCheckBox->setProperty("class", "cViewEditWidgetListItemCheckBypass");
-    bypassCheckBox->setToolTip(tr("Bypass this filter."));
+    bypassCheckBox->setToolTip(tr("Bypass."));
     titleLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
     closeButton->setIcon(QIcon(":/anitools/icons/close"));
-    closeButton->setToolTip(tr("Remove this filter."));
+    closeButton->setToolTip(tr("Remove."));
     closeButton->setAutoRaise(true);
 
     w1->setLayout(w1Layout);
@@ -659,3 +711,81 @@ void WidgetList::setAnimate(bool a)
 {
     mAnimate = a;
 }
+
+void WidgetList::setTitle(int i, const QString &title, const QString &tooltip)
+{
+    if (mIsEmpty || i < 0 || i >= mLayout->count() - 1)
+        return;
+
+    QWidget * w3 = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(0)->widget();
+    QLabel * titleLabel = qobject_cast<QLabel*>(w3->layout()->itemAt(2)->widget());
+
+    titleLabel->setText(title);
+    if (!tooltip.isNull())
+        titleLabel->setToolTip(tooltip);
+}
+
+void WidgetList::setItemMargins(const QMargins &margins)
+{
+    mItemMargins = margins;
+
+    QWidget * w;
+    for (int i = 0; i < count(); i++)
+    {
+        w = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget();
+        w->layout()->setContentsMargins(margins);
+    }
+}
+
+void WidgetList::setItemWidgetMargins(const QMargins &margins)
+{
+    mItemWidgetMargins = margins;
+
+    QWidget * w;
+    for (int i = 0; i < count(); i++)
+    {
+        w = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(1)->widget();
+        w->layout()->setContentsMargins(margins);
+    }
+}
+
+void WidgetList::setEmptyMessage(const QString &text)
+{
+    mLabelEmpty->setText(text);
+    if (count() == 0 && text.isEmpty())
+        mLabelEmpty->hide();
+}
+
+void WidgetList::setPlaceholderVisible(bool v)
+{
+    mIsPlaceholderVisible = v;
+}
+
+void WidgetList::setItemContentsFrameVisible(bool v)
+{
+    mIsItemContentsFrameVisible = v;
+
+    QWidget * w;
+    for (int i = 0; i < count(); i++)
+    {
+        w = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(1)->widget();
+        if (v)
+            w->setStyleSheet(
+                ".cViewEditWidgetListItemWidgetContainer"
+                "{"
+                    "border:1px solid palette(midlight);"
+                    "border-radius:2px;"
+                "}"
+                );
+        else
+            w->setStyleSheet(
+                ".cViewEditWidgetListItemWidgetContainer"
+                "{"
+                    "border:0px;"
+                    "border-radius:0px;"
+                "}"
+                );
+    }
+}
+
+}}

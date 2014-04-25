@@ -138,7 +138,7 @@
            <number>10</number>
           </property>
           <item>
-           <widget class="anitools::widgets::ToolButtonEx" name="mButtonImage" native="true">
+           <widget class="anitools::widgets::ImageButton" name="mButtonImage" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -177,9 +177,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>anitools::widgets::ToolButtonEx</class>
+   <class>anitools::widgets::ImageButton</class>
    <extends>QWidget</extends>
-   <header>toolbuttonex.h</header>
+   <header>imagebutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

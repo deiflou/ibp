@@ -134,9 +134,15 @@ bool ColorPicker::eventFilter(QObject *o, QEvent *e)
         {
             me = (QMouseEvent *)e;
             if (me->x() < w->width() >> 1)
+            {
                 w->setCursor(Qt::PointingHandCursor);
+                w->setToolTip(tr("Previous color."));
+            }
             else
+            {
                 w->unsetCursor();
+                w->setToolTip(tr("New color."));
+            }
 
             return true;
         }

@@ -17,35 +17,7 @@
    </size>
   </property>
   <property name="styleSheet">
-   <string notr="true">.cViewEditWidgetListItemCheckBypass, .cViewEditWidgetListItemCheckExpand
-{
-	padding:0;
-	margin:0;
-	spacing:0;
-}
-.cViewEditWidgetListItemCheckBypass::indicator:!checked
-{
-	image: url(&quot;:/anitools/icons/openEye&quot;);
-}
-.cViewEditWidgetListItemCheckBypass::indicator:checked
-{
-	image: url(&quot;:/anitools/icons/closedEye&quot;);
-}
-.cViewEditWidgetListItemCheckExpand::indicator:!checked
-{
-	image: url(&quot;:/anitools/icons/expandCollapseArrowRight&quot;);
-}
-.cViewEditWidgetListItemCheckExpand::indicator:checked
-{
-	image: url(&quot;:/anitools/icons/expandCollapseArrowDown&quot;);
-}
-.cViewEditWidgetListItemWidgetContainer
-{
-	border:1px solid palette(midlight);
-	border-radius:2px;
-}
-
-.cFlatOptionButton:!checked
+   <string notr="true">.cFlatOptionButton:!checked
 {
 	background-color:  palette(dark);
 }
@@ -70,7 +42,7 @@
 }
 .cFlatOptionButton
 {
-	padding: 2px 8px 2px 8px;
+	padding: 1px 4px 1px 4px;
 	margin: 0px;
 	spacing: 0px;
 	border-radius: 1px;
@@ -665,7 +637,7 @@
                 <property name="widgetResizable">
                  <bool>true</bool>
                 </property>
-                <widget class="WidgetList" name="mViewEditWidgetList">
+                <widget class="anitools::widgets::WidgetList" name="mViewEditWidgetList">
                  <property name="geometry">
                   <rect>
                    <x>0</x>
@@ -709,7 +681,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetList</class>
+   <class>anitools::widgets::WidgetList</class>
    <extends>QWidget</extends>
    <header>widgetlist.h</header>
    <container>1</container>

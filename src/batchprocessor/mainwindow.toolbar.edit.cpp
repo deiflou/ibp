@@ -396,5 +396,8 @@ void MainWindow::On_mToolbarEditButtonAddFilterAction_triggered()
     }
     f->setParent(&mViewEditImageFilterList);
     mViewEditImageFilterList.append(f);
-    ui->mViewEditWidgetList->append(f->widget(), f->info().value("name"));
+
+    ui->mViewEditWidgetList->append(f->widget(this));
+    ui->mViewEditWidgetList->setTitle(ui->mViewEditWidgetList->count() - 1,
+                                      f->info().value("name"), f->info().value("description"));
 }

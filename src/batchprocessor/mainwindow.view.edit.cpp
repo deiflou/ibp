@@ -194,13 +194,15 @@ bool MainWindow::viewEditLoadImageFilterList(const QString &fileName)
         filter = (ImageFilter *)mViewEditImageFilterList.at(i);
         if (!filter)
         {
-            ui->mViewEditWidgetList->append(0, "[" + tr("Broken Filter") + "]");
+            ui->mViewEditWidgetList->append(0);
             ui->mViewEditWidgetList->setWidgetBypass(i, mViewEditImageFilterList.bypass(i));
+            ui->mViewEditWidgetList->setTitle(i, "<i>[" + tr("Broken Filter") + "]</i>");
         }
         else
         {
-            ui->mViewEditWidgetList->append(filter->widget(this), filter->info().value("name"));
+            ui->mViewEditWidgetList->append(filter->widget(this));
             ui->mViewEditWidgetList->setWidgetBypass(i, mViewEditImageFilterList.bypass(i));
+            ui->mViewEditWidgetList->setTitle(i, filter->info().value("name"), filter->info().value("description"));
         }
     }
     ui->mViewEditWidgetList->setAnimate(true);
