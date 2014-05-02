@@ -19,55 +19,51 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H
-#define ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H
+#ifndef ROTATIONGAUGE_H
+#define ROTATIONGAUGE_H
 
 #include <QWidget>
 
 namespace anitools {
 namespace widgets {
 
-namespace Ui {
-class AffineTransformationList;
-}
-
-class AffineTransformationList : public QWidget
+class RotationGauge : public QWidget
 {
     Q_OBJECT
 
-public:
-    enum TransformationType
-    {
-        Translation,
-        Scaling,
-        Rotation,
-        Shearing
-    };
-
-    struct Transformation
-    {
-        TransformationType type;
-        double v1, v2;
-        bool bypass;
-    };
-
-public:
-    explicit AffineTransformationList(QWidget *parent = 0);
-    ~AffineTransformationList();
-
 private:
-    Ui::AffineTransformationList *ui;
+    double mAngle;
+    double mAltitude;
+    bool mAltitudeEnabled;
 
-    QList<Transformation> mTransformations;
+    bool mMouseButtonPressed;
+
+public:
+    explicit RotationGauge(QWidget *parent = 0);
+    
+    double angle();
+    double altitude();
+    bool isAltitudeEnabled();
+
+public slots:
+    void setAngle(double v);
+    void setAltitude(double v);
+    void enableAltitude(bool v);
+
+protected:
+    void paintEvent(QPaintEvent * e);
+    void mousePressEvent(QMouseEvent * e);
+    void mouseReleaseEvent(QMouseEvent * e);
+    void mouseMoveEvent(QMouseEvent * e);
+    void focusInEvent(QFocusEvent *e);
+    void focusOutEvent(QFocusEvent *e);
+    void keyPressEvent(QKeyEvent * e);
 
 signals:
-    void transformationChanged(const QList<Transformation> & tList);
-
-private slots:
-    void On_mButtonAppend_menuActionClicked();
-    void On_valueChanged(double v);
+    void angleChanged(double v);
+    void altitudeChanged(double v);
+    
 };
 
 }}
-
-#endif // ANITOOLS_WIDGETS_AFFINETRANSFORMATIONLIST_H
+#endif // ROTATIONGAUGE_H

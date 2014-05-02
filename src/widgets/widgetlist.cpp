@@ -58,7 +58,8 @@ WidgetList::WidgetList(QWidget *parent) :
     mItemMargins(10, 5, 10, 5),
     mItemWidgetMargins(10, 10, 10, 10),
     mIsPlaceholderVisible(true),
-    mIsItemContentsFrameVisible(true)
+    mIsItemContentsFrameVisible(true),
+    mIsItemShadowVisible(true)
 {
     mLayout = new QVBoxLayout(this);
     mLayout->addStretch(1);
@@ -102,6 +103,11 @@ WidgetList::WidgetList(QWidget *parent) :
     ".cViewEditWidgetListItemCheckExpand::indicator:checked"
     "{"
         "image: url(\":/anitools/icons/expandCollapseArrowDown\");"
+    "}"
+    ".cViewEditWidgetListItemWidgetContainer"
+    "{"
+        "border:1px solid palette(midlight);"
+        "border-radius:2px;"
     "}"
     );
 }
@@ -294,8 +300,14 @@ bool WidgetList::eventFilter(QObject *o, QEvent *e)
     {
         me = (QMouseEvent *)e;
 
-        if (me->button() != Qt::LeftButton || !mIsMooving || !mIsHolded)
+        if (me->button() != Qt::LeftButton || !mIsHolded)
             return QWidget::eventFilter(o, e);
+
+        if (!mIsMooving)
+        {
+            mIsHolded = false;
+            return QWidget::eventFilter(o, e);
+        }
 
         mDragTimer->stop();
 
@@ -436,11 +448,14 @@ bool WidgetList::eventFilter(QObject *o, QEvent *e)
             w2->setStyleSheet(".cViewEditWidgetListItemContainer{background-color:palette(window);"
                               "border-radius:2; border:1px solid palette(mid);}");
 
-            QGraphicsDropShadowEffect * ge2 = new QGraphicsDropShadowEffect(this);
-            ge2->setColor(QColor(0, 0, 0));
-            ge2->setBlurRadius(50);
-            ge2->setOffset(0, 1);
-            w1->setGraphicsEffect(ge2);
+            if (mIsItemShadowVisible)
+            {
+                QGraphicsDropShadowEffect * ge2 = new QGraphicsDropShadowEffect(this);
+                ge2->setColor(QColor(0, 0, 0));
+                ge2->setBlurRadius(50);
+                ge2->setOffset(0, 1);
+                w1->setGraphicsEffect(ge2);
+            }
 
             mIsMooving = true;
             mDraggedIndex = i;
@@ -628,23 +643,10 @@ QWidget *WidgetList::createWidgetContainer()
     w2->setAutoFillBackground(true);
     w2->setProperty("class", "cViewEditWidgetListItemContainer");
     w3->setProperty("class", "cViewEditWidgetListItemCaptionContainer");
-    w4->setProperty("class", "cViewEditWidgetListItemWidgetContainer");
     if (mIsItemContentsFrameVisible)
-        w4->setStyleSheet(
-            ".cViewEditWidgetListItemWidgetContainer"
-            "{"
-                "border:1px solid palette(midlight);"
-                "border-radius:2px;"
-            "}"
-            );
+        w4->setProperty("class", "cViewEditWidgetListItemWidgetContainer");
     else
-        w4->setStyleSheet(
-            ".cViewEditWidgetListItemWidgetContainer"
-            "{"
-                "border:0px;"
-                "border-radius:0px;"
-            "}"
-            );
+        w4->setProperty("class", "");
     expandCheckBox->setChecked(true);
     expandCheckBox->setToolTip(tr("Expand/collapse."));
     expandCheckBox->setProperty("class", "cViewEditWidgetListItemCheckExpand");
@@ -770,22 +772,15 @@ void WidgetList::setItemContentsFrameVisible(bool v)
     {
         w = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(1)->widget();
         if (v)
-            w->setStyleSheet(
-                ".cViewEditWidgetListItemWidgetContainer"
-                "{"
-                    "border:1px solid palette(midlight);"
-                    "border-radius:2px;"
-                "}"
-                );
+            w->setProperty("class", "cViewEditWidgetListItemWidgetContainer");
         else
-            w->setStyleSheet(
-                ".cViewEditWidgetListItemWidgetContainer"
-                "{"
-                    "border:0px;"
-                    "border-radius:0px;"
-                "}"
-                );
+            w->setProperty("class", "");
     }
+}
+
+void WidgetList::setItemShadowVisible(bool v)
+{
+    mIsItemShadowVisible = v;
 }
 
 }}

@@ -71,7 +71,7 @@ private:
     QParallelAnimationGroup * mAnimation;
 
     QMargins mItemMargins, mItemWidgetMargins;
-    bool mIsPlaceholderVisible, mIsItemContentsFrameVisible;
+    bool mIsPlaceholderVisible, mIsItemContentsFrameVisible, mIsItemShadowVisible;
 
     QWidget * createWidgetContainer();
 
@@ -95,6 +95,7 @@ public slots:
     void setEmptyMessage(const QString & text);
     void setPlaceholderVisible(bool v);
     void setItemContentsFrameVisible(bool v);
+    void setItemShadowVisible(bool v);
 
 private slots:
     void On_WidgetContainerExpandCheck_toggled(bool c);

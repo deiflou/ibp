@@ -50,7 +50,8 @@ SOURCES += \
     ../../src/widgets/imagebutton.cpp \
     ../../src/widgets/colorcompositionmodecombobox.cpp \
     ../../src/widgets/widgetlist.cpp \
-    ../../src/widgets/affinetransformationlist.cpp
+    ../../src/widgets/affinetransformationlist.cpp \
+    ../../src/widgets/rotationgauge.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -64,7 +65,8 @@ HEADERS += \
     ../../src/widgets/imagebutton.h \
     ../../src/widgets/colorcompositionmodecombobox.h \
     ../../src/widgets/widgetlist.h \
-    ../../src/widgets/affinetransformationlist.h
+    ../../src/widgets/affinetransformationlist.h \
+    ../../src/widgets/rotationgauge.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
