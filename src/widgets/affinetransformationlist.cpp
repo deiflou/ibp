@@ -21,7 +21,6 @@
 
 #include <QMenu>
 #include <QDoubleSpinBox>
-#include <QDebug>
 
 #include "affinetransformationlist.h"
 #include "ui_affinetransformationlist.h"
@@ -44,20 +43,20 @@ AffineTransformationList::AffineTransformationList(QWidget *parent) :
     ui->mWidgetList->setItemShadowVisible(false);
 
     QMenu * m = new QMenu(this);
-    QAction * a = new QAction(tr("Translate"), this);
-    a->setProperty("type", "translate");
+    QAction * a = new QAction(tr("Translation"), this);
+    a->setProperty("type", (int)Translation);
     connect(a, SIGNAL(triggered()), this, SLOT(On_mButtonAppend_menuActionClicked()));
     m->addAction(a);
-    a = new QAction(tr("Scale"), this);
-    a->setProperty("type", "scale");
+    a = new QAction(tr("Scaling"), this);
+    a->setProperty("type", (int)Scaling);
     connect(a, SIGNAL(triggered()), this, SLOT(On_mButtonAppend_menuActionClicked()));
     m->addAction(a);
-    a = new QAction(tr("Rotate"), this);
-    a->setProperty("type", "rotate");
+    a = new QAction(tr("Rotation"), this);
+    a->setProperty("type", (int)Rotation);
     connect(a, SIGNAL(triggered()), this, SLOT(On_mButtonAppend_menuActionClicked()));
     m->addAction(a);
-    a = new QAction(tr("Shear"), this);
-    a->setProperty("type", "shear");
+    a = new QAction(tr("Shearing"), this);
+    a->setProperty("type", (int)Shearing);
     connect(a, SIGNAL(triggered()), this, SLOT(On_mButtonAppend_menuActionClicked()));
     m->addAction(a);
 
@@ -72,36 +71,38 @@ AffineTransformationList::~AffineTransformationList()
     delete ui;
 }
 
-void AffineTransformationList::On_mButtonAppend_menuActionClicked()
+QList<AffineTransformation> AffineTransformationList::transformations() const
 {
-    QString type = sender()->property("type").toString();
+    return mTransformations;
+}
 
+QList<bool> AffineTransformationList::bypasses() const
+{
+    return mBypasses;
+}
+
+void AffineTransformationList::appendTransformation(const AffineTransformation &t)
+{
     QString title;
     QWidget * mainWidget = new QWidget(ui->mWidgetList);
     QHBoxLayout * mainLayout = new QHBoxLayout(mainWidget);
     QDoubleSpinBox * spin1, * spin2;
     RotationGauge * rot;
-    Transformation tfm;
 
+    mainWidget->setProperty("type", (int)t.type);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(5);
     mainLayout->addStretch(1);
 
-    ui->mWidgetList->append(mainWidget);
-
-    if (type == "scale")
-        tfm.v1 = tfm.v2 = 100;
-    else
-        tfm.v1 = tfm.v2 = 0;
-    tfm.bypass = false;
-
-    if (type == "rotate")
+    if (t.type == Rotation)
     {
+        title = tr("Rotate");
         rot = new RotationGauge(mainWidget);
         rot->setFocusPolicy(Qt::StrongFocus);
         spin1 = new QDoubleSpinBox(mainWidget);
         spin1->setRange(0, 360);
         spin1->setSuffix("°");
+        spin1->setValue(t.z);
         mainLayout->addWidget(rot);
         mainLayout->addWidget(spin1);
         connect(rot, SIGNAL(angleChanged(double)), spin1, SLOT(setValue(double)));
@@ -110,52 +111,61 @@ void AffineTransformationList::On_mButtonAppend_menuActionClicked()
     }
     else
     {
+        if (t.type == Translation)
+            title = tr("Translate");
+        else if (t.type == Scaling)
+            title = tr("Scale");
+        else
+            title = tr("Shear");
         spin1 = new QDoubleSpinBox(mainWidget);
         spin2 = new QDoubleSpinBox(mainWidget);
         spin1->setRange(-1000, 1000);
         spin2->setRange(-1000, 1000);
         spin1->setPrefix("X: ");
         spin2->setPrefix("Y: ");
-        spin1->setSuffix(type == "translate" ? "px" : "%");
-        spin2->setSuffix(type == "translate" ? "px" : "%");
-        spin1->setValue(type == "scale" ? 100 : 0);
-        spin2->setValue(type == "scale" ? 100 : 0);
+        spin1->setSuffix(t.type == Translation ? "px" : "%");
+        spin2->setSuffix(t.type == Translation ? "px" : "%");
+        spin1->setValue(t.x);
+        spin2->setValue(t.y);
         mainLayout->addWidget(spin1);
         mainLayout->addWidget(spin2);
         connect(spin1, SIGNAL(valueChanged(double)), this, SLOT(On_valueChanged(double)));
         connect(spin2, SIGNAL(valueChanged(double)), this, SLOT(On_valueChanged(double)));
     }
 
-    if (type == "translate")
-    {
-        title = tr("Translate");
-        tfm.type = Translation;
-    }
-    else if (type == "scale")
-    {
-        title = tr("Scale");
-        tfm.type = Scaling;
-    }
-    else if (type == "rotate")
-    {
-        title = tr("Rotate");
-        tfm.type = Rotation;
-    }
-    else
-    {
-        title = tr("Shear");
-        tfm.type = Shearing;
-    }
-
     mainLayout->addStretch(1);
-    mTransformations.append(tfm);
+
+    ui->mWidgetList->append(mainWidget);
     ui->mWidgetList->setTitle(ui->mWidgetList->count() - 1, title);
 }
 
-QDebug operator<<(QDebug d, const AffineTransformationList::Transformation &tfm)
+void AffineTransformationList::setTransformations(const QList<AffineTransformation> &t)
 {
-    d << tfm.type << " - " << tfm.v1 << " - " << tfm.v2 << " - " << tfm.bypass;
-    return d;
+    ui->mWidgetList->clear();
+    for (int i = 0; i < t.size(); i++)
+        appendTransformation(t.at(i));
+}
+
+void AffineTransformationList::setBypasses(const QList<bool> &b)
+{
+    if (b.size() != mTransformations.size())
+        return;
+    for (int i = 0; i < b.size(); i++)
+        ui->mWidgetList->setWidgetBypass(i, b.at(i));
+}
+
+void AffineTransformationList::On_mButtonAppend_menuActionClicked()
+{
+    AffineTransformationType type = (AffineTransformationType)sender()->property("type").toInt();
+
+    if (type == Translation)
+        appendTransformation(AffineTransformation(Translation, 0, 0, 0));
+    else if (type == Scaling)
+        appendTransformation(AffineTransformation(Scaling, 100, 100, 100));
+    else if (type == Rotation)
+        appendTransformation(AffineTransformation(Rotation, 0, 0, 0));
+    else
+        appendTransformation(AffineTransformation(Shearing, 0, 0, 0));
 }
 
 void AffineTransformationList::On_valueChanged(double v)
@@ -168,13 +178,63 @@ void AffineTransformationList::On_valueChanged(double v)
         if (ui->mWidgetList->at(i) == sp)
             break;
 
-    j = sp->layout()->indexOf(s) - (mTransformations.at(i).type == Rotation ? 2 : 1);
+    j = sp->layout()->indexOf(s) - (mTransformations.at(i).type == Rotation ? 0 : 1);
     if (j == 0)
-        mTransformations[i].v1 = v;
+        mTransformations[i].x = v;
+    else if (j == 1)
+        mTransformations[i].y = v;
     else
-        mTransformations[i].v2 = v;
+        mTransformations[i].z = v;
 
-    emit transformationChanged(mTransformations);
+    emit transformationsChanged();
+}
+
+void AffineTransformationList::on_mWidgetList_widgetInserted(int i)
+{
+    AffineTransformationType type = (AffineTransformationType)ui->mWidgetList->at(i)->property("type").toInt();
+    AffineTransformation tfm(type, 0, 0, 0);
+    QDoubleSpinBox * spin;
+
+    if (type == Rotation)
+    {
+        spin = (QDoubleSpinBox *)ui->mWidgetList->at(i)->layout()->itemAt(2)->widget();
+        tfm.z = spin->value();
+    }
+    else
+    {
+        spin = (QDoubleSpinBox *)ui->mWidgetList->at(i)->layout()->itemAt(1)->widget();
+        tfm.x = spin->value();
+        spin = (QDoubleSpinBox *)ui->mWidgetList->at(i)->layout()->itemAt(2)->widget();
+        tfm.y = spin->value();
+    }
+
+    mTransformations.insert(i, tfm);
+    mBypasses.insert(i, ui->mWidgetList->widgetBypass(i));
+
+    emit transformationsChanged();
+}
+
+void AffineTransformationList::on_mWidgetList_widgetMoved(int from, int to)
+{
+    mTransformations.move(from, to);
+    mBypasses.move(from, to);
+
+    emit transformationsChanged();
+}
+
+void AffineTransformationList::on_mWidgetList_widgetRemoved(int i)
+{
+    mTransformations.removeAt(i);
+    mBypasses.removeAt(i);
+
+    emit transformationsChanged();
+}
+
+void AffineTransformationList::on_mWidgetList_widgetBypassStatusChanged(int i, bool c)
+{
+    mBypasses[i] = c;
+
+    emit transformationsChanged();
 }
 
 }}

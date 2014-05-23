@@ -37,7 +37,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Color:</string>
+        <string>Texture:</string>
        </property>
       </widget>
      </item>
@@ -165,7 +165,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Blend Mode:</string>
+        <string>Color Composition Mode:</string>
        </property>
       </widget>
      </item>

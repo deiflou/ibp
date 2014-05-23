@@ -23,12 +23,6 @@
 #include <QFileInfo>
 #include <QDebug>
 
-#ifdef Q_OS_WIN32
-#include <QtWinExtras>
-#include <winuser.h>
-#include <dwmapi.h>
-#endif
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -53,8 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setAttribute(Qt::WA_TranslucentBackground);
-    QtWin::extendFrameIntoClientArea(this, 0, ui->mToolbarEdit->minimumSizeHint().height() + 15, 0, 0);
     mainLoad();
     toolbarEditLoad();
     toolbarBatchLoad();
@@ -64,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    mViewEditImageFilterList.quit();
+    while (mViewEditImageFilterList.isRunning());
+
     mainUnload();
     toolbarEditUnload();
     toolbarBatchUnload();
@@ -89,24 +84,6 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e)
 
 void MainWindow::mainLoad()
 {
-    // Windows Native Event Filter
-#ifdef Q_OS_WIN32
-    mMainStyleChangedTimer.setSingleShot(true);
-    connect(&mMainStyleChangedTimer, SIGNAL(timeout()),
-            this, SLOT(On_mMainStyleChangedTimer_timeout()));
-    mMainNativeEventFilter.registerMessage(WM_THEMECHANGED);
-    mMainNativeEventFilter.registerMessage(WM_SYSCOLORCHANGE);
-    mMainNativeEventFilter.registerMessage(WM_DWMCOMPOSITIONCHANGED);
-    mMainNativeEventFilter.registerMessage(WM_DWMCOLORIZATIONCOLORCHANGED);
-    mMainNativeEventFilter.registerMessage(WM_DWMNCRENDERINGCHANGED);
-#ifdef WIN_AERO
-    mMainNativeEventFilter.registerMessage(WM_NCHITTEST, true);
-#endif
-    connect(&mMainNativeEventFilter, SIGNAL(nativeEvent(void*,long*)),
-            this, SLOT(On_mMainNativeEventFilter_nativeEvent(void*,long*)));
-    On_mMainNativeEventFilter_nativeEvent(0, 0);
-#endif
-
     // Image Filter Plugin Loader
     mMainImageFilterPluginLoader.load(QApplication::applicationDirPath() + "/plugins");
     // General
@@ -172,89 +149,6 @@ void MainWindow::on_mMainButtonBatch_toggled(bool checked)
     ui->mMainContainerToolbars->setCurrentWidget(ui->mToolbarBatch);
     ui->mMainContainerViews->setCurrentWidget(ui->mViewBatch);
 }
-
-#ifdef Q_OS_WIN32
-void MainWindow::On_mMainNativeEventFilter_nativeEvent(void *message, long *result)
-{
-    MSG * m = (MSG *)message;
-    unsigned short lw;
-    if (m)
-        lw = LOWORD(m->message);
-    else
-        return;
-
-    switch (lw)
-    {
-#ifdef WIN_AERO
-    case WM_NCHITTEST:
-    {
-        if (m->hwnd == (HWND)this->effectiveWinId() && QtWin::isCompositionEnabled())
-        {
-            POINTS wpt = MAKEPOINTS(m->lParam);
-            QPoint pt = ui->mToolbarMoveHandle->mapFromGlobal(QPoint(wpt.x, wpt.y));
-            if (ui->mToolbarMoveHandle->rect().contains(pt))
-            {
-                *result = HTCAPTION;
-                break;
-            }
-        }
-
-        *result = DefWindowProc(m->hwnd, m->message, m->wParam, m->lParam);
-        break;
-    }
-#endif
-    default:
-    {
-#ifdef WIN_AERO
-        if (QtWin::isCompositionEnabled())
-        {
-            ui->mMainSeparatorToolbars->hide();
-            ui->mMainContainerViews->setAutoFillBackground(true);
-            ui->mMainContainer->setAutoFillBackground(false);
-            ui->mToolbarEditSeparator01->setStyleSheet("QFrame{"
-                                                       "border-left: 1px solid rgba(0, 0, 0, 64);"
-                                                       "border-top: 0px;"
-                                                       "border-right: 1px solid rgba(255, 255, 255, 64);"
-                                                       "border-bottom: 0px;"
-                                                       "}");
-            ui->mToolbarEditSeparator02->setStyleSheet(ui->mToolbarEditSeparator01->styleSheet());
-            ui->mToolbarEdit->layout()->setContentsMargins(5, 5, 0, 10);
-            ui->mToolbarBatch->layout()->setContentsMargins(5, 5, 0, 10);
-            ui->mMainContainerChangeSection->layout()->setContentsMargins(0, 5, 5, 10);
-
-            setAttribute(Qt::WA_TranslucentBackground);
-            QtWin::extendFrameIntoClientArea(this, 0, ui->mToolbarEdit->minimumSizeHint().height(), 0, 0);
-        }
-        else
-        {
-            ui->mMainSeparatorToolbars->show();
-            ui->mMainContainerViews->setAutoFillBackground(false);
-            ui->mMainContainer->setAutoFillBackground(true);
-            ui->mToolbarEditSeparator01->setStyleSheet("");
-            ui->mToolbarEditSeparator02->setStyleSheet("");
-            ui->mToolbarEdit->layout()->setContentsMargins(10, 10, 0, 10);
-            ui->mToolbarBatch->layout()->setContentsMargins(10, 10, 0, 10);
-            ui->mMainContainerChangeSection->layout()->setContentsMargins(0, 10, 10, 10);
-
-            setAttribute(Qt::WA_TranslucentBackground, false);
-            setAttribute(Qt::WA_NoSystemBackground, false);
-            QtWin::extendFrameIntoClientArea(this, 0, 0, 0, 0);
-        }
-#endif
-        if (lw == WM_SYSCOLORCHANGE)
-            mMainStyleChangedTimer.start(500);
-
-        break;
-    }
-    }
-}
-
-void MainWindow::On_mMainStyleChangedTimer_timeout()
-{
-    extern void setDarkPalette();
-    setDarkPalette();
-}
-#endif
 
 void MainWindow::On_mMainWatcherImageFilterListPresets_directoryChanged(const QString &path)
 {

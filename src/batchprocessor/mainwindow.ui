@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>500</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -531,41 +531,42 @@
                   </property>
                   <item>
                    <widget class="anitools::widgets::ImageViewer" name="mViewEditImagePreviewOutput" native="true">
-                    <layout class="QHBoxLayout" name="horizontalLayout_8">
-                     <item>
-                      <spacer name="horizontalSpacer_4">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>179</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QProgressBar" name="mViewEditProgressBarProcessingOutput">
-                       <property name="textVisible">
-                        <bool>false</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_5">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>179</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                    </layout>
+                    <widget class="QProgressBar" name="mViewEditProgressBarProcessingOutput">
+                     <property name="geometry">
+                      <rect>
+                       <x>30</x>
+                       <y>160</y>
+                       <width>331</width>
+                       <height>4</height>
+                      </rect>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>4</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>4</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QProgressBar
+{
+	border : 0px;
+	background-color : palette(dark);
+}
+QProgressBar::chunk
+{
+	background-color : palette(highlight);
+}</string>
+                     </property>
+                     <property name="textVisible">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
                    </widget>
                   </item>
                   <item>
@@ -643,7 +644,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>99</width>
-                   <height>445</height>
+                   <height>485</height>
                   </rect>
                  </property>
                 </widget>
@@ -669,9 +670,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>anitools::widgets::ImageViewer</class>
+   <class>anitools::widgets::WidgetList</class>
    <extends>QWidget</extends>
-   <header>imageviewer.h</header>
+   <header>widgetlist.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -681,9 +682,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>anitools::widgets::WidgetList</class>
+   <class>anitools::widgets::ImageViewer</class>
    <extends>QWidget</extends>
-   <header>widgetlist.h</header>
+   <header>imageviewer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -692,7 +693,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="mButtonGroupMainChangeSection"/>
   <buttongroup name="mButtonGroupToolbarEditSplitter"/>
+  <buttongroup name="mButtonGroupMainChangeSection"/>
  </buttongroups>
 </ui>

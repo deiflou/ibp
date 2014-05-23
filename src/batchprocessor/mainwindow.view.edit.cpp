@@ -76,7 +76,7 @@ void MainWindow::viewEditLoad()
     mViewEditImageFilterList.setAutoRun(true);
     mViewEditImageFilterList.setUseCache(true);
     mViewEditImageFilterList.setPluginLoader(&mMainImageFilterPluginLoader);
-    viewEditLoadImageFilterList(QApplication::applicationDirPath() + "/settings/celprocessor.ifl");
+    viewEditLoadImageFilterList(QApplication::applicationDirPath() + "/settings/batchprocessor.ifl");
     mViewEditImageFilterListIsDirty = false;
 }
 
@@ -85,7 +85,7 @@ void MainWindow::viewEditUnload()
     mViewEditImageFilterList.setName(tr("Current Filter List"));
     mViewEditImageFilterList.setDescription(tr("This file contains the filter list that celprocessor "
                                                "was using the last time it was closed."));
-    mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/celprocessor.ifl");
+    mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/batchprocessor.ifl");
 }
 
 void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
@@ -97,6 +97,7 @@ void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
                  ui->mViewEditSplitterPreview->width();
         int s2 = ui->mViewEdit->width() - s1 - ui->mViewEditSplitterMain->handleWidth();
         ui->mViewEditSplitterMain->setSizes(QList<int>() << s1 << s2);
+        return;
     }
     if ((o == ui->mViewEditWidgetList || o == ui->mViewEditWidgetListScrollArea || o == this)
             && e->type() == QEvent::Resize)
@@ -119,7 +120,6 @@ void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
 
         return;
     }
-
 }
 
 bool MainWindow::viewEditLoadInputImage(const QString &fileName)
@@ -214,24 +214,18 @@ bool MainWindow::viewEditLoadImageFilterList(const QString &fileName)
 
 void MainWindow::On_mViewEditImageFilterList_processingProgress(int p)
 {
-    QMutex m;
-    m.lock();
     ui->mViewEditProgressBarProcessingOutput->setValue(p);
     ui->mViewEditProgressBarProcessingOutput->show();
-    m.unlock();
 }
 
 void MainWindow::On_mViewEditImageFilterList_processingCompleted(const QImage &i)
 {
-    QMutex m;
-    m.lock();
     mViewEditOutputImage = i.copy();
     ui->mViewEditComboOutputZoom->setEnabled(true);
     ui->mViewEditSliderOutputZoom->setEnabled(true);
     ui->mViewEditImagePreviewOutput->setImage(mViewEditOutputImage);
     ui->mToolbarEditButtonSaveImage->setEnabled(!mViewEditOutputImage.isNull());
     ui->mViewEditProgressBarProcessingOutput->hide();
-    m.unlock();
 }
 
 void MainWindow::on_mViewEditImagePreviewInput_zoomIndexChanged(int index)
@@ -242,6 +236,13 @@ void MainWindow::on_mViewEditImagePreviewInput_zoomIndexChanged(int index)
 void MainWindow::on_mViewEditImagePreviewOutput_zoomIndexChanged(int index)
 {
     ui->mViewEditComboOutputZoom->setCurrentIndex(index);
+}
+
+void MainWindow::on_mViewEditImagePreviewOutput_viewportResized(const QRect &r)
+{
+    ui->mViewEditProgressBarProcessingOutput->move(1, r.height()
+                                                   - ui->mViewEditProgressBarProcessingOutput->height() + 1);
+    ui->mViewEditProgressBarProcessingOutput->resize(r.width(), 0);
 }
 
 void MainWindow::on_mViewEditSliderInputZoom_valueChanged(int value)

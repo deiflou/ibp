@@ -32,6 +32,10 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
+
+    ui->mButtonImage->setExtraDataFlags(ImageButton::CheckerboardBackground | ImageButton::ImageTiled |
+                                        ImageButton::ImageStretched | ImageButton::ImageStretchOnlyIfBiggerThanButton |
+                                        ImageButton::ImageKeepAspectRatio);
 }
 
 FilterWidget::~FilterWidget()
@@ -87,6 +91,18 @@ void FilterWidget::setOpacity(int v)
     emit opacityChanged(v);
 }
 
+void FilterWidget::setTransformations(const QList<AffineTransformation> &t, const QList<bool> &b)
+{
+    if (ui->mWidgetAffineTransformationsList->transformations() == t &&
+        ui->mWidgetAffineTransformationsList->bypasses() == b)
+        return;
+    mEmitSignals = false;
+    ui->mWidgetAffineTransformationsList->setTransformations(t);
+    ui->mWidgetAffineTransformationsList->setBypasses(b);
+    mEmitSignals = true;
+    emit transformationsChanged(t, b);
+}
+
 void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)
 {
     if (mEmitSignals)
@@ -135,4 +151,11 @@ void FilterWidget::on_mSpinOpacity_valueChanged(int arg1)
     ui->mSliderOpacity->setValue(arg1);
     if (mEmitSignals)
         emit opacityChanged(arg1);
+}
+
+void FilterWidget::on_mWidgetAffineTransformationsList_transformationsChanged()
+{
+    if (mEmitSignals)
+        emit transformationsChanged(ui->mWidgetAffineTransformationsList->transformations(),
+                                    ui->mWidgetAffineTransformationsList->bypasses());
 }

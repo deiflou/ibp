@@ -49,6 +49,9 @@ public:
     void removeAt(int i);
     void clear();
 
+    bool widgetBypass(int i);
+    bool widgetExpanded(int i);
+
 protected:
     void moveEvent(QMoveEvent *e);
     bool eventFilter(QObject *o, QEvent *e);

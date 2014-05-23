@@ -47,12 +47,14 @@ signals:
     void positionChanged(Filter::Position v);
     void colorCompositionModeChanged(ColorCompositionMode v);
     void opacityChanged(int v);
+    void transformationsChanged(const QList<AffineTransformation> & t, const QList<bool> & b);
 
 public slots:
     void setImage(const QImage & i);
     void setPosition(Filter::Position v);
     void setColorCompositionMode(ColorCompositionMode v);
     void setOpacity(int v);
+    void setTransformations(const QList<AffineTransformation> & t, const QList<bool> & b);
 
 private slots:
     void on_mButtonImage_imageChanged(const QImage & i);
@@ -62,6 +64,7 @@ private slots:
     void on_mComboColorCompositionMode_colorCompositionModeChanged(ColorCompositionMode m);
     void on_mSliderOpacity_valueChanged(int value);
     void on_mSpinOpacity_valueChanged(int arg1);
+    void on_mWidgetAffineTransformationsList_transformationsChanged();
 };
 
 #endif // FILTERWIDGET_H

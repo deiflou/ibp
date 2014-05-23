@@ -29,16 +29,10 @@
 #include "../imgproc/freeimage.h"
 #include "../imgproc/imagefilterlist.h"
 #include "../plugins/imagefilterpluginloader.h"
-#ifdef Q_OS_WIN32
-#include "../misc/nativeeventfilter.h"
-#endif
 
 #include "imagefolderlistpopup.h"
 #include "../widgets/widgetlist.h"
 
-#ifdef Q_OS_WIN32
-using namespace anitools::misc;
-#endif
 using namespace anitools::plugins;
 using namespace anitools::imgproc;
 using namespace anitools::widgets;
@@ -72,10 +66,6 @@ private:
         QString fileName, name, description;
     };
     QList<MainImageFilterListPresetsInfo> mMainImageFilterListPresets;
-#ifdef Q_OS_WIN32
-    NativeEventFilter mMainNativeEventFilter;
-    QTimer mMainStyleChangedTimer;
-#endif
 
     void mainLoad();
     void mainUnload();
@@ -124,10 +114,6 @@ private slots:
     // Main
     void on_mMainButtonEdit_toggled(bool checked);
     void on_mMainButtonBatch_toggled(bool checked);
-#ifdef Q_OS_WIN32
-    void On_mMainNativeEventFilter_nativeEvent(void * message, long * result);
-    void On_mMainStyleChangedTimer_timeout();
-#endif
 
     void On_mMainWatcherImageFilterListPresets_directoryChanged(const QString & path);
 
@@ -154,6 +140,7 @@ private slots:
 
     void on_mViewEditImagePreviewInput_zoomIndexChanged(int index);
     void on_mViewEditImagePreviewOutput_zoomIndexChanged(int index);
+    void on_mViewEditImagePreviewOutput_viewportResized(const QRect & r);
     void on_mViewEditSliderInputZoom_valueChanged(int value);
     void on_mViewEditComboInputZoom_currentIndexChanged(int index);
     void on_mViewEditSliderOutputZoom_valueChanged(int value);

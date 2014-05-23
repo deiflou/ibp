@@ -103,6 +103,8 @@ private:
     QImage mBackgroundImage;
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(ToolButtonEx::ExtraDataFlags)
+
 }}
 
 #endif // ANITOOLS_WIDGETS_TOOLBUTTONEX_H

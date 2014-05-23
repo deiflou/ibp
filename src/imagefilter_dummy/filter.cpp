@@ -47,15 +47,18 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
+    Q_UNUSED(s)
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
+    Q_UNUSED(s)
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
+    Q_UNUSED(parent)
     return 0;
 }

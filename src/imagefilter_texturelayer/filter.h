@@ -58,18 +58,22 @@ private:
     Position mPosition;
     ColorCompositionMode mColorCompositionMode;
     int mOpacity;
+    QList<AffineTransformation> mTransformations;
+    QList<bool> mBypasses;
 
 signals:
     void imageChanged(const QImage & i);
     void positionChanged(Filter::Position v);
     void colorCompositionModeChanged(ColorCompositionMode v);
     void opacityChanged(int v);
+    void transformationsChanged(const QList<AffineTransformation> & t, const QList<bool> & b);
 
 public slots:
     void setImage(const QImage & i);
     void setPosition(Filter::Position v);
     void setColorCompositionMode(ColorCompositionMode v);
     void setOpacity(int v);
+    void setTransformations(const QList<AffineTransformation> & t, const QList<bool> & b);
 };
 
 #endif // FILTER_H

@@ -84,6 +84,14 @@ enum ColorCompositionMode
     ColorCompositionMode_Unsupported
 };
 
+enum AffineTransformationType
+{
+    Translation,
+    Scaling,
+    Rotation,
+    Shearing
+};
+
 struct RGB
 {
     unsigned char r, g, b;
@@ -122,6 +130,33 @@ struct Lab
 struct CMYK
 {
     unsigned char c, m, y, k;
+};
+
+struct AffineTransformation
+{
+    AffineTransformationType type;
+    double x, y, z;
+
+    AffineTransformation()
+    {
+        type = Translation;
+        x = y = z = 0;
+    }
+    AffineTransformation(AffineTransformationType t, double x, double y, double z)
+    {
+        type = t;
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+    bool operator==(const AffineTransformation & t) const
+    {
+        return t.type == type && t.x == x && t.y == y && t.z == z;
+    }
+    bool operator!=(const AffineTransformation & t) const
+    {
+        return !(t.type == type && t.x == x && t.y == y && t.z == z);
+    }
 };
 
 }}

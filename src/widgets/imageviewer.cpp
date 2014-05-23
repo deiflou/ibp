@@ -50,6 +50,7 @@ bool ImageViewer::viewportEvent(QEvent *e)
     if (e->type() == QEvent::Resize)
     {
         updateScrollBars();
+        emit viewportResized(vp->rect());
         return true;
     }
     else if (e->type() == QEvent::Paint)

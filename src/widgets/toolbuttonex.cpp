@@ -119,7 +119,8 @@ void ToolButtonEx::paintEvent(QPaintEvent *e)
 
     QStyleOption tool(0);
     tool.palette = toolbutton.palette;
-    if (toolbutton.subControls & QStyle::SC_ToolButton) {
+    if (toolbutton.subControls & QStyle::SC_ToolButton)
+    {
         if ((bflags & (QStyle::State_MouseOver | QStyle::State_Sunken |
                  QStyle::State_On | QStyle::State_Raised)) || !autoRaise)
         {
@@ -127,7 +128,7 @@ void ToolButtonEx::paintEvent(QPaintEvent *e)
             tool.state = bflags;
             p.setClipRect(button);
             p.drawPrimitive(QStyle::PE_PanelButtonTool, tool);
-            if (!(bflags & QStyle::State_Sunken))
+            if (!(bflags & QStyle::State_Sunken) && (bflags & QStyle::State_Enabled))
             {
                 p.setPen(outline);
                 p.drawLine(button.topRight() + QPoint(0, 1), button.bottomRight() - QPoint(0, 1));

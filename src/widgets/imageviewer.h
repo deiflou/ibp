@@ -42,6 +42,7 @@ protected:
 
 signals:
     void zoomIndexChanged(int zoomIndex);
+    void viewportResized(const QRect & r);
 
 public slots:
     void setZoomIndex(int newZoomIndex);

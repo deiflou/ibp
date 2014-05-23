@@ -259,6 +259,30 @@ void WidgetList::clear()
     mAnimate = true;
 }
 
+bool WidgetList::widgetBypass(int i)
+{
+    if (mIsEmpty || i < 0 || i >= mLayout->count() - 1)
+        return false;
+
+    QWidget * w3 = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(0)->widget();
+    QCheckBox * cb = qobject_cast<QCheckBox *>(w3->layout()->itemAt(1)->widget());
+    if (!cb)
+        return false;
+    return cb->isChecked();
+}
+
+bool WidgetList::widgetExpanded(int i)
+{
+    if (mIsEmpty || i < 0 || i >= mLayout->count() - 1)
+        return false;
+
+    QWidget * w3 = mLayout->itemAt(i)->widget()->layout()->itemAt(0)->widget()->layout()->itemAt(0)->widget();
+    QCheckBox * cb = qobject_cast<QCheckBox *>(w3->layout()->itemAt(0)->widget());
+    if (!cb)
+        return false;
+    return cb->isChecked();
+}
+
 void WidgetList::moveEvent(QMoveEvent *e)
 {
     if (!mIsMooving)

@@ -22,7 +22,6 @@ TEMPLATE = app
 
 win32 {
     QT += winextras
-    DEFINES += WIN_AERO
     CONFIG(debug, debug|release) {
         DESTDIR = ../../bin/win32/debug/
         LIBS += -L../../lib/win32/widgets/debug/ -lanitools.widgets
