@@ -51,7 +51,11 @@ SOURCES += \
     ../../src/widgets/colorcompositionmodecombobox.cpp \
     ../../src/widgets/widgetlist.cpp \
     ../../src/widgets/affinetransformationlist.cpp \
-    ../../src/widgets/rotationgauge.cpp
+    ../../src/widgets/rotationgauge.cpp \
+    ../../src/widgets/inputlevelsslider.cpp \
+    ../../src/widgets/inputlevelswidget.cpp \
+    ../../src/widgets/outputlevelsslider.cpp \
+    ../../src/widgets/outputlevelswidget.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -66,7 +70,11 @@ HEADERS += \
     ../../src/widgets/colorcompositionmodecombobox.h \
     ../../src/widgets/widgetlist.h \
     ../../src/widgets/affinetransformationlist.h \
-    ../../src/widgets/rotationgauge.h
+    ../../src/widgets/rotationgauge.h \
+    ../../src/widgets/inputlevelsslider.h \
+    ../../src/widgets/inputlevelswidget.h \
+    ../../src/widgets/outputlevelsslider.h \
+    ../../src/widgets/outputlevelswidget.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
@@ -74,4 +82,6 @@ RESOURCES += \
 FORMS += \
     ../../src/widgets/genericdialog.ui \
     ../../src/widgets/colorpicker.ui \
-    ../../src/widgets/affinetransformationlist.ui
+    ../../src/widgets/affinetransformationlist.ui \
+    ../../src/widgets/inputlevelswidget.ui \
+    ../../src/widgets/outputlevelswidget.ui

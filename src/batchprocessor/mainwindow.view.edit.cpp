@@ -83,7 +83,7 @@ void MainWindow::viewEditLoad()
 void MainWindow::viewEditUnload()
 {
     mViewEditImageFilterList.setName(tr("Current Filter List"));
-    mViewEditImageFilterList.setDescription(tr("This file contains the filter list that celprocessor "
+    mViewEditImageFilterList.setDescription(tr("This file contains the filter list that batchprocessor "
                                                "was using the last time it was closed."));
     mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/batchprocessor.ifl");
 }
