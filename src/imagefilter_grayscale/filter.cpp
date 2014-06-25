@@ -50,9 +50,9 @@ QImage Filter::process(const QImage &inputImage)
 
     register BGRA * bits = (BGRA*)i.bits();
     register int totalPixels = i.width() * i.height();
-    register unsigned short gR = .2126 * 0x10000;
-    register unsigned short gG = .7152 * 0x10000;
-    register unsigned short gB = .0722 * 0x10000;
+    register unsigned int gR = .2126 * 0x10000;
+    register unsigned int gG = .7152 * 0x10000;
+    register unsigned int gB = .0722 * 0x10000;
 
     while (totalPixels--)
     {

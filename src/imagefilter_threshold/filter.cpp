@@ -79,9 +79,9 @@ QImage Filter::process(const QImage &inputImage)
         if (mAffectedChannel[0])
         {
             register int gray;
-            register unsigned short gR = .2126 * 0x10000;
-            register unsigned short gG = .7152 * 0x10000;
-            register unsigned short gB = .0722 * 0x10000;
+            register unsigned int gR = .2126 * 0x10000;
+            register unsigned int gG = .7152 * 0x10000;
+            register unsigned int gB = .0722 * 0x10000;
             while (totalPixels--)
             {
                 gray = (bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16);

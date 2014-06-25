@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include <math.h>
+#include <QDebug>
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"

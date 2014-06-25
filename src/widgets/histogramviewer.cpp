@@ -60,7 +60,6 @@ void HistogramViewer::paintEvent(QPaintEvent *e)
         {
             linePos = i * (r.width() - 1) / 255;
             histV = (double)mHistogram[i] / mHistMax;
-            //histV = log10(histV * 9 + 1);
             p.drawLine(linePos + 2, r.bottom(), linePos + 2,
                        r.bottom() - histV * (r.height() - 1));
         }
@@ -164,7 +163,7 @@ void HistogramViewer::setImage(const QImage & newImage)
 
 void HistogramViewer::setHistogram(const QVector<unsigned int> &newHistogram)
 {
-    if (newHistogram.isEmpty())
+    if (newHistogram.isEmpty() || newHistogram.size() != 256)
     {
         mHasHistogram = false;
         repaint();

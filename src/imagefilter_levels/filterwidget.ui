@@ -35,66 +35,6 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Histogram:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QWidget" name="mWidgetHistogram" native="true"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Input Levels:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="anitools::widgets::InputLevelsWidget" name="mWidgetInputLevels" native="true"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Output Levels:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="anitools::widgets::OutputLevelsWidget" name="mWidgetOutputLevels" native="true"/>
-       </item>
-      </layout>
-     </item>
-     <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Working Channel:</string>
@@ -236,6 +176,46 @@
           <string notr="true">buttonGroup</string>
          </attribute>
         </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Input Levels:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="anitools::widgets::InputLevelsWidget" name="mWidgetInputLevels" native="true"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Output Levels:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="anitools::widgets::OutputLevelsWidget" name="mWidgetOutputLevels" native="true"/>
        </item>
       </layout>
      </item>

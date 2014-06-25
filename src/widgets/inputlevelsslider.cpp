@@ -124,6 +124,8 @@ void InputLevelsSlider::paintHandle(QPainter & p, const QPoint & pos, const QCol
 
 void InputLevelsSlider::paintEvent(QPaintEvent *e)
 {
+    Q_UNUSED(e)
+
     QPainter p(this);
 
     QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);

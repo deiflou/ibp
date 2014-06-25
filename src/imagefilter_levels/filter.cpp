@@ -197,6 +197,7 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setInputWhitePoint(mInputLevels[mWorkingChannel][InputWhitePoint]);
     fw->setOutputBlackPoint(mOutputLevels[mWorkingChannel][OutputBlackPoint]);
     fw->setOutputWhitePoint(mOutputLevels[mWorkingChannel][OutputWhitePoint]);
+
     connect(this, SIGNAL(workingChannelChanged(Filter::WorkingChannel)),
             fw, SLOT(setWorkingChannel(Filter::WorkingChannel)));
     connect(this, SIGNAL(inputBlackPointChanged(double)),

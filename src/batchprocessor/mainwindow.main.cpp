@@ -56,9 +56,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    mViewEditImageFilterList.quit();
-    while (mViewEditImageFilterList.isRunning());
-
     mainUnload();
     toolbarEditUnload();
     toolbarBatchUnload();
@@ -99,6 +96,7 @@ void MainWindow::mainLoad()
 
 void MainWindow::mainUnload()
 {
+    mViewEditImageFilterList.wait();
 }
 
 void MainWindow::mainReloadImageFilterListPresets()

@@ -24,10 +24,12 @@
 
 #include <QObject>
 #include <QHash>
+#include <QVector>
 #include <QString>
 #include <QImage>
 #include <QSettings>
 #include <QWidget>
+#include <QMutex>
 
 #include "../imgproc/imagefilter.h"
 
