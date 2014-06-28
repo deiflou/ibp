@@ -36,10 +36,10 @@ extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
     QHash<QString, QString> info;
 
-    info.insert("id", "anitools.imagefilter.flip");
+    info.insert("id", "anitools.imagefilter.basicrotation");
     info.insert("version", "0.1.0");
-    info.insert("name", QObject::tr("Flip"));
-    info.insert("description", QObject::tr("Flip the image around the vertical and/or horizontal axis"));
+    info.insert("name", QObject::tr("Basic Rotation"));
+    info.insert("description", QObject::tr("Rotate the image by 90° increments"));
     info.insert("tags", QObject::tr("Geometry"));
     info.insert("author", QObject::tr("Deif Lou"));
     info.insert("copyright", QObject::tr(""));

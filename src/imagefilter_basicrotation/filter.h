@@ -19,35 +19,49 @@
 **
 ****************************************************************************/
 
-#include <QHash>
+#ifndef FILTER_H
+#define FILTER_H
 
-#include "filter.h"
+#include <QObject>
+#include <QHash>
+#include <QString>
+#include <QImage>
+#include <QSettings>
+#include <QWidget>
+
 #include "../imgproc/imagefilter.h"
 
 using namespace anitools::imgproc;
 
-#ifdef Q_OS_WIN32
-#define ANITOOLS_EXPORT __declspec(dllexport)
-#else
-#define ANITOOLS_EXPORT
-#endif
-
-extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
+class Filter : public ImageFilter
 {
-    QHash<QString, QString> info;
+    Q_OBJECT
 
-    info.insert("id", "anitools.imagefilter.flip");
-    info.insert("version", "0.1.0");
-    info.insert("name", QObject::tr("Flip"));
-    info.insert("description", QObject::tr("Flip the image around the vertical and/or horizontal axis"));
-    info.insert("tags", QObject::tr("Geometry"));
-    info.insert("author", QObject::tr("Deif Lou"));
-    info.insert("copyright", QObject::tr(""));
-    info.insert("url", QObject::tr(""));
-    return info;
-}
+public:
+    enum Angle
+    {
+        _90Clockwise = 1,
+        _90CounterClockwise = 2,
+        _180 = 3
+    };
 
-extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
-{
-    return new Filter();
-}
+    Filter();
+    ~Filter();
+    ImageFilter * clone();
+    QHash<QString, QString> info();
+    QImage process(const QImage & inputImage);
+    bool loadParameters(QSettings & s);
+    bool saveParameters(QSettings & s);
+    QWidget * widget(QWidget *parent = 0);
+
+private:
+    Angle mAngle;
+
+signals:
+    void angleChanged(Filter::Angle a);
+
+public slots:
+    void setAngle(Filter::Angle a);
+};
+
+#endif // FILTER_H

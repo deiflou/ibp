@@ -24,7 +24,7 @@
 #include "../imgproc/types.h"
 
 Filter::Filter() :
-    mDirection(Horizontal)
+    mAngle(_90Clockwise)
 {
 }
 
@@ -35,7 +35,7 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
-    f->mDirection = mDirection;
+    f->mAngle = mAngle;
     return f;
 }
 
@@ -50,40 +50,49 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    QImage i;
+    if (mAngle == _180)
+        i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    else
+        i = QImage(inputImage.height(), inputImage.width(), QImage::Format_ARGB32);
     register BGRA * bitsIn, * bitsOut;
     register int pixels;
 
-    switch (mDirection)
+    switch (mAngle)
     {
-        case Horizontal:
+        case _90Clockwise:
         {
             pixels = i.width();
-            for (int y = 0; y < i.height(); y++)
+            for (int y = 0; y < inputImage.height(); y++)
             {
                 bitsIn = (BGRA *)inputImage.scanLine(y);
-                bitsOut = (BGRA *)i.scanLine(y) + pixels - 1;
-                for (int x = 0; x < pixels; x++)
+                bitsOut = (BGRA *)i.bits() + pixels - y - 1;
+                for (int x = 0; x < inputImage.width(); x++)
                 {
                     *bitsOut = *bitsIn;
                     bitsIn++;
-                    bitsOut--;
+                    bitsOut += pixels;
                 }
             }
             break;
         }
-        case Vertical:
+        case _90CounterClockwise:
         {
-            pixels = i.width() * 4;
-            for (int y = 0; y < i.height(); y++)
+            pixels = i.width();
+            for (int y = 0; y < inputImage.height(); y++)
             {
                 bitsIn = (BGRA *)inputImage.scanLine(y);
-                bitsOut = (BGRA *)i.scanLine(i.height() - y - 1);
-                memcpy(bitsOut, bitsIn, pixels);
+                bitsOut = (BGRA *)i.scanLine(i.height() - 1) + y;
+                for (int x = 0; x < inputImage.width(); x++)
+                {
+                    *bitsOut = *bitsIn;
+                    bitsIn++;
+                    bitsOut -= pixels;
+                }
             }
             break;
         }
-        case Both:
+        case _180:
         {
             pixels = i.width() * i.height();
             bitsIn = (BGRA *)inputImage.bits();
@@ -103,46 +112,46 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
-    QString directionStr;
-    Direction direction;
+    QString angleStr;
+    Angle angle;
 
-    directionStr = s.value("direction", "horizontal").toString();
-    if (directionStr == "horizontal")
-        direction = Horizontal;
-    else if (directionStr == "vertical")
-        direction = Vertical;
-    else if (directionStr == "both")
-        direction = Both;
+    angleStr = s.value("angle", "90clockwise").toString();
+    if (angleStr == "90clockwise")
+        angle = _90Clockwise;
+    else if (angleStr == "90counterclockwise")
+        angle = _90CounterClockwise;
+    else if (angleStr == "180")
+        angle = _180;
     else
         return false;
 
-    setDirection(direction);
+    setAngle(angle);
 
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("direction", mDirection == Horizontal ? "horizontal" :
-                            mDirection == Vertical ? "vertical" :
-                                                     "both");
+    s.setValue("angle", mAngle == _90Clockwise ? "90clockwise" :
+                        mAngle == _90CounterClockwise ? "90counterclockwise" :
+                                                        "180");
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setDirection(mDirection);
-    connect(this, SIGNAL(directionChanged(Filter::Direction)), fw, SLOT(setDirection(Filter::Direction)));
-    connect(fw, SIGNAL(directionChanged(Filter::Direction)), this, SLOT(setDirection(Filter::Direction)));
+    fw->setAngle(mAngle);
+    connect(this, SIGNAL(angleChanged(Filter::Angle)), fw, SLOT(setAngle(Filter::Angle)));
+    connect(fw, SIGNAL(angleChanged(Filter::Angle)), this, SLOT(setAngle(Filter::Angle)));
     return fw;
 }
 
-void Filter::setDirection(Filter::Direction d)
+void Filter::setAngle(Filter::Angle a)
 {
-    if (d == mDirection)
+    if (a == mAngle)
         return;
-    mDirection = d;
-    emit directionChanged(d);
+    mAngle = a;
+    emit angleChanged(a);
     emit parametersChanged();
 }

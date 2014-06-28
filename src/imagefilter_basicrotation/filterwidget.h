@@ -19,35 +19,42 @@
 **
 ****************************************************************************/
 
-#include <QHash>
+#ifndef FILTERWIDGET_H
+#define FILTERWIDGET_H
+
+#include <QWidget>
+#include <QToolButton>
+#include <QSlider>
+#include <QSpinBox>
 
 #include "filter.h"
-#include "../imgproc/imagefilter.h"
 
-using namespace anitools::imgproc;
-
-#ifdef Q_OS_WIN32
-#define ANITOOLS_EXPORT __declspec(dllexport)
-#else
-#define ANITOOLS_EXPORT
-#endif
-
-extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
-{
-    QHash<QString, QString> info;
-
-    info.insert("id", "anitools.imagefilter.flip");
-    info.insert("version", "0.1.0");
-    info.insert("name", QObject::tr("Flip"));
-    info.insert("description", QObject::tr("Flip the image around the vertical and/or horizontal axis"));
-    info.insert("tags", QObject::tr("Geometry"));
-    info.insert("author", QObject::tr("Deif Lou"));
-    info.insert("copyright", QObject::tr(""));
-    info.insert("url", QObject::tr(""));
-    return info;
+namespace Ui {
+class FilterWidget;
 }
 
-extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
+class FilterWidget : public QWidget
 {
-    return new Filter();
-}
+    Q_OBJECT
+
+public:
+    explicit FilterWidget(QWidget *parent = 0);
+    ~FilterWidget();
+
+private:
+    Ui::FilterWidget *ui;
+    bool mEmitSignals;
+
+signals:
+    void angleChanged(Filter::Angle a);
+
+public slots:
+    void setAngle(Filter::Angle a);
+
+private slots:
+    void on_mButtonAngle90Clockwise_toggled(bool checked);
+    void on_mButtonAngle90CounterClockwise_toggled(bool checked);
+    void on_mButtonAngle180_toggled(bool checked);
+};
+
+#endif // FILTERWIDGET_H
