@@ -55,7 +55,8 @@ SOURCES += \
     ../../src/widgets/inputlevelsslider.cpp \
     ../../src/widgets/inputlevelswidget.cpp \
     ../../src/widgets/outputlevelsslider.cpp \
-    ../../src/widgets/outputlevelswidget.cpp
+    ../../src/widgets/outputlevelswidget.cpp \
+    ../../src/widgets/anchorpositionbox.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -74,7 +75,8 @@ HEADERS += \
     ../../src/widgets/inputlevelsslider.h \
     ../../src/widgets/inputlevelswidget.h \
     ../../src/widgets/outputlevelsslider.h \
-    ../../src/widgets/outputlevelswidget.h
+    ../../src/widgets/outputlevelswidget.h \
+    ../../src/widgets/anchorpositionbox.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc

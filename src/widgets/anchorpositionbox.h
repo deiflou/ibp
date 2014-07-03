@@ -19,51 +19,44 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_WIDGETS_ROTATIONGAUGE_H
-#define ANITOOLS_WIDGETS_ROTATIONGAUGE_H
+#ifndef ANITOOLS_WIDGETS_ANCHORPOSITIONBOX_H
+#define ANITOOLS_WIDGETS_ANCHORPOSITIONBOX_H
 
 #include <QWidget>
+
+#include "../misc/util.h"
 
 namespace anitools {
 namespace widgets {
 
-class RotationGauge : public QWidget
+class AnchorPositionBox : public QWidget
 {
     Q_OBJECT
 
-private:
-    double mAngle;
-    double mAltitude;
-    bool mAltitudeEnabled;
-
-    bool mMouseButtonPressed;
-
 public:
-    explicit RotationGauge(QWidget *parent = 0);
-    
-    double angle();
-    double altitude();
-    bool isAltitudeEnabled();
+    explicit AnchorPositionBox(QWidget *parent = 0);
+
+    anitools::misc::Alignment anchorPosition() const;
+
+private:
+    anitools::misc::Alignment mAnchorPosition;
+
+    void paintArrow(QPainter &p, int x0, int y0, int x1, int y1);
 
 public slots:
-    void setAngle(double v);
-    void setAltitude(double v);
-    void enableAltitude(bool v);
+    void setAnchorPosition(anitools::misc::Alignment ap);
 
 protected:
     void paintEvent(QPaintEvent * e);
     void mousePressEvent(QMouseEvent * e);
-    void mouseReleaseEvent(QMouseEvent * e);
-    void mouseMoveEvent(QMouseEvent * e);
     void focusInEvent(QFocusEvent *e);
     void focusOutEvent(QFocusEvent *e);
     void keyPressEvent(QKeyEvent * e);
 
 signals:
-    void angleChanged(double v);
-    void altitudeChanged(double v);
+    void anchorPositionChanged(anitools::misc::Alignment ap);
     
 };
 
 }}
-#endif // ANITOOLS_WIDGETS_ROTATIONGAUGE_H
+#endif // ANITOOLS_WIDGETS_ANCHORPOSITIONBOX_H

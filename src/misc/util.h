@@ -40,6 +40,19 @@ namespace misc {
 #define AT_maximum(a, b) ((a) > (b) ? (a) : (b))
 #define AT_maximum3(a, b, c) AT_maximum((a), AT_maximum((b), (c)))
 
+enum Alignment
+{
+    TopLeft,
+    TopCenter,
+    TopRight,
+    CenterLeft,
+    CenterCenter,
+    CenterRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight
+};
+
 inline double euclideanDistance(double x0, double y0, double x1, double y1)
 {
     double dx = x1 - x0;
@@ -89,6 +102,19 @@ inline QRectF fitRectWithin(const QRectF & inner, const QRectF & outer, double *
     if (resizeFactor)
         *resizeFactor = rf;
     return QRectF(newLeft, newTop, newWidth, newHeight);
+}
+
+inline double angleBetweenPoints(double x0, double y0, double x1, double y1)
+{
+    double dx = x1 - x0;
+    double dy = y1 - y0;
+    return atan2(dy, dx);
+}
+inline double angleBetweenPoints(const QPointF & p0, const QPointF & p1)
+{
+    double dx = p1.x() - p0.x();
+    double dy = p1.y() - p0.y();
+    return atan2(dy, dx);
 }
 
 }}
