@@ -24,10 +24,12 @@
 
 #include <QObject>
 #include <QHash>
+#include <QVector>
 #include <QString>
 #include <QImage>
 #include <QSettings>
 #include <QWidget>
+#include <QMutex>
 
 #include "../imgproc/imagefilter.h"
 
@@ -42,10 +44,10 @@ public:
     {
         RGB, Red, Green, Blue, Alpha
     };
-    enum LevelsParameter
+    enum BCParameter
     {
-        InputBlackPoint = 0, InputGamma = 1, InputWhitePoint = 2,
-        OutputBlackPoint = 0, OutputWhitePoint = 1
+        Brightness = 0,
+        Contrast = 1
     };
 
     Filter();
@@ -59,27 +61,20 @@ public:
 
 private:
     WorkingChannel mWorkingChannel;
-    double mInputLevels[5][3];
-    double mOutputLevels[5][2];
+    int mBrightnessContrast[5][2];
     unsigned char mLuts[5][256];
 
     void makeLUT(WorkingChannel c);
 
 signals:
     void workingChannelChanged(Filter::WorkingChannel s);
-    void inputBlackPointChanged(double v);
-    void inputGammaChanged(double v);
-    void inputWhitePointChanged(double v);
-    void outputBlackPointChanged(double v);
-    void outputWhitePointChanged(double v);
+    void brightnessChanged(int v);
+    void contrastChanged(int v);
 
 public slots:
     void setWorkingChannel(Filter::WorkingChannel s);
-    void setInputBlackPoint(double v);
-    void setInputGamma(double v);
-    void setInputWhitePoint(double v);
-    void setOutputBlackPoint(double v);
-    void setOutputWhitePoint(double v);
+    void setBrightness(int v);
+    void setContrast(int v);
 };
 
 #endif // FILTER_H
