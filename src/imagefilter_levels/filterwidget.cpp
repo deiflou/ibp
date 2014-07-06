@@ -31,6 +31,9 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
+
+    ui->mWidgetInputLevels->setUnits(1);
+    ui->mWidgetOutputLevels->setUnits(1);
 }
 
 FilterWidget::~FilterWidget()

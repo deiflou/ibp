@@ -28,10 +28,12 @@ win32 {
         DESTDIR = ../../lib/win32/widgets/debug
         DLLDESTDIR = ../../bin/win32/debug
         LIBS += -L../../lib/win32/imgproc/debug -lanitools.imgproc
+        LIBS += -L../../lib/win32/misc/debug -lanitools.misc
     } else {
         DESTDIR = ../../lib/win32/widgets/release
         DLLDESTDIR = ../../bin/win32/release
         LIBS += -L../../lib/win32/imgproc/release -lanitools.imgproc
+        LIBS += -L../../lib/win32/misc/release -lanitools.misc
     }
 }
 
@@ -56,7 +58,8 @@ SOURCES += \
     ../../src/widgets/inputlevelswidget.cpp \
     ../../src/widgets/outputlevelsslider.cpp \
     ../../src/widgets/outputlevelswidget.cpp \
-    ../../src/widgets/anchorpositionbox.cpp
+    ../../src/widgets/anchorpositionbox.cpp \
+    ../../src/widgets/curves.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -76,7 +79,8 @@ HEADERS += \
     ../../src/widgets/inputlevelswidget.h \
     ../../src/widgets/outputlevelsslider.h \
     ../../src/widgets/outputlevelswidget.h \
-    ../../src/widgets/anchorpositionbox.h
+    ../../src/widgets/anchorpositionbox.h \
+    ../../src/widgets/curves.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc

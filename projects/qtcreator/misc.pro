@@ -33,7 +33,17 @@ win32 {
 
 SOURCES += \
     ../../src/misc/nativeeventfilter.cpp \
+    ../../src/misc/basesplineinterpolator.cpp \
+    ../../src/misc/cubicsplineinterpolator.cpp \
+    ../../src/misc/linearsplineinterpolator.cpp \
+    ../../src/misc/nearestneighborsplineinterpolator.cpp \
+    ../../src/misc/splineinterpolator.cpp
 
 HEADERS += \
     ../../src/misc/util.h \
     ../../src/misc/nativeeventfilter.h \
+    ../../src/misc/basesplineinterpolator.h \
+    ../../src/misc/cubicsplineinterpolator.h \
+    ../../src/misc/linearsplineinterpolator.h \
+    ../../src/misc/nearestneighborsplineinterpolator.h \
+    ../../src/misc/splineinterpolator.h
