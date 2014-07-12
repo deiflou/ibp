@@ -66,20 +66,22 @@ void initColorProfiles()
 
 void convertBGRToHSV(const unsigned char *inputBuffer, unsigned char *outputBuffer, int nPixels)
 {
-    register int min, max, dMax, h, s, v, dMaxOver2;
+    register int r, g, b, min, max, dMax, h, s, v;
     while (nPixels--)
     {
-        min = AT_minimum3(inputBuffer[ColorChannel_Blue], inputBuffer[ColorChannel_Green],
-                                    inputBuffer[ColorChannel_Red]);
-        max = AT_maximum3(inputBuffer[ColorChannel_Blue], inputBuffer[ColorChannel_Green],
-                                    inputBuffer[ColorChannel_Red]);
+        r = inputBuffer[ColorChannel_Red] * 4095 / 255;
+        g = inputBuffer[ColorChannel_Green] * 4095 / 255;
+        b = inputBuffer[ColorChannel_Blue] * 4095 / 255;
+
+        min = AT_minimum3(r, g, b);
+        max = AT_maximum3(r, g, b);
         dMax = max - min;
 
         if (dMax == 0)
         {
             outputBuffer[ColorChannel_Hue] = 0;
             outputBuffer[ColorChannel_Saturation] = 0;
-            outputBuffer[ColorChannel_Value] = max;
+            outputBuffer[ColorChannel_Value] = max >> 4;
 
             inputBuffer += 4;
             outputBuffer += 3;
@@ -87,22 +89,18 @@ void convertBGRToHSV(const unsigned char *inputBuffer, unsigned char *outputBuff
         }
 
         v = max;
-        s = lut02[dMax][max];
+        s = (dMax << 12) / max;
 
-        dMaxOver2 = dMax >> 1;
-        if (max == inputBuffer[ColorChannel_Red])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax];
-        else if (max == inputBuffer[ColorChannel_Green])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] + 85;
+        if (max == r)
+            h = ((g - b) << 12) / 6 / dMax;
+        else if (max == g)
+            h = ((b - r) << 12) / 6 / dMax + 1365;
         else
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] + 170;
+            h = ((r - g) << 12) / 6 / dMax + 2730;
 
-        outputBuffer[ColorChannel_Hue] = h < 0 ? h + 256 : h > 255 ? h - 256 : h;
-        outputBuffer[ColorChannel_Saturation] = s;
-        outputBuffer[ColorChannel_Value] = v;
+        outputBuffer[ColorChannel_Hue] = (h < 0 ? h + 4096 : h > 4095 ? h - 4096 : h) * 255 / 4095;
+        outputBuffer[ColorChannel_Saturation] = s * 255 / 4095;
+        outputBuffer[ColorChannel_Value] = v * 255 / 4095;
 
         inputBuffer += 4;
         outputBuffer += 3;
@@ -111,44 +109,43 @@ void convertBGRToHSV(const unsigned char *inputBuffer, unsigned char *outputBuff
 
 void convertBGRToHSL(const unsigned char *inputBuffer, unsigned char *outputBuffer, int nPixels)
 {
-    register int min, max, dMax, minPlusMax, h, s, l, dMaxOver2;
+    register int r, g, b, min, max, dMax, minPlusMax, h, s, l;
     while (nPixels--)
     {
-        min = AT_minimum3(inputBuffer[ColorChannel_Blue], inputBuffer[ColorChannel_Green],
-                                    inputBuffer[ColorChannel_Red]);
-        max = AT_maximum3(inputBuffer[ColorChannel_Blue], inputBuffer[ColorChannel_Green],
-                                    inputBuffer[ColorChannel_Red]);
+        r = inputBuffer[ColorChannel_Red] * 4095 / 255;
+        g = inputBuffer[ColorChannel_Green] * 4095 / 255;
+        b = inputBuffer[ColorChannel_Blue] * 4095 / 255;
+
+        min = AT_minimum3(r, g, b);
+        max = AT_maximum3(r, g, b);
         dMax = max - min;
+
         minPlusMax = min + max;
+        l = minPlusMax >> 1;
 
         if (dMax == 0)
         {
             outputBuffer[ColorChannel_Hue] = 0;
             outputBuffer[ColorChannel_Saturation] = 0;
-            outputBuffer[ColorChannel_Lightness] = minPlusMax >> 1;
+            outputBuffer[ColorChannel_Lightness] = l >> 4;
 
             inputBuffer += 4;
             outputBuffer += 3;
             continue;
         }
 
-        l = minPlusMax >> 1;
-        s = l < 128 ? lut02[dMax][minPlusMax] : lut02[dMax][511 - minPlusMax];
+        s = (dMax << 12) / (l < 2048 ? minPlusMax : 8191 - minPlusMax);
 
-        dMaxOver2 = dMax >> 1;
-        if (max == inputBuffer[ColorChannel_Red])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax];
-        else if (max == inputBuffer[ColorChannel_Green])
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Blue])][42] + dMaxOver2][dMax] + 85;
+        if (max == r)
+            h = ((g - b) << 12) / 6 / dMax;
+        else if (max == g)
+            h = ((b - r) << 12) / 6 / dMax + 1365;
         else
-            h = lut02[lut01[(max - inputBuffer[ColorChannel_Green])][42] + dMaxOver2][dMax] -
-                lut02[lut01[(max - inputBuffer[ColorChannel_Red])][42] + dMaxOver2][dMax] + 170;
+            h = ((r - g) << 12) / 6 / dMax + 2730;
 
-        outputBuffer[ColorChannel_Hue] = h < 0 ? h + 256 : h > 255 ? h - 256 : h;
-        outputBuffer[ColorChannel_Saturation] = s;
-        outputBuffer[ColorChannel_Lightness] = l;
+        outputBuffer[ColorChannel_Hue] = (h < 0 ? h + 4096 : h > 4095 ? h - 4096 : h) * 255 / 4095;
+        outputBuffer[ColorChannel_Saturation] = s * 255 / 4095;
+        outputBuffer[ColorChannel_Lightness] = l * 255 / 4095;
 
         inputBuffer += 4;
         outputBuffer += 3;
@@ -169,7 +166,7 @@ void convertBGRToCMYK(const unsigned char *inputBuffer, unsigned char *outputBuf
 
 void convertHSVToBGR(const unsigned char *inputBuffer, unsigned char *outputBuffer, int nPixels)
 {
-    register int i, v0, v1, v2, v3;
+    register int r, g, b, h, s, v, i, v0, v1, v2, v3;
     while (nPixels--)
     {
         if (inputBuffer[ColorChannel_Saturation] == 0)
@@ -182,50 +179,58 @@ void convertHSVToBGR(const unsigned char *inputBuffer, unsigned char *outputBuff
             continue;
         }
 
-        i = (inputBuffer[ColorChannel_Hue] + 1) * 6;
-        if (i == 1536)
-            i = 0;
-        v0 = i - (i >> 8 << 8);
-        v1 = lut01[inputBuffer[ColorChannel_Value]][255 - inputBuffer[ColorChannel_Saturation]];
-        v2 = lut01[inputBuffer[ColorChannel_Value]][255 - lut01[inputBuffer[ColorChannel_Saturation]][v0]];
-        v3 = lut01[inputBuffer[ColorChannel_Value]][255 - lut01[inputBuffer[ColorChannel_Saturation]][255 - v0]];
+        h = inputBuffer[ColorChannel_Hue] * 4095 / 255;
+        s = inputBuffer[ColorChannel_Saturation] * 4095 / 255;
+        v = inputBuffer[ColorChannel_Value] * 4095 / 255;
 
-        if (i > 1279)
+        i = (h + 1) * 6;
+        if (i == 24576)
+            i = 0;
+        v0 = i - (i >> 12 << 12);
+        v1 = v * (4095 - s) / 4095;
+        v2 = v * (4095 - s * v0 / 4095) / 4095;
+        v3 = v * (4095 - s * (4095 - v0) / 4095) / 4095;
+
+        if (i > 20479)
         {
-            outputBuffer[ColorChannel_Red] = inputBuffer[ColorChannel_Value];
-            outputBuffer[ColorChannel_Green] = v1;
-            outputBuffer[ColorChannel_Blue] = v2;
+            r = v;
+            g = v1;
+            b = v2;
         }
-        else if (i > 1023)
+        else if (i > 16383)
         {
-            outputBuffer[ColorChannel_Red] = v3;
-            outputBuffer[ColorChannel_Green] = v1;
-            outputBuffer[ColorChannel_Blue] = inputBuffer[ColorChannel_Value];
+            r = v3;
+            g = v1;
+            b = v;
         }
-        else if (i > 767)
+        else if (i > 12287)
         {
-            outputBuffer[ColorChannel_Red] = v1;
-            outputBuffer[ColorChannel_Green] = v2;
-            outputBuffer[ColorChannel_Blue] = inputBuffer[ColorChannel_Value];
+            r = v1;
+            g = v2;
+            b = v;
         }
-        else if (i > 511)
+        else if (i > 8191)
         {
-            outputBuffer[ColorChannel_Red] = v1;
-            outputBuffer[ColorChannel_Green] = inputBuffer[ColorChannel_Value];
-            outputBuffer[ColorChannel_Blue] = v3;
+            r = v1;
+            g = v;
+            b = v3;
         }
-        else if (i > 255)
+        else if (i > 4095)
         {
-            outputBuffer[ColorChannel_Red] = v2;
-            outputBuffer[ColorChannel_Green] = inputBuffer[ColorChannel_Value];
-            outputBuffer[ColorChannel_Blue] = v1;
+            r = v2;
+            g = v;
+            b = v1;
         }
         else
         {
-            outputBuffer[ColorChannel_Red] = inputBuffer[ColorChannel_Value];
-            outputBuffer[ColorChannel_Green] = v3 ;
-            outputBuffer[ColorChannel_Blue] = v1;
+            r = v;
+            g = v3 ;
+            b = v1;
         }
+
+        outputBuffer[ColorChannel_Red] = r * 255 / 4095;
+        outputBuffer[ColorChannel_Green] = g * 255 / 4095;
+        outputBuffer[ColorChannel_Blue] = b * 255 / 4095;
 
         inputBuffer += 3;
         outputBuffer += 4;
@@ -265,7 +270,7 @@ void convertHSVToCMYK(const unsigned char *inputBuffer, unsigned char *outputBuf
 
 void convertHSLToBGR(const unsigned char *inputBuffer, unsigned char *outputBuffer, int nPixels)
 {
-    register int v2, v1, h, vH;
+    register int r, g, b, h, s, l, v2, v1, vH;
     while (nPixels--)
     {
         if (inputBuffer[ColorChannel_Saturation] == 0)
@@ -278,46 +283,49 @@ void convertHSLToBGR(const unsigned char *inputBuffer, unsigned char *outputBuff
             continue;
         }
 
-        v2 = (inputBuffer[ColorChannel_Lightness] < 128) ?
-             inputBuffer[ColorChannel_Lightness] * (255 + inputBuffer[ColorChannel_Saturation]) / 255 :
-             inputBuffer[ColorChannel_Lightness] + inputBuffer[ColorChannel_Saturation] -
-             lut01[inputBuffer[ColorChannel_Saturation]][inputBuffer[ColorChannel_Lightness]];
-        v1 = (inputBuffer[ColorChannel_Lightness] << 1) - v2;
+        h = inputBuffer[ColorChannel_Hue] * 4095 / 255;
+        s = inputBuffer[ColorChannel_Saturation] * 4095 / 255;
+        l = inputBuffer[ColorChannel_Lightness] * 4095 / 255;
 
-        h = inputBuffer[ColorChannel_Hue];
+        v2 = l < 2048 ? l * (4095 + s) / 4095 : l + s - l * s / 4095;
+        v1 = (l << 1) - v2;
 
-        vH = h + 85;
-        if (vH > 255)
-            vH -= 256;
-        if (6 * vH < 256)
-            outputBuffer[ColorChannel_Red] = v1 + lut01[v2 - v1][vH * 6];
-        else if (2 * vH < 256)
-            outputBuffer[ColorChannel_Red] = v2;
-        else if (3 * vH < 512)
-            outputBuffer[ColorChannel_Red] = v1 + lut01[v2 - v1][(170 - vH) * 6];
+        vH = h + 1365;
+        if (vH > 4095)
+            vH -= 4096;
+        if (6 * vH < 4096)
+            r = v1 + (v2 - v1) * vH * 6 / 4095;
+        else if (2 * vH < 4096)
+            r = v2;
+        else if (3 * vH < 8192)
+            r = v1 + (v2 - v1) * (2730 - vH) * 6 / 4095;
         else
-            outputBuffer[ColorChannel_Red] = v1;
+            r = v1;
 
-        if (6 * h < 256)
-            outputBuffer[ColorChannel_Green] = v1 + lut01[v2 - v1][h * 6];
-        else if (2 * h < 256)
-            outputBuffer[ColorChannel_Green] = v2;
-        else if (3 * h < 512)
-            outputBuffer[ColorChannel_Green] = v1 + lut01[v2 - v1][(170 - h) * 6];
+        if (6 * h < 4096)
+            g = v1 + (v2 - v1) * h * 6 / 4095;
+        else if (2 * h < 4096)
+            g = v2;
+        else if (3 * h < 8192)
+            g = v1 + (v2 - v1) * (2730 - h) * 6 / 4095;
         else
-            outputBuffer[ColorChannel_Green] = v1;
+            g = v1;
 
-        vH = h - 85;
+        vH = h - 1365;
         if (vH < 0)
-            vH += 256;
-        if (6 * vH < 256)
-            outputBuffer[ColorChannel_Blue] = v1 + lut01[v2 - v1][vH * 6];
-        else if (2 * vH < 256)
-            outputBuffer[ColorChannel_Blue] = v2;
-        else if (3 * vH < 512)
-            outputBuffer[ColorChannel_Blue] = v1 + lut01[v2 - v1][(170 - vH) * 6];
+            vH += 4096;
+        if (6 * vH < 4096)
+            b = v1 + (v2 - v1) * vH * 6 / 4095;
+        else if (2 * vH < 4096)
+            b = v2;
+        else if (3 * vH < 8192)
+            b = v1 + (v2 - v1) * (2730 - vH) * 6 / 4095;
         else
-            outputBuffer[ColorChannel_Blue] = v1;
+            b = v1;
+
+        outputBuffer[ColorChannel_Red] = r * 255 / 4095;
+        outputBuffer[ColorChannel_Green] = g * 255 / 4095;
+        outputBuffer[ColorChannel_Blue] = b * 255 / 4095;
 
         inputBuffer += 3;
         outputBuffer += 4;

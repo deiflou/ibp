@@ -24,6 +24,7 @@
 #include "../imgproc/types.h"
 #include "../imgproc/colorconversion.h"
 #include "../imgproc/lut.h"
+#include "../misc/util.h"
 
 Filter::Filter() :
     mColorize(false),
@@ -65,46 +66,89 @@ QImage Filter::process(const QImage &inputImage)
 
     QImage i = inputImage.copy();
     HSL * inputHSLImage, * bits;
-    register int totalSize = inputImage.width() * inputImage.height();
+    register int totalSize;
     register int h2, s2, l2;
 
-    inputHSLImage = (HSL *)malloc(totalSize * sizeof(HSL));
-    convertBGRToHSL((unsigned char *)i.bits(), (unsigned char *)inputHSLImage, totalSize);
+    if (mRelLightness != 0)
+    {
+        BGRA * bits2 = (BGRA *)i.bits();
+        totalSize = inputImage.width() * inputImage.height();
+        l2 = mRelLightness * 255 / 100;
 
-    bits = inputHSLImage;
+        if (mRelLightness < 0)
+        {
+            l2 += 255;
+            while (totalSize--)
+            {
+                bits2->r = lut01[bits2->r][l2];
+                bits2->g = lut01[bits2->g][l2];
+                bits2->b = lut01[bits2->b][l2];
+
+                bits2++;
+            }
+        }
+        else
+        {
+            while (totalSize--)
+            {
+                bits2->r += lut01[255 - bits2->r][l2];
+                bits2->g += lut01[255 - bits2->g][l2];
+                bits2->b += lut01[255 - bits2->b][l2];
+
+                bits2++;
+            }
+        }
+
+    }
 
     if (!mColorize)
     {
-        h2 = mRelHue * 128 / 180;
-        s2 = mRelSaturation * 255 / 100;
-        l2 = mRelLightness * 255 / 100;
-        while (totalSize--)
+        if (mRelHue != 0 || mRelSaturation != 0)
         {
-            bits->h = (bits->h + h2 + 256) % 256;
-            bits->s += s2 < 0 ? -lut01[-s2][bits->s] : lut01[s2][255 - bits->s];
-            bits->l += l2 < 0 ? -lut01[-l2][bits->l] : lut01[l2][255 - bits->l];
+            totalSize = inputImage.width() * inputImage.height();
+            inputHSLImage = (HSL *)malloc(totalSize * sizeof(HSL));
+            convertBGRToHSL((unsigned char *)i.bits(), (unsigned char *)inputHSLImage, totalSize);
+            bits = inputHSLImage;
 
-            bits++;
+            h2 = mRelHue * 127 / 180;
+            s2 = mRelSaturation * 255 / 100;
+            while (totalSize--)
+            {
+                bits->h = (bits->h + h2 + 256) % 256;
+                if (bits->s > 0)
+                    bits->s = s2 < 0 ?
+                              lut01[bits->s][s2 + 255] :
+                              s2 == 255 ? 255 : AT_minimum(lut02[bits->s][255 - s2], 255);
+
+                bits++;
+            }
+
+            convertHSLToBGR((unsigned char *)inputHSLImage, (unsigned char *)i.bits(),
+                            inputImage.width() * inputImage.height());
+            free(inputHSLImage);
         }
     }
     else
     {
+        totalSize = inputImage.width() * inputImage.height();
+        inputHSLImage = (HSL *)malloc(totalSize * sizeof(HSL));
+        convertBGRToHSL((unsigned char *)i.bits(), (unsigned char *)inputHSLImage, totalSize);
+        bits = inputHSLImage;
+
         h2 = mAbsHue * 255 / 360;
         s2 = mAbsSaturation * 255 / 100;
-        l2 = mRelLightness * 255 / 100;
         while (totalSize--)
         {
             bits->h = h2;
             bits->s = s2;
-            bits->l += l2 < 0 ? -lut01[-l2][bits->l] : lut01[l2][255 - bits->l];
 
             bits++;
         }
-    }
 
-    convertHSLToBGR((unsigned char *)inputHSLImage, (unsigned char *)i.bits(),
-                    inputImage.width() * inputImage.height());
-    free(inputHSLImage);
+        convertHSLToBGR((unsigned char *)inputHSLImage, (unsigned char *)i.bits(),
+                        inputImage.width() * inputImage.height());
+        free(inputHSLImage);
+    }
 
     return i;
 }
