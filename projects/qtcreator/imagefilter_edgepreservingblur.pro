@@ -38,7 +38,7 @@ SOURCES += ../../src/imagefilter_edgepreservingblur/filter.cpp \
            ../../src/imagefilter_edgepreservingblur/filterwidget.cpp
 
 HEADERS += ../../src/imagefilter_edgepreservingblur/filter.h \
-           ../../src/imagefilter_edgepreservingblur/filterwidget.h
+           ../../src/imagefilter_edgepreservingblur/filterwidget.h \
 
 FORMS += ../../src/imagefilter_edgepreservingblur/filterwidget.ui
 

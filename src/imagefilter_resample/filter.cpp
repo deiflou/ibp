@@ -151,10 +151,10 @@ bool Filter::loadParameters(QSettings &s)
     else
         return false;
 
-    setWidth(width);
-    setHeight(height);
     setWidthMode(widthMode);
     setHeightMode(heightMode);
+    setWidth(width);
+    setHeight(height);
     setResamplingMode(resamplingMode);
 
     return true;
@@ -176,10 +176,10 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setWidth(mWidth);
-    fw->setHeight(mHeight);
     fw->setWidthMode(mWidthMode);
     fw->setHeightMode(mHeightMode);
+    fw->setWidth(mWidth);
+    fw->setHeight(mHeight);
     fw->setResamplingMode(mResamplingMode);
 
     connect(this, SIGNAL(widthChanged(int)), fw, SLOT(setWidth(int)));

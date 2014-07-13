@@ -80,7 +80,7 @@ void FilterWidget::on_mSliderEdgePreservation_valueChanged(int value)
 
 void FilterWidget::on_mSpinEdgePreservation_valueChanged(int arg1)
 {
-    ui->mSpinEdgePreservation->setValue(arg1);
+    ui->mSliderEdgePreservation->setValue(arg1);
     if (mEmitSignals)
         emit edgePreservationChanged(arg1);
 }

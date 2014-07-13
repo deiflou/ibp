@@ -23,10 +23,11 @@
 
 #include "filter.h"
 #include "filterwidget.h"
+#include "../imgproc/types.h"
 
 Filter::Filter() :
     mRadius(0.0),
-    mEdgePreservation(95)
+    mEdgePreservation(50)
 {
 }
 
@@ -58,6 +59,8 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    double sigmaS = (mRadius + 1.0) / 3.;
+    double sigmaR = (100 - mEdgePreservation) * 255. / 100.;
 
     cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
     cv::Mat msrcbgr(msrc.rows, msrc.cols, CV_8UC3);
@@ -69,9 +72,7 @@ QImage Filter::process(const QImage &inputImage)
     int from_to[] = { 0,0, 1,1, 2,2, 3,3 };
     cv::mixChannels(&msrc, 1, out, 2, from_to, 4);
 
-    double sigma = (mRadius + 1.0) / 3.;
-    double sigma2 = (100 - mEdgePreservation) * 255. / 100. / 3.;
-    cv::bilateralFilter(msrcbgr, mdstbgr, 0, sigma2, sigma);
+    cv::bilateralFilter(msrcbgr, mdstbgr, 0, sigmaR, sigmaS);
 
     cv::Mat out2[] = { mdstbgr, msrcalpha };
     cv::mixChannels(out2, 2, &mdst, 1, from_to, 4);
