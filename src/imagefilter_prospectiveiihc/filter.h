@@ -19,42 +19,42 @@
 **
 ****************************************************************************/
 
-#ifndef FILTERWIDGET_H
-#define FILTERWIDGET_H
+#ifndef FILTER_H
+#define FILTER_H
 
-#include <QWidget>
+#include <QObject>
+#include <QHash>
+#include <QString>
 #include <QImage>
+#include <QSettings>
+#include <QWidget>
 
-#include "filter.h"
+#include "../imgproc/imagefilter.h"
 
-namespace Ui {
-class FilterWidget;
-}
+using namespace anitools::imgproc;
 
-class FilterWidget : public QWidget
+class Filter : public ImageFilter
 {
     Q_OBJECT
 
 public:
-    explicit FilterWidget(QWidget *parent = 0);
-    ~FilterWidget();
+    Filter();
+    ~Filter();
+    ImageFilter * clone();
+    QHash<QString, QString> info();
+    QImage process(const QImage & inputImage);
+    bool loadParameters(QSettings & s);
+    bool saveParameters(QSettings & s);
+    QWidget * widget(QWidget *parent = 0);
 
 private:
-    Ui::FilterWidget *ui;
-    bool mEmitSignals;
+    QImage mImage;
 
 signals:
-    void modeChanged(int m);
     void imageChanged(const QImage & i);
 
 public slots:
-    void setMode(int m);
     void setImage(const QImage & i);
-
-private slots:
-    void on_mButtonAuto_toggled(bool c);
-    void on_mButtonFromImage_toggled(bool c);
-    void on_mButtonImage_imageChanged(const QImage &i);
 };
 
-#endif // FILTERWIDGET_H
+#endif // FILTER_H

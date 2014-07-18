@@ -18,7 +18,7 @@
 QT += widgets
 TEMPLATE = lib
 
-TARGET = anitools.imagefilter.illuminationcorrection
+TARGET = anitools.imagefilter.prospectiveiihc
 
 win32 {
     CONFIG(debug, debug|release) {
@@ -32,16 +32,14 @@ win32 {
     }
 }
 
-LIBS += -lopencv_core300 -lopencv_imgproc300
-
 INCLUDEPATH += ../../src/widgets
 
-SOURCES += ../../src/imagefilter_illuminationcorrection/filter.cpp \
-           ../../src/imagefilter_illuminationcorrection/main.cpp \
-           ../../src/imagefilter_illuminationcorrection/filterwidget.cpp
+SOURCES += ../../src/imagefilter_prospectiveiihc/filter.cpp \
+           ../../src/imagefilter_prospectiveiihc/main.cpp \
+           ../../src/imagefilter_prospectiveiihc/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_illuminationcorrection/filter.h \
-           ../../src/imagefilter_illuminationcorrection/filterwidget.h
+HEADERS += ../../src/imagefilter_prospectiveiihc/filter.h \
+           ../../src/imagefilter_prospectiveiihc/filterwidget.h
 
-FORMS += ../../src/imagefilter_illuminationcorrection/filterwidget.ui
+FORMS += ../../src/imagefilter_prospectiveiihc/filterwidget.ui
 

@@ -556,7 +556,7 @@
                       <string notr="true">QProgressBar
 {
 	border : 0px;
-	background-color : palette(dark);
+	background-color : palette(shadow);
 }
 QProgressBar::chunk
 {
@@ -643,7 +643,7 @@ QProgressBar::chunk
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>99</width>
+                   <width>195</width>
                    <height>485</height>
                   </rect>
                  </property>
@@ -693,7 +693,7 @@ QProgressBar::chunk
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="mButtonGroupToolbarEditSplitter"/>
   <buttongroup name="mButtonGroupMainChangeSection"/>
+  <buttongroup name="mButtonGroupToolbarEditSplitter"/>
  </buttongroups>
 </ui>

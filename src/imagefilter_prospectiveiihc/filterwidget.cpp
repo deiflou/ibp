@@ -34,7 +34,6 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
-    ui->mContainerImage->hide();
     ui->mButtonImage->setExtraDataFlags(ToolButtonEx::ExtraDataFlags(ToolButtonEx::ImageStretched |
                                                                      ToolButtonEx::ImageKeepAspectRatio |
                                                                      ToolButtonEx::ImageStretchOnlyIfBiggerThanButton |
@@ -46,19 +45,6 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setMode(int m)
-{
-    if ((m == 0 && ui->mButtonAuto->isChecked()) || (m == 1 && ui->mButtonFromImage->isChecked()))
-        return;
-    mEmitSignals = false;
-    if (m == 0)
-        ui->mButtonAuto->setChecked(true);
-    else
-        ui->mButtonFromImage->setChecked(true);
-    mEmitSignals = true;
-    emit modeChanged(m);
-}
-
 void FilterWidget::setImage(const QImage &i)
 {
     if (i == ui->mButtonImage->image())
@@ -67,24 +53,6 @@ void FilterWidget::setImage(const QImage &i)
     ui->mButtonImage->setImage(i);
     mEmitSignals = true;
     emit imageChanged(i);
-}
-
-void FilterWidget::on_mButtonAuto_toggled(bool c)
-{
-    if (!c)
-        return;
-    ui->mContainerImage->hide();
-    if (mEmitSignals)
-        emit modeChanged(0);
-}
-
-void FilterWidget::on_mButtonFromImage_toggled(bool c)
-{
-    if (!c)
-        return;
-    ui->mContainerImage->show();
-    if (mEmitSignals)
-        emit modeChanged(1);
 }
 
 void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)

@@ -19,45 +19,35 @@
 **
 ****************************************************************************/
 
-#ifndef FILTER_H
-#define FILTER_H
-
-#include <QObject>
 #include <QHash>
-#include <QString>
-#include <QImage>
-#include <QSettings>
-#include <QWidget>
 
+#include "filter.h"
 #include "../imgproc/imagefilter.h"
 
 using namespace anitools::imgproc;
 
-class Filter : public ImageFilter
+#ifdef Q_OS_WIN32
+#define ANITOOLS_EXPORT __declspec(dllexport)
+#else
+#define ANITOOLS_EXPORT
+#endif
+
+extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
-    Q_OBJECT
+    QHash<QString, QString> info;
 
-public:
-    Filter();
-    ~Filter();
-    ImageFilter * clone();
-    QHash<QString, QString> info();
-    QImage process(const QImage & inputImage);
-    bool loadParameters(QSettings & s);
-    bool saveParameters(QSettings & s);
-    QWidget * widget(QWidget *parent = 0);
+    info.insert("id", "anitools.imagefilter.morphologicaliihc");
+    info.insert("version", "0.1.0");
+    info.insert("name", QObject::tr("Morphological IIH Correction"));
+    info.insert("description", QObject::tr("Removes the artifacts due to a bad illumination using a morphological approach"));
+    info.insert("tags", QObject::tr("Illumination, Morphology"));
+    info.insert("author", QObject::tr("Deif Lou"));
+    info.insert("copyright", QObject::tr(""));
+    info.insert("url", QObject::tr(""));
+    return info;
+}
 
-private:
-    int mMode;
-    QImage mImage;
-
-signals:
-    void modeChanged(int m);
-    void imageChanged(const QImage & i);
-
-public slots:
-    void setMode(int m);
-    void setImage(const QImage & i);
-};
-
-#endif // FILTER_H
+extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
+{
+    return new Filter();
+}

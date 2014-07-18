@@ -35,76 +35,6 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Mode:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QToolButton" name="mButtonAuto">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Auto</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-         <property name="class" stdset="0">
-          <string>cFlatOptionButton</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="mButtonFromImage">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>From Image</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-         <property name="class" stdset="0">
-          <string>cFlatOptionButton</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">buttonGroup</string>
-         </attribute>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
       <widget class="QWidget" name="mContainerImage" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
@@ -125,7 +55,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Image:</string>
+           <string>IIH Image:</string>
           </property>
          </widget>
         </item>

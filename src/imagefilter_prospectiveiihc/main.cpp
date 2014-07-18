@@ -36,12 +36,11 @@ extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
     QHash<QString, QString> info;
 
-    info.insert("id", "anitools.imagefilter.edgepreservingblur");
+    info.insert("id", "anitools.imagefilter.prospectiveiihc");
     info.insert("version", "0.1.0");
-    info.insert("name", QObject::tr("Edge-Preserving Blur (Bilateral Filter)"));
-    info.insert("description", QObject::tr("Blurs the image using a smooth gaussian "
-                                           "distribution but preserving hard edges"));
-    info.insert("tags", QObject::tr("Smooth, Noise"));
+    info.insert("name", QObject::tr("Prospective IIH Correction"));
+    info.insert("description", QObject::tr("Removes the artifacts due to a bad illumination using a prospective approach"));
+    info.insert("tags", QObject::tr("Illumination"));
     info.insert("author", QObject::tr("Deif Lou"));
     info.insert("copyright", QObject::tr(""));
     info.insert("url", QObject::tr(""));

@@ -84,7 +84,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Radius:</string>
+        <string>Blur Radius:</string>
        </property>
       </widget>
      </item>
