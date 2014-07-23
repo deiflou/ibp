@@ -23,6 +23,7 @@
 #include "filterwidget.h"
 #include "../imgproc/lut.h"
 #include "../imgproc/types.h"
+#include "../imgproc/colorconversion.h"
 #include "../misc/util.h"
 
 Filter::Filter() :
@@ -56,21 +57,36 @@ QImage Filter::process(const QImage &inputImage)
     if (mImage.isNull())
         return inputImage;
 
-    QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
     QImage bg = mImage.scaled(inputImage.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    register int totalPixels = inputImage.width() * inputImage.height();
-    register BGRA * bits1 = (BGRA*)bg.bits(), * bits2 = (BGRA*)inputImage.bits(), *bits3 = (BGRA*)i.bits();
+    register int w = inputImage.width(), h = inputImage.height(), mean = 0, totalPixels = w * h;
+    register HSL * bitsHSL = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLsl;
+    register HSL * bitsHSLbg = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLbgsl;
 
+    convertBGRToHSL(inputImage.bits(), (unsigned char *)bitsHSL, w * h);
+    convertBGRToHSL(bg.bits(), (unsigned char *)bitsHSLbg, w * h);
+
+    bitsHSLbgsl = bitsHSLbg;
     while (totalPixels--)
     {
-        bits3->r = AT_minimum(lut02[bits2->r][bits1->r], 255);
-        bits3->g = AT_minimum(lut02[bits2->g][bits1->g], 255);
-        bits3->b = AT_minimum(lut02[bits2->b][bits1->b], 255);
-        bits3->a = bits2->a;
-        bits1++;
-        bits2++;
-        bits3++;
+        mean += bitsHSLbgsl->l;
+        bitsHSLbgsl++;
     }
+    mean /= w * h;
+
+    bitsHSLsl = bitsHSL;
+    bitsHSLbgsl = bitsHSLbg;
+    totalPixels = w * h;
+    while (totalPixels--)
+    {
+        bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][bitsHSLbgsl->l] * mean / 255, 255);;
+        bitsHSLsl++;
+        bitsHSLbgsl++;
+    }
+
+    QImage i = inputImage.copy();
+    convertHSLToBGR((unsigned char *)bitsHSL, i.bits(), w * h);
+    free(bitsHSL);
+    free(bitsHSLbg);
 
     return i;
 }

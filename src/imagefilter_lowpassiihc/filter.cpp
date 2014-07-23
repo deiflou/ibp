@@ -89,17 +89,14 @@ QImage Filter::process(const QImage &inputImage)
         cv::Mat mresized(sh, sw, CV_8UC1);
         cv::Mat mresized2(sh, sw, CV_8UC1);
         cv::resize(mlchannel, mresized, cv::Size(sw, sh));
-        cv::medianBlur(mresized, mresized2, 5);
-        cv::morphologyEx(mresized2, mresized, cv::MORPH_CLOSE,
-                         cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(30, 30)));
-        cv::resize(mresized, mlchannel, cv::Size(w, h));
+        cv::GaussianBlur(mresized, mresized2, cv::Size(31, 31), 0);
+        cv::resize(mresized2, mlchannel, cv::Size(w, h));
     }
     else
     {
         cv::Mat mlchannel2(h, w, CV_8UC1);
-        cv::medianBlur(mlchannel, mlchannel2, 5);
-        cv::morphologyEx(mlchannel2, mlchannel, cv::MORPH_CLOSE,
-                         cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(30, 30)));
+        cv::GaussianBlur(mlchannel, mlchannel2, cv::Size(31, 31), 0);
+        mlchannel = mlchannel2;
     }
 
     for (y = 0; y < h; y++)
