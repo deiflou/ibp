@@ -110,15 +110,15 @@ QImage Filter::process(const QImage &inputImage)
     }
 
     // Remove noise
-    cv::Mat mBlurred(sh, sw, CV_8UC1);
-    cv::GaussianBlur(mInitial, mBlurred, cv::Size(BLURKERNELSIZE, BLURKERNELSIZE), 0);
+    cv::Mat mMatUChar(sh, sw, CV_8UC1);
+    cv::GaussianBlur(mInitial, mMatUChar, cv::Size(BLURKERNELSIZE, BLURKERNELSIZE), 0);
 
-    // Convert to float
-    cv::Mat mBlurredF(sh, sw, CV_64FC1);
+    // Convert to float and scale
+    cv::Mat mMatDouble(sh, sw, CV_64FC1);
     for (y = 0; y < sh; y++)
     {
-        mbits8 = mBlurred.ptr(y);
-        mbits321 = (double *)mBlurredF.ptr(y);
+        mbits8 = mMatUChar.ptr(y);
+        mbits321 = (double *)mMatDouble.ptr(y);
         for (x = 0; x < sw; x++)
         {
             *mbits321 = (*mbits8) / 255.;
@@ -130,8 +130,8 @@ QImage Filter::process(const QImage &inputImage)
     // Get the gradient of the blurred image
     cv::Mat mGradientX(sh, sw, CV_64FC1);
     cv::Mat mGradientY(sh, sw, CV_64FC1);
-    cv::Sobel(mBlurredF, mGradientX, -1, 1, 0);
-    cv::Sobel(mBlurredF, mGradientY, -1, 0, 1);
+    cv::Sobel(mMatDouble, mGradientX, -1, 1, 0);
+    cv::Sobel(mMatDouble, mGradientY, -1, 0, 1);
 
     // Apply weights to the gradient
     for (y = 0; y < sh; y++)
@@ -149,7 +149,7 @@ QImage Filter::process(const QImage &inputImage)
     }
 
     // Surface fitting using eigen
-    // First set up the matrix A and the vector b
+    // First set up the matrix A and the vector b for least squares fitting with the gradient image
     register int row = 0, column = 0, totalPixels = sw * sh;
     Eigen::MatrixXf ls_A(totalPixels * 2, MATRIXCOLUMNS);
     Eigen::VectorXf ls_b(totalPixels * 2);
@@ -185,42 +185,63 @@ QImage Filter::process(const QImage &inputImage)
     // Solve...
     ls_x = ls_A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
 
-    // Create polynomial image
-    cv::Mat mIIHf(sh, sw, CV_64FC1);
+    // Set up the matrix A and the vector b for least squares fitting with the blurred image
+    ls_A = Eigen::MatrixXf(totalPixels * 1, 2);
+    ls_b = Eigen::VectorXf(totalPixels);
     register double value;
+    row = 0;
     for (y = 0; y < sh; y++)
     {
-        mbits321 = (double *)mIIHf.ptr(y);
+        mbits321 = (double *)mMatDouble.ptr(y);
         for (x = 0; x < sw; x++)
         {
+            column = 0;
             value = 0.;
-            row = 0;
             for (i = 1; i <= DEGREE; i++)
             {
                 for (j = 0; j <= i; j++)
                 {
-                    value += ls_x(row) * (x == 0 ? 1 : pow(x, i - j)) * (y == 0 ? 1 : pow(y, j));
-                    row++;
+                    value += ls_x(column) * (x == 0 ? 1 : pow(x, i - j)) * (y == 0 ? 1 : pow(y, j));
+                    column++;
                 }
             }
-            *mbits321 = value;
+            ls_A(row, 0) = value;
+            ls_A(row, 1) = 1;
+            ls_b(row) = *mbits321;
 
             mbits321++;
+            row++;
+        }
+    }
+    // Solve...
+    ls_x = ls_A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
+
+    // Create the IIH model image
+    row = 0;
+    for (y = 0; y < sh; y++)
+    {
+        mbits321 = (double *)mMatDouble.ptr(y);
+        for (x = 0; x < sw; x++)
+        {
+            *mbits321 = ls_A(row, 0) * ls_x(0) + ls_x(1);
+
+            mbits321++;
+            row++;
         }
     }
 
-    // Remap due to the lack of the constant term in the previous step and get the mean
-    cv::Mat mIIH(sh, sw, CV_8UC1);
-    double min, max, minb, maxb;
-    cv::minMaxLoc(mIIHf, &min, &max);
-    cv::minMaxLoc(mBlurredF, &minb, &maxb);
+    // Remap due to out of range values and scale
+    double minIIH, maxIIH, minIIHc, maxIIHc;
+    cv::minMaxLoc(mMatDouble, &minIIH, &maxIIH);
+    minIIHc = AT_clamp(0., minIIH, 1.);
+    maxIIHc = AT_clamp(0., maxIIH, 1.);
     for (y = 0; y < sh; y++)
     {
-        mbits321 = (double *)mIIHf.ptr(y);
-        mbits8 = mIIH.ptr(y);
+        mbits321 = (double *)mMatDouble.ptr(y);
+        mbits8 = mMatUChar.ptr(y);
         for (x = 0; x < sw; x++)
         {
-            *mbits8 = round((minb + ((*mbits321) - min) * (maxb - minb) / (max - min)) * 255.);
+            *mbits8 = round((minIIHc + ((*mbits321) - minIIH) * (maxIIHc - minIIHc) / (maxIIH - minIIH)) * 255.);
             mean += *mbits8;
             mbits8++;
             mbits321++;
@@ -230,9 +251,9 @@ QImage Filter::process(const QImage &inputImage)
 
     // Resample
     if (w != sw || h != sh)
-        cv::resize(mIIH, mlchannel, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
+        cv::resize(mMatUChar, mlchannel, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
     else
-        mlchannel = mIIH;
+        mlchannel = mMatUChar;
 
     // Divide lightness channel
     for (y = 0; y < h; y++)
