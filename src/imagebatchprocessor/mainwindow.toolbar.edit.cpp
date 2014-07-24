@@ -34,7 +34,7 @@ void MainWindow::toolbarEditLoad()
 {
     // Load Image Button
     ui->mToolbarEditButtonLoadImage->setText(tr("Load Image"));
-    ui->mToolbarEditButtonLoadImage->setIcon(QIcon(":/batchprocessor/icons/loadImage"));
+    ui->mToolbarEditButtonLoadImage->setIcon(QIcon(":/imagebatchprocessor/icons/loadImage"));
     ui->mToolbarEditButtonLoadImage->setIconSize(QSize(22, 22));
     ui->mToolbarEditButtonLoadImage->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     ui->mToolbarEditButtonLoadImage->setAutoRaise(true);
@@ -57,8 +57,8 @@ void MainWindow::toolbarEditLoad()
     // Add Filter Button
     ui->mToolbarEditButtonAddFilter->setText("");
     QIcon mToolbarEditButtonAddFilterIcon;
-    mToolbarEditButtonAddFilterIcon.addFile(":/batchprocessor/icons/addImageFilter");
-    mToolbarEditButtonAddFilterIcon.addFile(":/batchprocessor/icons/addImageFilterDisabled", QSize(), QIcon::Disabled);
+    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilter");
+    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilterDisabled", QSize(), QIcon::Disabled);
     ui->mToolbarEditButtonAddFilter->setIcon(mToolbarEditButtonAddFilterIcon);
     ui->mToolbarEditButtonAddFilter->setIconSize(QSize(22, 22));
     ui->mToolbarEditButtonAddFilter->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -72,8 +72,8 @@ void MainWindow::toolbarEditLoad()
     // Load Filters Button
     ui->mToolbarEditButtonLoadFilters->setText("");
     QIcon mToolbarEditButtonLoadFiltersIcon;
-    mToolbarEditButtonLoadFiltersIcon.addFile(":/batchprocessor/icons/loadImageFilters");
-    mToolbarEditButtonLoadFiltersIcon.addFile(":/batchprocessor/icons/loadImageFiltersDisabled",
+    mToolbarEditButtonLoadFiltersIcon.addFile(":/imagebatchprocessor/icons/loadImageFilters");
+    mToolbarEditButtonLoadFiltersIcon.addFile(":/imagebatchprocessor/icons/loadImageFiltersDisabled",
                                               QSize(), QIcon::Disabled);
     ui->mToolbarEditButtonLoadFilters->setIcon(mToolbarEditButtonLoadFiltersIcon);
     ui->mToolbarEditButtonLoadFilters->setIconSize(QSize(22, 22));

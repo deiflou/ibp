@@ -134,9 +134,9 @@
                <string>Save image.</string>
               </property>
               <property name="icon">
-               <iconset resource="batchprocessor.qrc">
-                <normaloff>:/batchprocessor/icons/saveImage</normaloff>
-                <disabledoff>:/batchprocessor/icons/saveImageDisabled</disabledoff>:/batchprocessor/icons/saveImage</iconset>
+               <iconset resource="imagebatchprocessor.qrc">
+                <normaloff>:/imagebatchprocessor/icons/saveImage</normaloff>
+                <disabledoff>:/imagebatchprocessor/icons/saveImageDisabled</disabledoff>:/imagebatchprocessor/icons/saveImage</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -191,9 +191,9 @@
                <string>Save image filter list.</string>
               </property>
               <property name="icon">
-               <iconset resource="batchprocessor.qrc">
-                <normaloff>:/batchprocessor/icons/saveImageFilters</normaloff>
-                <disabledoff>:/batchprocessor/icons/saveImageFiltersDisabled</disabledoff>:/batchprocessor/icons/saveImageFilters</iconset>
+               <iconset resource="imagebatchprocessor.qrc">
+                <normaloff>:/imagebatchprocessor/icons/saveImageFilters</normaloff>
+                <disabledoff>:/imagebatchprocessor/icons/saveImageFiltersDisabled</disabledoff>:/imagebatchprocessor/icons/saveImageFilters</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -234,8 +234,8 @@
                <string>Lay out preview vertically.</string>
               </property>
               <property name="icon">
-               <iconset resource="batchprocessor.qrc">
-                <normaloff>:/batchprocessor/icons/vSplitter</normaloff>:/batchprocessor/icons/vSplitter</iconset>
+               <iconset resource="imagebatchprocessor.qrc">
+                <normaloff>:/imagebatchprocessor/icons/vSplitter</normaloff>:/imagebatchprocessor/icons/vSplitter</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -266,8 +266,8 @@
                <string>Lay out preview horizontally.</string>
               </property>
               <property name="icon">
-               <iconset resource="batchprocessor.qrc">
-                <normaloff>:/batchprocessor/icons/hSplitter</normaloff>:/batchprocessor/icons/hSplitter</iconset>
+               <iconset resource="imagebatchprocessor.qrc">
+                <normaloff>:/imagebatchprocessor/icons/hSplitter</normaloff>:/imagebatchprocessor/icons/hSplitter</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -349,8 +349,8 @@
               <string>Edit</string>
              </property>
              <property name="icon">
-              <iconset resource="batchprocessor.qrc">
-               <normaloff>:/batchprocessor/icons/edit</normaloff>:/batchprocessor/icons/edit</iconset>
+              <iconset resource="imagebatchprocessor.qrc">
+               <normaloff>:/imagebatchprocessor/icons/edit</normaloff>:/imagebatchprocessor/icons/edit</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -384,8 +384,8 @@
               <string>Batch Processing</string>
              </property>
              <property name="icon">
-              <iconset resource="batchprocessor.qrc">
-               <normaloff>:/batchprocessor/icons/batchProcessing</normaloff>:/batchprocessor/icons/batchProcessing</iconset>
+              <iconset resource="imagebatchprocessor.qrc">
+               <normaloff>:/imagebatchprocessor/icons/batchProcessing</normaloff>:/imagebatchprocessor/icons/batchProcessing</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -689,7 +689,7 @@ QProgressBar::chunk
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="batchprocessor.qrc"/>
+  <include location="imagebatchprocessor.qrc"/>
  </resources>
  <connections/>
  <buttongroups>

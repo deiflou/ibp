@@ -17,7 +17,7 @@
 
 QT += widgets
 
-TARGET = anitools.batchprocessor
+TARGET = anitools.imagebatchprocessor
 TEMPLATE = app
 
 win32 {
@@ -39,21 +39,21 @@ win32 {
 
 LIBS += -lFreeImage
 
-INCLUDEPATH += ../../src/batchprocessor/ \
+INCLUDEPATH += ../../src/imagebatchprocessor/ \
                ../../src/widgets/
 
-SOURCES += ../../src/batchprocessor/main.cpp \
-           ../../src/batchprocessor/mainwindow.toolbar.edit.cpp \
-           ../../src/batchprocessor/mainwindow.main.cpp \
-           ../../src/batchprocessor/mainwindow.toolbar.batch.cpp \
-           ../../src/batchprocessor/mainwindow.view.batch.cpp \
-           ../../src/batchprocessor/mainwindow.view.edit.cpp \
-           ../../src/batchprocessor/imagefolderlistpopup.cpp
+SOURCES += ../../src/imagebatchprocessor/main.cpp \
+           ../../src/imagebatchprocessor/mainwindow.toolbar.edit.cpp \
+           ../../src/imagebatchprocessor/mainwindow.main.cpp \
+           ../../src/imagebatchprocessor/mainwindow.toolbar.batch.cpp \
+           ../../src/imagebatchprocessor/mainwindow.view.batch.cpp \
+           ../../src/imagebatchprocessor/mainwindow.view.edit.cpp \
+           ../../src/imagebatchprocessor/imagefolderlistpopup.cpp
 
-HEADERS += ../../src/batchprocessor/mainwindow.h \
-           ../../src/batchprocessor/imagefolderlistpopup.h
+HEADERS += ../../src/imagebatchprocessor/mainwindow.h \
+           ../../src/imagebatchprocessor/imagefolderlistpopup.h
 
-FORMS += ../../src/batchprocessor/mainwindow.ui \
-         ../../src/batchprocessor/imagefolderlistpopup.ui
+FORMS += ../../src/imagebatchprocessor/mainwindow.ui \
+         ../../src/imagebatchprocessor/imagefolderlistpopup.ui
 
-RESOURCES += ../../src/batchprocessor/batchprocessor.qrc
+RESOURCES += ../../src/imagebatchprocessor/imagebatchprocessor.qrc

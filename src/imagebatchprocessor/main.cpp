@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
 
     QApplication a(argc, argv);
-    a.setApplicationDisplayName("Anitools Batch Processor");
+    a.setApplicationDisplayName("Anitools Image Batch Processor");
     a.setObjectName("App");
     setDarkPalette();
     QApplication::setStyle("Fusion");

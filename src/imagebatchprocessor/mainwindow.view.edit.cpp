@@ -76,16 +76,16 @@ void MainWindow::viewEditLoad()
     mViewEditImageFilterList.setAutoRun(true);
     mViewEditImageFilterList.setUseCache(true);
     mViewEditImageFilterList.setPluginLoader(&mMainImageFilterPluginLoader);
-    viewEditLoadImageFilterList(QApplication::applicationDirPath() + "/settings/batchprocessor.ifl");
+    viewEditLoadImageFilterList(QApplication::applicationDirPath() + "/settings/imagebatchprocessor.ifl");
     mViewEditImageFilterListIsDirty = false;
 }
 
 void MainWindow::viewEditUnload()
 {
     mViewEditImageFilterList.setName(tr("Current Filter List"));
-    mViewEditImageFilterList.setDescription(tr("This file contains the filter list that batchprocessor "
+    mViewEditImageFilterList.setDescription(tr("This file contains the filter list that image batch processor "
                                                "was using the last time it was closed."));
-    mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/batchprocessor.ifl");
+    mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/imagebatchprocessor.ifl");
 }
 
 void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)

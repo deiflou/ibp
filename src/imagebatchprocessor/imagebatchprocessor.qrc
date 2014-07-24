@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/batchprocessor/icons">
+    <qresource prefix="/imagebatchprocessor/icons">
         <file alias="hSplitter">resources/icons/hSplitter.png</file>
         <file alias="loadImageFilters">resources/icons/loadImageFilters.png</file>
         <file alias="loadImage">resources/icons/loadImage.png</file>
