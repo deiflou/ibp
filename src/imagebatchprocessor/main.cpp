@@ -20,8 +20,14 @@
 ****************************************************************************/
 
 #include <QApplication>
+#ifdef USE_USER_CONFIGURATION_FOLDER
+#include <QStandardPaths>
+#endif
 
 #include "mainwindow.h"
+#include "../misc/configurationmanager.h"
+
+using namespace anitools::misc;
 
 void setDarkPalette()
 {
@@ -60,12 +66,18 @@ int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(widgets);
 
-
     QApplication a(argc, argv);
     a.setApplicationDisplayName("Anitools Image Batch Processor");
     a.setObjectName("App");
     setDarkPalette();
     QApplication::setStyle("Fusion");
+
+#ifdef USE_USER_CONFIGURATION_FOLDER
+    ConfigurationManager::setFolder(QStandardPaths::writableLocation(GenericDataLocation) + "/anitools");
+#else
+    ConfigurationManager::setFolder(a.applicationDirPath() + "/settings");
+#endif
+    ConfigurationManager::setFileName("imagebatchprocessor.cfg");
 
     MainWindow w;
     w.setObjectName("MainWindow");

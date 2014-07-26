@@ -37,7 +37,8 @@ SOURCES += \
     ../../src/misc/cubicsplineinterpolator.cpp \
     ../../src/misc/linearsplineinterpolator.cpp \
     ../../src/misc/nearestneighborsplineinterpolator.cpp \
-    ../../src/misc/splineinterpolator.cpp
+    ../../src/misc/splineinterpolator.cpp \
+    ../../src/misc/configurationmanager.cpp
 
 HEADERS += \
     ../../src/misc/util.h \
@@ -46,4 +47,5 @@ HEADERS += \
     ../../src/misc/cubicsplineinterpolator.h \
     ../../src/misc/linearsplineinterpolator.h \
     ../../src/misc/nearestneighborsplineinterpolator.h \
-    ../../src/misc/splineinterpolator.h
+    ../../src/misc/splineinterpolator.h \
+    ../../src/misc/configurationmanager.h

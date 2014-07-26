@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>540</height>
+    <width>810</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -46,6 +46,10 @@
 	margin: 0px;
 	spacing: 0px;
 	border-radius: 1px;
+}
+#mMainContainerTop
+{
+	background-color:palette(mid);
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
@@ -66,7 +70,7 @@
    </property>
    <item>
     <widget class="QWidget" name="mMainContainer" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,1">
+     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -83,159 +87,275 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="mMainLayoutTop" stretch="0,1,0">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QStackedWidget" name="mMainContainerToolbars">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="mToolbarEdit">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <widget class="QWidget" name="mMainContainerTop" native="true">
+        <layout class="QHBoxLayout" name="mMainLayoutTop" stretch="0,1,0">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>1</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>1</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QStackedWidget" name="mMainContainerToolbars">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="mToolbarEdit">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonLoadImage" native="true">
+               <property name="toolTip">
+                <string>Load image.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="mToolbarEditButtonSaveImage">
+               <property name="toolTip">
+                <string>Save image.</string>
+               </property>
+               <property name="icon">
+                <iconset resource="imagebatchprocessor.qrc">
+                 <normaloff>:/imagebatchprocessor/icons/saveImage</normaloff>
+                 <disabledoff>:/imagebatchprocessor/icons/saveImageDisabled</disabledoff>:/imagebatchprocessor/icons/saveImage</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonIconOnly</enum>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="mToolbarEditSeparator01">
+               <property name="minimumSize">
+                <size>
+                 <width>2</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>2</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonAddFilter" native="true">
+               <property name="toolTip">
+                <string>Add image filter.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonLoadFilters" native="true">
+               <property name="toolTip">
+                <string>Load image filter list.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="mToolbarEditButtonSaveFilters">
+               <property name="toolTip">
+                <string>Save image filter list.</string>
+               </property>
+               <property name="icon">
+                <iconset resource="imagebatchprocessor.qrc">
+                 <normaloff>:/imagebatchprocessor/icons/saveImageFilters</normaloff>
+                 <disabledoff>:/imagebatchprocessor/icons/saveImageFiltersDisabled</disabledoff>:/imagebatchprocessor/icons/saveImageFilters</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonIconOnly</enum>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="mToolbarEditSeparator02">
+               <property name="minimumSize">
+                <size>
+                 <width>2</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>2</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="mToolbarEditButtonVSplitter">
+               <property name="toolTip">
+                <string>Lay out preview vertically.</string>
+               </property>
+               <property name="icon">
+                <iconset resource="imagebatchprocessor.qrc">
+                 <normaloff>:/imagebatchprocessor/icons/vSplitter</normaloff>:/imagebatchprocessor/icons/vSplitter</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonIconOnly</enum>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">mButtonGroupToolbarEditSplitter</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="mToolbarEditButtonHSplitter">
+               <property name="toolTip">
+                <string>Lay out preview horizontally.</string>
+               </property>
+               <property name="icon">
+                <iconset resource="imagebatchprocessor.qrc">
+                 <normaloff>:/imagebatchprocessor/icons/hSplitter</normaloff>:/imagebatchprocessor/icons/hSplitter</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="toolButtonStyle">
+                <enum>Qt::ToolButtonIconOnly</enum>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">mButtonGroupToolbarEditSplitter</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="mToolbarBatch">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pushButton">
+               <property name="text">
+                <string>PushButton</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="mToolbarMoveHandle" native="true"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="mMainContainerChangeSection" native="true">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <property name="spacing">
              <number>5</number>
             </property>
             <property name="leftMargin">
-             <number>10</number>
+             <number>0</number>
             </property>
             <property name="topMargin">
              <number>10</number>
             </property>
             <property name="rightMargin">
-             <number>0</number>
+             <number>10</number>
             </property>
             <property name="bottomMargin">
              <number>10</number>
             </property>
             <item>
-             <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonLoadImage" native="true">
+             <widget class="QToolButton" name="mMainButtonEdit">
               <property name="toolTip">
-               <string>Load image.</string>
+               <string>Switch to edit view.</string>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="mToolbarEditButtonSaveImage">
-              <property name="toolTip">
-               <string>Save image.</string>
+              <property name="text">
+               <string>Edit</string>
               </property>
               <property name="icon">
                <iconset resource="imagebatchprocessor.qrc">
-                <normaloff>:/imagebatchprocessor/icons/saveImage</normaloff>
-                <disabledoff>:/imagebatchprocessor/icons/saveImageDisabled</disabledoff>:/imagebatchprocessor/icons/saveImage</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>22</width>
-                <height>22</height>
-               </size>
-              </property>
-              <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonIconOnly</enum>
-              </property>
-              <property name="autoRaise">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="Line" name="mToolbarEditSeparator01">
-              <property name="minimumSize">
-               <size>
-                <width>2</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>2</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonAddFilter" native="true">
-              <property name="toolTip">
-               <string>Add image filter.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="anitools::widgets::ToolButtonEx" name="mToolbarEditButtonLoadFilters" native="true">
-              <property name="toolTip">
-               <string>Load image filter list.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="mToolbarEditButtonSaveFilters">
-              <property name="toolTip">
-               <string>Save image filter list.</string>
-              </property>
-              <property name="icon">
-               <iconset resource="imagebatchprocessor.qrc">
-                <normaloff>:/imagebatchprocessor/icons/saveImageFilters</normaloff>
-                <disabledoff>:/imagebatchprocessor/icons/saveImageFiltersDisabled</disabledoff>:/imagebatchprocessor/icons/saveImageFilters</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>22</width>
-                <height>22</height>
-               </size>
-              </property>
-              <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonIconOnly</enum>
-              </property>
-              <property name="autoRaise">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="Line" name="mToolbarEditSeparator02">
-              <property name="minimumSize">
-               <size>
-                <width>2</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>2</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="mToolbarEditButtonVSplitter">
-              <property name="toolTip">
-               <string>Lay out preview vertically.</string>
-              </property>
-              <property name="icon">
-               <iconset resource="imagebatchprocessor.qrc">
-                <normaloff>:/imagebatchprocessor/icons/vSplitter</normaloff>:/imagebatchprocessor/icons/vSplitter</iconset>
+                <normaloff>:/imagebatchprocessor/icons/edit</normaloff>:/imagebatchprocessor/icons/edit</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -250,24 +370,27 @@
                <bool>true</bool>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonIconOnly</enum>
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
               </property>
               <attribute name="buttonGroup">
-               <string notr="true">mButtonGroupToolbarEditSplitter</string>
+               <string notr="true">mButtonGroupMainChangeSection</string>
               </attribute>
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="mToolbarEditButtonHSplitter">
+             <widget class="QToolButton" name="mMainButtonBatch">
               <property name="toolTip">
-               <string>Lay out preview horizontally.</string>
+               <string>Switch to batch processing view.</string>
+              </property>
+              <property name="text">
+               <string>Batch Processing</string>
               </property>
               <property name="icon">
                <iconset resource="imagebatchprocessor.qrc">
-                <normaloff>:/imagebatchprocessor/icons/hSplitter</normaloff>:/imagebatchprocessor/icons/hSplitter</iconset>
+                <normaloff>:/imagebatchprocessor/icons/batchProcessing</normaloff>:/imagebatchprocessor/icons/batchProcessing</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -279,148 +402,27 @@
                <bool>true</bool>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonIconOnly</enum>
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
               </property>
               <attribute name="buttonGroup">
-               <string notr="true">mButtonGroupToolbarEditSplitter</string>
+               <string notr="true">mButtonGroupMainChangeSection</string>
               </attribute>
              </widget>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="mToolbarBatch">
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <property name="spacing">
-             <number>5</number>
-            </property>
-            <property name="leftMargin">
-             <number>10</number>
-            </property>
-            <property name="topMargin">
-             <number>10</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>10</number>
-            </property>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>PushButton</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-        <item>
-         <widget class="QWidget" name="mToolbarMoveHandle" native="true"/>
-        </item>
-        <item>
-         <widget class="QWidget" name="mMainContainerChangeSection" native="true">
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <property name="spacing">
-            <number>5</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>10</number>
-           </property>
-           <property name="rightMargin">
-            <number>10</number>
-           </property>
-           <property name="bottomMargin">
-            <number>10</number>
-           </property>
-           <item>
-            <widget class="QToolButton" name="mMainButtonEdit">
-             <property name="toolTip">
-              <string>Switch to edit view.</string>
-             </property>
-             <property name="text">
-              <string>Edit</string>
-             </property>
-             <property name="icon">
-              <iconset resource="imagebatchprocessor.qrc">
-               <normaloff>:/imagebatchprocessor/icons/edit</normaloff>:/imagebatchprocessor/icons/edit</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>22</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-             <property name="toolButtonStyle">
-              <enum>Qt::ToolButtonTextBesideIcon</enum>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
-             </property>
-             <attribute name="buttonGroup">
-              <string notr="true">mButtonGroupMainChangeSection</string>
-             </attribute>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="mMainButtonBatch">
-             <property name="toolTip">
-              <string>Switch to batch processing view.</string>
-             </property>
-             <property name="text">
-              <string>Batch Processing</string>
-             </property>
-             <property name="icon">
-              <iconset resource="imagebatchprocessor.qrc">
-               <normaloff>:/imagebatchprocessor/icons/batchProcessing</normaloff>:/imagebatchprocessor/icons/batchProcessing</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>22</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="toolButtonStyle">
-              <enum>Qt::ToolButtonTextBesideIcon</enum>
-             </property>
-             <property name="autoRaise">
-              <bool>true</bool>
-             </property>
-             <attribute name="buttonGroup">
-              <string notr="true">mButtonGroupMainChangeSection</string>
-             </attribute>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="Line" name="mMainSeparatorToolbars">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="mMainContainerViews">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="QWidget" name="mViewEdit">
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <property name="spacing">
@@ -444,7 +446,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="handleWidth">
-             <number>10</number>
+             <number>1</number>
             </property>
             <property name="childrenCollapsible">
              <bool>false</bool>
@@ -454,78 +456,83 @@
               <property name="spacing">
                <number>0</number>
               </property>
-              <property name="leftMargin">
-               <number>10</number>
-              </property>
-              <property name="topMargin">
-               <number>10</number>
-              </property>
-              <property name="bottomMargin">
-               <number>10</number>
-              </property>
               <item>
                <widget class="QSplitter" name="mViewEditSplitterPreview">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
                 <property name="handleWidth">
-                 <number>10</number>
+                 <number>1</number>
                 </property>
                 <property name="childrenCollapsible">
                  <bool>false</bool>
                 </property>
                 <widget class="QWidget" name="verticalLayoutWidget">
-                 <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
+                 <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1">
                   <property name="spacing">
                    <number>5</number>
                   </property>
                   <item>
-                   <widget class="anitools::widgets::ImageViewer" name="mViewEditImagePreviewInput" native="true"/>
-                  </item>
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,0,0">
-                    <property name="spacing">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <spacer name="horizontalSpacer_2">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
+                   <widget class="anitools::widgets::ImageViewer" name="mViewEditImagePreviewInput" native="true">
+                    <widget class="QWidget" name="mViewEditContainerInputZoom" native="true">
+                     <property name="geometry">
+                      <rect>
+                       <x>400</x>
+                       <y>210</y>
+                       <width>181</width>
+                       <height>21</height>
+                      </rect>
+                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout">
+                      <property name="spacing">
+                       <number>5</number>
                       </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
+                      <property name="leftMargin">
+                       <number>0</number>
                       </property>
-                     </spacer>
-                    </item>
-                    <item>
-                     <widget class="QSlider" name="mViewEditSliderInputZoom">
-                      <property name="toolTip">
-                       <string>Change the zoom factor of the input image preview.</string>
+                      <property name="topMargin">
+                       <number>0</number>
                       </property>
-                      <property name="maximum">
-                       <number>13</number>
+                      <property name="rightMargin">
+                       <number>0</number>
                       </property>
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
+                      <property name="bottomMargin">
+                       <number>0</number>
                       </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="mViewEditComboInputZoom">
-                      <property name="toolTip">
-                       <string>Change the zoom factor of the input image preview.</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                      <item>
+                       <widget class="QSlider" name="mViewEditSliderInputZoom">
+                        <property name="toolTip">
+                         <string>Change the zoom factor of the input image preview.</string>
+                        </property>
+                        <property name="maximum">
+                         <number>13</number>
+                        </property>
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="mViewEditComboInputZoom">
+                        <property name="toolTip">
+                         <string>Change the zoom factor of the input image preview.</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
                 <widget class="QWidget" name="verticalLayoutWidget_2">
-                 <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
+                 <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1">
                   <property name="spacing">
                    <number>5</number>
                   </property>
@@ -534,9 +541,9 @@
                     <widget class="QProgressBar" name="mViewEditProgressBarProcessingOutput">
                      <property name="geometry">
                       <rect>
-                       <x>30</x>
-                       <y>160</y>
-                       <width>331</width>
+                       <x>170</x>
+                       <y>50</y>
+                       <width>221</width>
                        <height>4</height>
                       </rect>
                      </property>
@@ -567,47 +574,54 @@ QProgressBar::chunk
                       <bool>false</bool>
                      </property>
                     </widget>
+                    <widget class="QWidget" name="mViewEditContainerOutputZoom" native="true">
+                     <property name="geometry">
+                      <rect>
+                       <x>400</x>
+                       <y>190</y>
+                       <width>181</width>
+                       <height>21</height>
+                      </rect>
+                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout_5">
+                      <property name="spacing">
+                       <number>5</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QSlider" name="mViewEditSliderOutputZoom">
+                        <property name="toolTip">
+                         <string>Change the zoom factor of the output image preview.</string>
+                        </property>
+                        <property name="maximum">
+                         <number>13</number>
+                        </property>
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="mViewEditComboOutputZoom">
+                        <property name="toolTip">
+                         <string>Change the zoom factor of the output image preview.</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
                    </widget>
-                  </item>
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,0,0">
-                    <property name="spacing">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <spacer name="horizontalSpacer_3">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                    <item>
-                     <widget class="QSlider" name="mViewEditSliderOutputZoom">
-                      <property name="toolTip">
-                       <string>Change the zoom factor of the output image preview.</string>
-                      </property>
-                      <property name="maximum">
-                       <number>13</number>
-                      </property>
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="mViewEditComboOutputZoom">
-                      <property name="toolTip">
-                       <string>Change the zoom factor of the output image preview.</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
                   </item>
                  </layout>
                 </widget>
@@ -616,17 +630,10 @@ QProgressBar::chunk
              </layout>
             </widget>
             <widget class="QWidget" name="horizontalLayoutWidget_2">
-             <layout class="QHBoxLayout" name="mViewEditLayoutScrollArea" stretch="0,1">
+             <layout class="QHBoxLayout" name="mViewEditLayoutScrollArea" stretch="1">
               <property name="spacing">
                <number>0</number>
               </property>
-              <item>
-               <widget class="Line" name="mViewEditSeparatorScrollArea">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
               <item>
                <widget class="QScrollArea" name="mViewEditWidgetListScrollArea">
                 <property name="frameShape">
@@ -643,8 +650,8 @@ QProgressBar::chunk
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>195</width>
-                   <height>485</height>
+                   <width>764</width>
+                   <height>519</height>
                   </rect>
                  </property>
                 </widget>
@@ -660,9 +667,8 @@ QProgressBar::chunk
        </widget>
       </item>
      </layout>
-     <zorder></zorder>
-     <zorder>mMainSeparatorToolbars</zorder>
      <zorder>mMainContainerViews</zorder>
+     <zorder>mMainContainerTop</zorder>
     </widget>
    </item>
   </layout>

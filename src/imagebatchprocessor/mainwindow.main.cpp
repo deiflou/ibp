@@ -21,10 +21,17 @@
 
 #include <QFile>
 #include <QFileInfo>
-#include <QDebug>
+#include <QResizeEvent>
+#include <QMoveEvent>
+#include <QWindowStateChangeEvent>
+#include <QGraphicsDropShadowEffect>
+//#include <QDebug>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "../misc/configurationmanager.h"
+
+using namespace anitools::misc;
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
@@ -67,8 +74,76 @@ MainWindow::~MainWindow()
 
 void MainWindow::resizeEvent(QResizeEvent *e)
 {
+    Q_UNUSED(e);
+
     toolbarEditEventFilter((QObject*)this, (QEvent*)e);
     viewEditEventFilter((QObject*)this, (QEvent*)e);
+
+    if (this->windowState() == Qt::WindowNoState)
+    {
+        mMainWindowSize = e->size();
+        mMainOldWindowSize = e->oldSize();
+    }
+    //qDebug() << "resize" << this->windowState() << mMainWindowSize << mMainOldWindowSize;
+}
+
+void MainWindow::moveEvent(QMoveEvent *e)
+{
+    Q_UNUSED(e);
+
+    if (this->windowState() == Qt::WindowNoState)
+    {
+        mMainWindowPos = this->pos();
+        mMainOldWindowPos = e->oldPos() - (e->pos() - this->pos());
+    }
+    //qDebug() << "move" << mMainWindowPos << mMainOldWindowPos;
+}
+
+void MainWindow::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::WindowStateChange)
+    {
+        QWindowStateChangeEvent * event = (QWindowStateChangeEvent *)e;
+
+        if (event->oldState() == Qt::WindowNoState && this->windowState() == Qt::WindowMaximized && !mMainIsMaximized)
+        {
+            mMainWindowSize = mMainOldWindowSize;
+            mMainWindowPos = mMainOldWindowPos;
+            mMainIsMaximized = true;
+            //qDebug() << "max" << mMainWindowPos << mMainOldWindowPos << mMainWindowSize << mMainOldWindowSize;
+        }
+        else if (event->oldState() == Qt::WindowMaximized && this->windowState() == Qt::WindowNoState)
+        {
+            mMainIsMaximized = false;
+            //qDebug() << "normal" << mMainWindowPos << mMainOldWindowPos << mMainWindowSize << mMainOldWindowSize;
+        }
+    }
+    QWidget::changeEvent(e);
+}
+
+void MainWindow::showEvent(QShowEvent *e)
+{
+    Q_UNUSED(e);
+
+    // Resize, move, show
+    mMainWindowSize = mMainOldWindowSize = ConfigurationManager::value("mainwindow/size", QSize()).toSize();
+    mMainWindowPos = mMainOldWindowPos = ConfigurationManager::value("mainwindow/position", QPoint()).toPoint();
+    mMainIsMaximized = ConfigurationManager::value("mainwindow/ismaximized", false).toBool();
+    //qDebug() << "show" << mMainWindowPos << mMainOldWindowPos << mMainWindowSize << mMainOldWindowSize;
+    this->resize(mMainWindowSize);
+    this->move(mMainWindowPos);
+
+
+    if (mMainIsMaximized)
+        this->showMaximized();
+
+    viewEditShow();
+
+    // View change
+    if (ConfigurationManager::value("mainwindow/currentview", "edit").toString() == "batch")
+        ui->mMainButtonBatch->setChecked(true);
+
+    QWidget::showEvent(e);
 }
 
 bool MainWindow::eventFilter(QObject *o, QEvent *e)
@@ -92,11 +167,24 @@ void MainWindow::mainLoad()
             this, SLOT(On_mMainWatcherImageFilterListPresets_directoryChanged(QString)));
     // Image Filter List Pressets
     mainReloadImageFilterListPresets();
+    // Shadow effect in the toolbar container
+    QGraphicsDropShadowEffect * shadow = new QGraphicsDropShadowEffect();
+    shadow->setOffset(0, 4);
+    shadow->setBlurRadius(20);
+    shadow->setColor(QColor(0, 0, 0, 128));
+    ui->mMainContainerTop->setGraphicsEffect(shadow);
 }
 
 void MainWindow::mainUnload()
 {
     mViewEditImageFilterList.wait();
+
+    ConfigurationManager::setValue("mainwindow/size", mMainWindowSize);
+    ConfigurationManager::setValue("mainwindow/position", mMainWindowPos);
+    ConfigurationManager::setValue("mainwindow/ismaximized", mMainIsMaximized);
+
+    QString currentView = ui->mMainButtonBatch->isChecked() ? "batch" : "edit";
+    ConfigurationManager::setValue("mainwindow/currentview", currentView);
 }
 
 void MainWindow::mainReloadImageFilterListPresets()

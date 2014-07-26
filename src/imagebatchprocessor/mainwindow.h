@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QFileSystemWatcher>
 #include <QMenu>
+#include <QGraphicsOpacityEffect>
 
 #include "../imgproc/freeimage.h"
 #include "../imgproc/imagefilterlist.h"
@@ -53,6 +54,9 @@ public:
 protected:
     // Main
     void resizeEvent(QResizeEvent *e);
+    void moveEvent(QMoveEvent *e);
+    void changeEvent(QEvent *e);
+    void showEvent(QShowEvent *e);
     bool eventFilter(QObject *o, QEvent *e);
 
 private:
@@ -66,6 +70,10 @@ private:
         QString fileName, name, description;
     };
     QList<MainImageFilterListPresetsInfo> mMainImageFilterListPresets;
+
+    QSize mMainWindowSize, mMainOldWindowSize;
+    QPoint mMainWindowPos, mMainOldWindowPos;
+    bool mMainIsMaximized;
 
     void mainLoad();
     void mainUnload();
@@ -96,9 +104,11 @@ private:
     QWidget * mViewEditWidgetDummyFade1, * mViewEditWidgetDummyFade2;
     bool mViewEditIsLoadingImageFilterList;
     bool mViewEditImageFilterListIsDirty;
+    QGraphicsOpacityEffect * mViewEditContainerInputZoomOpacityEffect, * mViewEditContainerOutputZoomOpacityEffect;
 
     void viewEditLoad();
     void viewEditUnload();
+    void viewEditShow();
     void viewEditEventFilter(QObject *o, QEvent *e);
 
     bool viewEditLoadInputImage(const QString & fileName);
@@ -139,6 +149,7 @@ private slots:
     void On_mViewEditImageFilterList_processingCompleted(const QImage & i);
 
     void on_mViewEditImagePreviewInput_zoomIndexChanged(int index);
+    void on_mViewEditImagePreviewInput_viewportResized(const QRect & r);
     void on_mViewEditImagePreviewOutput_zoomIndexChanged(int index);
     void on_mViewEditImagePreviewOutput_viewportResized(const QRect & r);
     void on_mViewEditSliderInputZoom_valueChanged(int value);

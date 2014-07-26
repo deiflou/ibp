@@ -39,7 +39,7 @@ OutputLevelsSlider::OutputLevelsSlider(QWidget *parent) :
 {
     QGraphicsDropShadowEffect * shadow = new QGraphicsDropShadowEffect();
     shadow->setOffset(0, 2);
-    shadow->setBlurRadius(8);
+    shadow->setBlurRadius(12);
     shadow->setColor(QColor(0, 0, 0, 128));
     this->setGraphicsEffect(shadow);
 
@@ -129,15 +129,19 @@ void OutputLevelsSlider::paintEvent(QPaintEvent *e)
     grd.setColorAt(0.0, QColor(0, 0, 0));
     grd.setColorAt(1.0, QColor(255, 255, 255));
 
+    QPainterPath cPath;
+    cPath.addRoundedRect(r, 1, 1);
+    p.setClipPath(cPath);
     p.fillRect(r.adjusted(0, 0, 0, -r.center().y()), grd);
     p.drawImage(r.adjusted(0, r.center().y(), 0, 0), mFunction);
-
+    p.setClipping(false);
+/*
     p.setBrush(Qt::transparent);
     p.setPen(QColor(0, 0, 0, 128));
     p.drawRect(r.adjusted(0, 0, -1, -1));
     p.setPen(QColor(255, 255, 255, 128));
     p.drawRect(r.adjusted(1, 1, -2, -2));
-
+*/
     double y, xB, xW;
     y = this->rect().bottom() - HANDLE_HEIGHT;
     xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;

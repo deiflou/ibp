@@ -29,6 +29,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "../imgproc/freeimage.h"
+#include "../misc/configurationmanager.h"
+
+using namespace anitools::misc;
 
 void MainWindow::toolbarEditLoad()
 {
@@ -58,7 +61,8 @@ void MainWindow::toolbarEditLoad()
     ui->mToolbarEditButtonAddFilter->setText("");
     QIcon mToolbarEditButtonAddFilterIcon;
     mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilter");
-    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilterDisabled", QSize(), QIcon::Disabled);
+    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilterDisabled",
+                                            QSize(), QIcon::Disabled);
     ui->mToolbarEditButtonAddFilter->setIcon(mToolbarEditButtonAddFilterIcon);
     ui->mToolbarEditButtonAddFilter->setIconSize(QSize(22, 22));
     ui->mToolbarEditButtonAddFilter->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -85,7 +89,6 @@ void MainWindow::toolbarEditLoad()
 
     // Save Filters Button
     ui->mToolbarEditButtonSaveFilters->setEnabled(false);
-
 
 }
 
@@ -251,8 +254,6 @@ void MainWindow::on_mToolbarEditButtonLoadImage_clicked()
         QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
         return;
     }
-
-    mToolbarEditImageFolderListPopUp->setFolder(QFileInfo(fileName).path());
 }
 
 void MainWindow::on_mToolbarEditButtonLoadImage_menuButtonPressed()

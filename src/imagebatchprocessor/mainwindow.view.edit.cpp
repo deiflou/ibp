@@ -20,13 +20,27 @@
 ****************************************************************************/
 
 #include <QScrollBar>
-#include <QDebug>
+#include <QGraphicsOpacityEffect>
+#include <math.h>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "../misc/configurationmanager.h"
+
+#define VIEWEDITCONTAINERZOOMOPACITY .25
+
+using namespace anitools::misc;
 
 void MainWindow::viewEditLoad()
 {
+    // Opacity effects for the zoom containers
+    mViewEditContainerInputZoomOpacityEffect = new QGraphicsOpacityEffect();
+    mViewEditContainerInputZoomOpacityEffect->setOpacity(VIEWEDITCONTAINERZOOMOPACITY);
+    ui->mViewEditContainerInputZoom->setGraphicsEffect(mViewEditContainerInputZoomOpacityEffect);
+    mViewEditContainerOutputZoomOpacityEffect = new QGraphicsOpacityEffect();
+    mViewEditContainerOutputZoomOpacityEffect->setOpacity(VIEWEDITCONTAINERZOOMOPACITY);
+    ui->mViewEditContainerOutputZoom->setGraphicsEffect(mViewEditContainerOutputZoomOpacityEffect);
+
     // Progress Bar Processing Output
     ui->mViewEditProgressBarProcessingOutput->hide();
 
@@ -55,13 +69,13 @@ void MainWindow::viewEditLoad()
     mViewEditWidgetDummyFade2 = new QWidget(this);
     mViewEditWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
     mViewEditWidgetDummyFade2->setAttribute(Qt::WA_TransparentForMouseEvents);
-    mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
-                                             "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-                                             "stop:0 palette(button), stop:1 rgba(0, 0, 0, 0)); }");
+//    mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
+//                                             "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
+//                                             "stop:0 palette(button), stop:1 rgba(0, 0, 0, 0)); }");
     mViewEditWidgetDummyFade2->setStyleSheet("QWidget { background-color:"
                                              "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
                                              "stop:0 rgba(0, 0, 0, 0), stop:1 palette(button)); }");
-    mViewEditWidgetDummyFade1->setAutoFillBackground(true);
+//    mViewEditWidgetDummyFade1->setAutoFillBackground(true);
     mViewEditWidgetDummyFade2->setAutoFillBackground(true);
 
 
@@ -76,8 +90,45 @@ void MainWindow::viewEditLoad()
     mViewEditImageFilterList.setAutoRun(true);
     mViewEditImageFilterList.setUseCache(true);
     mViewEditImageFilterList.setPluginLoader(&mMainImageFilterPluginLoader);
-    viewEditLoadImageFilterList(QApplication::applicationDirPath() + "/settings/imagebatchprocessor.ifl");
+    viewEditLoadImageFilterList(ConfigurationManager::folder() + "/imagebatchprocessor.ifl");
     mViewEditImageFilterListIsDirty = false;
+
+    // Load last image
+    viewEditLoadInputImage(ConfigurationManager::value("viewedit/inputimagefilename", "").toString());
+
+}
+
+void MainWindow::viewEditShow()
+{
+    // Load view configuration
+    int splitterPos = ConfigurationManager::value("viewedit/imagefilterlist/width", 0).toInt();
+    ui->mViewEditSplitterMain->setSizes(QList<int>() << ui->mViewEditSplitterMain->width() - splitterPos -
+                                        ui->mViewEditSplitterMain->handleWidth() << splitterPos);
+
+    if (ConfigurationManager::value("viewedit/preview/splitterorientation", Qt::Vertical).toInt() == Qt::Horizontal)
+        ui->mToolbarEditButtonHSplitter->setChecked(true);
+
+    splitterPos = round(ConfigurationManager::value("viewedit/preview/splitterposition", 0).toDouble() *
+                        (ui->mViewEditSplitterPreview->orientation() == Qt::Vertical ?
+                        ui->mViewEditSplitterPreview->height() :
+                        ui->mViewEditSplitterPreview->width()) / 100.);
+    ui->mViewEditSplitterPreview->setSizes(QList<int>() << splitterPos <<
+                                           (ui->mViewEditSplitterPreview->orientation() == Qt::Vertical ?
+                                           ui->mViewEditSplitterPreview->height() :
+                                           ui->mViewEditSplitterPreview->width()) -
+                                           splitterPos - ui->mViewEditSplitterPreview->handleWidth());
+
+    ui->mViewEditComboInputZoom->setCurrentIndex(
+                ConfigurationManager::value("viewedit/preview/inputimagezoom", 7).toInt());
+    ui->mViewEditComboOutputZoom->setCurrentIndex(
+                ConfigurationManager::value("viewedit/preview/outputimagezoom", 7).toInt());
+
+    QPoint pos = ConfigurationManager::value("viewedit/preview/inputimageposition", QPoint(0, 0)).toPoint();
+    ui->mViewEditImagePreviewInput->horizontalScrollBar()->setValue(pos.x());
+    ui->mViewEditImagePreviewInput->verticalScrollBar()->setValue(pos.y());
+    pos = ConfigurationManager::value("viewedit/preview/outputimageposition", QPoint(0, 0)).toPoint();
+    ui->mViewEditImagePreviewOutput->horizontalScrollBar()->setValue(pos.x());
+    ui->mViewEditImagePreviewOutput->verticalScrollBar()->setValue(pos.y());
 }
 
 void MainWindow::viewEditUnload()
@@ -85,7 +136,30 @@ void MainWindow::viewEditUnload()
     mViewEditImageFilterList.setName(tr("Current Filter List"));
     mViewEditImageFilterList.setDescription(tr("This file contains the filter list that image batch processor "
                                                "was using the last time it was closed."));
-    mViewEditImageFilterList.save(QApplication::applicationDirPath() + "/settings/imagebatchprocessor.ifl");
+    mViewEditImageFilterList.save(ConfigurationManager::folder() + "/imagebatchprocessor.ifl");
+
+    // Save configuration
+    ConfigurationManager::setValue("viewedit/inputimagefilename", mViewEditInputImageFilename);
+    ConfigurationManager::setValue("viewedit/imagefilterlist/width", ui->mViewEditSplitterMain->sizes().at(1));
+
+    ConfigurationManager::setValue("viewedit/preview/splitterorientation",
+                                   ui->mViewEditSplitterPreview->orientation());
+    ConfigurationManager::setValue("viewedit/preview/splitterposition",
+                                   ui->mViewEditSplitterPreview->sizes().at(0) * 100. /
+                                   (ui->mViewEditSplitterPreview->orientation() == Qt::Vertical ?
+                                   ui->mViewEditSplitterPreview->height() :
+                                   ui->mViewEditSplitterPreview->width()));
+
+    ConfigurationManager::setValue("viewedit/preview/inputimagezoom", ui->mViewEditImagePreviewInput->zoomIndex());
+    ConfigurationManager::setValue("viewedit/preview/outputimagezoom", ui->mViewEditImagePreviewOutput->zoomIndex());
+
+    ConfigurationManager::setValue("viewedit/preview/inputimageposition", QPoint(
+                                       ui->mViewEditImagePreviewInput->horizontalScrollBar()->value(),
+                                       ui->mViewEditImagePreviewInput->verticalScrollBar()->value()));
+    ConfigurationManager::setValue("viewedit/preview/outputimageposition", QPoint(
+                                       ui->mViewEditImagePreviewOutput->horizontalScrollBar()->value(),
+                                       ui->mViewEditImagePreviewOutput->verticalScrollBar()->value()));
+
 }
 
 void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
@@ -120,6 +194,20 @@ void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
 
         return;
     }
+    if (o == ui->mViewEditContainerInputZoom)
+    {
+        if (e->type() == QEvent::Enter)
+            mViewEditContainerInputZoomOpacityEffect->setOpacity(1.);
+        else if (e->type() == QEvent::Leave)
+            mViewEditContainerInputZoomOpacityEffect->setOpacity(VIEWEDITCONTAINERZOOMOPACITY);
+    }
+    if (o == ui->mViewEditContainerOutputZoom)
+    {
+        if (e->type() == QEvent::Enter)
+            mViewEditContainerOutputZoomOpacityEffect->setOpacity(1.);
+        else if (e->type() == QEvent::Leave)
+            mViewEditContainerOutputZoomOpacityEffect->setOpacity(VIEWEDITCONTAINERZOOMOPACITY);
+    }
 }
 
 bool MainWindow::viewEditLoadInputImage(const QString &fileName)
@@ -150,6 +238,8 @@ bool MainWindow::viewEditLoadInputImage(const QString &fileName)
     ui->mViewEditSliderInputZoom->setEnabled(true);
     ui->mViewEditComboInputZoom->setEnabled(true);
     mViewEditImageFilterList.setInputImage(mViewEditInputImage);
+
+    mToolbarEditImageFolderListPopUp->setFolder(QFileInfo(fileName).path());
 
     return true;
 }
@@ -233,6 +323,12 @@ void MainWindow::on_mViewEditImagePreviewInput_zoomIndexChanged(int index)
     ui->mViewEditComboInputZoom->setCurrentIndex(index);
 }
 
+void MainWindow::on_mViewEditImagePreviewInput_viewportResized(const QRect &r)
+{
+    ui->mViewEditContainerInputZoom->move(r.width() - ui->mViewEditContainerInputZoom->width() - 10,
+                                          r.height() - ui->mViewEditContainerInputZoom->height() -10);
+}
+
 void MainWindow::on_mViewEditImagePreviewOutput_zoomIndexChanged(int index)
 {
     ui->mViewEditComboOutputZoom->setCurrentIndex(index);
@@ -243,6 +339,9 @@ void MainWindow::on_mViewEditImagePreviewOutput_viewportResized(const QRect &r)
     ui->mViewEditProgressBarProcessingOutput->move(1, r.height()
                                                    - ui->mViewEditProgressBarProcessingOutput->height() + 1);
     ui->mViewEditProgressBarProcessingOutput->resize(r.width(), 0);
+
+    ui->mViewEditContainerOutputZoom->move(r.width() - ui->mViewEditContainerOutputZoom->width() - 10,
+                                           r.height() - ui->mViewEditContainerOutputZoom->height() -10);
 }
 
 void MainWindow::on_mViewEditSliderInputZoom_valueChanged(int value)
