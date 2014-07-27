@@ -41,6 +41,10 @@ void MainWindow::viewEditLoad()
     mViewEditContainerOutputZoomOpacityEffect->setOpacity(VIEWEDITCONTAINERZOOMOPACITY);
     ui->mViewEditContainerOutputZoom->setGraphicsEffect(mViewEditContainerOutputZoomOpacityEffect);
 
+    // Imageviews look
+    ui->mViewEditImagePreviewInput->setFrameShape(QFrame::NoFrame);
+    ui->mViewEditImagePreviewOutput->setFrameShape(QFrame::NoFrame);
+
     // Progress Bar Processing Output
     ui->mViewEditProgressBarProcessingOutput->hide();
 
@@ -64,19 +68,13 @@ void MainWindow::viewEditLoad()
     ui->mViewEditSplitterMain->setStretchFactor(0, 1);
     ui->mViewEditSplitterMain->setStretchFactor(1, 0);
 
-    // Widgets Dummy Fade
+    // Widget Dummy Fade
     mViewEditWidgetDummyFade1 = new QWidget(this);
-    mViewEditWidgetDummyFade2 = new QWidget(this);
     mViewEditWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
-    mViewEditWidgetDummyFade2->setAttribute(Qt::WA_TransparentForMouseEvents);
-//    mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
-//                                             "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-//                                             "stop:0 palette(button), stop:1 rgba(0, 0, 0, 0)); }");
-    mViewEditWidgetDummyFade2->setStyleSheet("QWidget { background-color:"
+    mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
                                              "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
                                              "stop:0 rgba(0, 0, 0, 0), stop:1 palette(button)); }");
-//    mViewEditWidgetDummyFade1->setAutoFillBackground(true);
-    mViewEditWidgetDummyFade2->setAutoFillBackground(true);
+    mViewEditWidgetDummyFade1->setAutoFillBackground(true);
 
 
     ui->mViewEditWidgetListScrollArea->installEventFilter(this);
@@ -184,13 +182,10 @@ void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
         }
 
         QRect r = ui->mViewEditWidgetList->rect();
-        mViewEditWidgetDummyFade1->move(this->width() - ui->mViewEditWidgetListScrollArea->width(),
-                                        ui->mMainContainerViews->y());
-        mViewEditWidgetDummyFade1->resize(r.width(), 24);
 
-        mViewEditWidgetDummyFade2->move(this->width() - ui->mViewEditWidgetListScrollArea->width(),
+        mViewEditWidgetDummyFade1->move(this->width() - ui->mViewEditWidgetListScrollArea->width(),
                                         this->height() - 24);
-        mViewEditWidgetDummyFade2->resize(r.width(), 24);
+        mViewEditWidgetDummyFade1->resize(r.width(), 24);
 
         return;
     }
@@ -336,7 +331,7 @@ void MainWindow::on_mViewEditImagePreviewOutput_zoomIndexChanged(int index)
 
 void MainWindow::on_mViewEditImagePreviewOutput_viewportResized(const QRect &r)
 {
-    ui->mViewEditProgressBarProcessingOutput->move(1, r.height()
+    ui->mViewEditProgressBarProcessingOutput->move(0, r.height()
                                                    - ui->mViewEditProgressBarProcessingOutput->height() + 1);
     ui->mViewEditProgressBarProcessingOutput->resize(r.width(), 0);
 

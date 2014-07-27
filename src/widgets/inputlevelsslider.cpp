@@ -134,12 +134,21 @@ void InputLevelsSlider::paintEvent(QPaintEvent *e)
     grd.setColorAt(0.0, QColor(0, 0, 0));
     grd.setColorAt(1.0, QColor(255, 255, 255));
 
-    QPainterPath cPath;
-    cPath.addRoundedRect(r, 1, 1);
-    p.setClipPath(cPath);
-    p.fillRect(r.adjusted(0, 0, 0, -r.center().y()), grd);
-    p.drawImage(r.adjusted(0, r.center().y(), 0, 0), mFunction);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    p.setPen(Qt::NoPen);
+    p.setClipRect(r.adjusted(0, 0, 0, -r.center().y()));
+    p.setBrush(grd);
+    p.drawRoundedRect(r, 1, 1);
+    p.setClipRect(r.adjusted(0, r.center().y(), 0, 0));
+    p.setBrushOrigin(LEFT_MARGIN - 1, TOP_MARGIN - 1);
+    QBrush b(mFunction);
+    b.setTransform(QTransform(r.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
+    p.setBrush(b);
+    p.drawRoundedRect(r, 1, 1);
     p.setClipping(false);
+    p.setRenderHint(QPainter::Antialiasing, false);
+    p.setRenderHint(QPainter::SmoothPixmapTransform, false);
 /*
     p.setBrush(Qt::transparent);
     p.setPen(QColor(0, 0, 0, 128));

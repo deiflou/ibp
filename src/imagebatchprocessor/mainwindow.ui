@@ -50,6 +50,57 @@
 #mMainContainerTop
 {
 	background-color:palette(mid);
+}
+
+#mViewEditImagePreviewInput, #mViewEditImagePreviewOutput
+{
+    background: palette(base);
+}
+#mViewEditImagePreviewInput  QScrollBar, #mViewEditImagePreviewOutput  QScrollBar
+{
+    border: 0;
+    background: palette(base);
+    margin: 0;
+	padding: 0;
+}
+#mViewEditImagePreviewInput  QScrollBar::handle, #mViewEditImagePreviewOutput  QScrollBar::handle
+{
+    border-radius:1px;
+}
+#mViewEditImagePreviewInput QScrollBar:horizontal, #mViewEditImagePreviewOutput  QScrollBar:horizontal
+{
+    height: 5px;
+}
+#mViewEditImagePreviewInput  QScrollBar:vertical, #mViewEditImagePreviewOutput  QScrollBar:vertical
+{
+    width: 5px;
+}
+#mViewEditImagePreviewInput  QScrollBar::handle:horizontal, #mViewEditImagePreviewOutput  QScrollBar::handle:horizontal
+{
+    background: palette(highlight);
+	min-width:20px;
+}
+#mViewEditImagePreviewInput  QScrollBar::handle:vertical, #mViewEditImagePreviewOutput  QScrollBar::handle:vertical
+{
+    background: palette(highlight);
+	min-height:20px;
+}
+#mViewEditImagePreviewInput QScrollBar::add-line:horizontal, #mViewEditImagePreviewOutput QScrollBar::add-line:horizontal,
+#mViewEditImagePreviewInput QScrollBar::add-line:vertical, #mViewEditImagePreviewOutput QScrollBar::add-line:vertical,
+#mViewEditImagePreviewInput QScrollBar::sub-line:horizontal, #mViewEditImagePreviewOutput QScrollBar::sub-line:horizontal,
+#mViewEditImagePreviewInput QScrollBar::sub-line:vertical, #mViewEditImagePreviewOutput QScrollBar::sub-line:vertical
+{
+	width:0;
+}
+
+#mViewEditProgressBarProcessingOutput
+{
+	border : 0px;
+	background-color : #ed1461;
+}
+#mViewEditProgressBarProcessingOutput::chunk
+{
+	background-color : #00ffd8;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
@@ -544,31 +595,20 @@
                        <x>170</x>
                        <y>50</y>
                        <width>221</width>
-                       <height>4</height>
+                       <height>5</height>
                       </rect>
                      </property>
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>4</height>
+                       <height>5</height>
                       </size>
                      </property>
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
-                       <height>4</height>
+                       <height>5</height>
                       </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">QProgressBar
-{
-	border : 0px;
-	background-color : palette(shadow);
-}
-QProgressBar::chunk
-{
-	background-color : palette(highlight);
-}</string>
                      </property>
                      <property name="textVisible">
                       <bool>false</bool>

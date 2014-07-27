@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow),
     // Main
+    mMainWidgetDummyFade1(0),
     mMainWatcherImageFilterListPresets(0),
     // Toolbar Edit
     mToolbarEditImageFolderListPopUp(0),
@@ -47,7 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mViewEditInputImageFI(0),
     mViewEditInputImageFilename(),
     mViewEditWidgetDummyFade1(0),
-    mViewEditWidgetDummyFade2(0),
     mViewEditIsLoadingImageFilterList(false),
     mViewEditImageFilterListIsDirty(false)
 
@@ -79,6 +79,11 @@ void MainWindow::resizeEvent(QResizeEvent *e)
     toolbarEditEventFilter((QObject*)this, (QEvent*)e);
     viewEditEventFilter((QObject*)this, (QEvent*)e);
 
+    // Dummy fade widget
+    mMainWidgetDummyFade1->move(0, ui->mMainContainerTop->height());
+    mMainWidgetDummyFade1->resize(this->width(), 16);
+
+    // Window size & state
     if (this->windowState() == Qt::WindowNoState)
     {
         mMainWindowSize = e->size();
@@ -156,6 +161,15 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e)
 
 void MainWindow::mainLoad()
 {
+    // Widgets Dummy Fade
+    mMainWidgetDummyFade1 = new QWidget(this);
+    mMainWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
+    mMainWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
+                                         "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
+                                         "stop:0 rgba(0, 0, 0, .4), stop:.2 rgba(0, 0, 0, .32)"
+                                         ", stop:.4 rgba(0, 0, 0, .16), stop:.6 rgba(0, 0, 0, .05)"
+                                         ", stop:.8 rgba(0, 0, 0, .01), stop:1 rgba(0, 0, 0, .0)); }");
+    mMainWidgetDummyFade1->setAutoFillBackground(true);
     // Image Filter Plugin Loader
     mMainImageFilterPluginLoader.load(QApplication::applicationDirPath() + "/plugins");
     // General
@@ -167,12 +181,6 @@ void MainWindow::mainLoad()
             this, SLOT(On_mMainWatcherImageFilterListPresets_directoryChanged(QString)));
     // Image Filter List Pressets
     mainReloadImageFilterListPresets();
-    // Shadow effect in the toolbar container
-    QGraphicsDropShadowEffect * shadow = new QGraphicsDropShadowEffect();
-    shadow->setOffset(0, 4);
-    shadow->setBlurRadius(20);
-    shadow->setColor(QColor(0, 0, 0, 128));
-    ui->mMainContainerTop->setGraphicsEffect(shadow);
 }
 
 void MainWindow::mainUnload()

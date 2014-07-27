@@ -63,6 +63,8 @@ private:
     Ui::MainWindow *ui;
 
     // Main
+    QWidget * mMainWidgetDummyFade1;
+
     ImageFilterPluginLoader mMainImageFilterPluginLoader;
     QFileSystemWatcher * mMainWatcherImageFilterListPresets;
     struct MainImageFilterListPresetsInfo
@@ -101,7 +103,7 @@ private:
     FIBITMAP * mViewEditInputImageFI;
     QString mViewEditInputImageFilename;
     ImageFilterList mViewEditImageFilterList;
-    QWidget * mViewEditWidgetDummyFade1, * mViewEditWidgetDummyFade2;
+    QWidget * mViewEditWidgetDummyFade1;
     bool mViewEditIsLoadingImageFilterList;
     bool mViewEditImageFilterListIsDirty;
     QGraphicsOpacityEffect * mViewEditContainerInputZoomOpacityEffect, * mViewEditContainerOutputZoomOpacityEffect;
