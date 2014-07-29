@@ -10,4 +10,7 @@
     <qresource prefix="/anitools/other">
         <file alias="cmykProfile">resources/other/ISOcoated_v2_eci.icc</file>
     </qresource>
+    <qresource prefix="/anitools/style">
+        <file alias="style.css">resources/style/style.css</file>
+    </qresource>
 </RCC>

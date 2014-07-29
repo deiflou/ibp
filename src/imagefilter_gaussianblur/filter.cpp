@@ -60,7 +60,7 @@ QImage Filter::process(const QImage &inputImage)
     cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
     cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
 
-    double sigma = (mRadius + 1.0) / 3.0;
+    double sigma = (mRadius + .5) / 2.45;
     cv::GaussianBlur(msrc, mdst, cv::Size(0, 0), sigma);
 
     return i;

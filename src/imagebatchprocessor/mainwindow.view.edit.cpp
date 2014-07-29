@@ -21,6 +21,7 @@
 
 #include <QScrollBar>
 #include <QGraphicsOpacityEffect>
+#include <QDebug>
 #include <math.h>
 
 #include "mainwindow.h"
@@ -71,9 +72,18 @@ void MainWindow::viewEditLoad()
     // Widget Dummy Fade
     mViewEditWidgetDummyFade1 = new QWidget(this);
     mViewEditWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
+    QColor buttonColor = this->palette().color(QPalette::Button);
+    QString buttonColorStr = QString::number(buttonColor.red()) + "," +
+                             QString::number(buttonColor.green()) + "," +
+                             QString::number(buttonColor.blue());
     mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
                                              "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-                                             "stop:0 rgba(0, 0, 0, 0), stop:1 palette(button)); }");
+                                             "stop:0 rgba(" + buttonColorStr + ", 0.),"
+                                             "stop:.2 rgba(" + buttonColorStr + ", .02),"
+                                             "stop:.4 rgba(" + buttonColorStr + ", .11),"
+                                             "stop:.6 rgba(" + buttonColorStr + ", .37),"
+                                             "stop:.8 rgba(" + buttonColorStr + ", .78),"
+                                             "stop:1 rgba(" + buttonColorStr + ", 1.)); }");
     mViewEditWidgetDummyFade1->setAutoFillBackground(true);
 
 

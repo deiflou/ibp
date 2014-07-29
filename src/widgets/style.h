@@ -19,49 +19,15 @@
 **
 ****************************************************************************/
 
-#include <QMessageBox>
 
-#include "imagebutton.h"
-#include "filedialog.h"
-#include "../imgproc/freeimage.h"
+#ifndef ANITOOLS_WIDGETS_STYLE_H
+#define ANITOOLS_WIDGETS_STYLE_H
 
 namespace anitools {
 namespace widgets {
 
-using namespace anitools::imgproc;
-
-ImageButton::ImageButton(QWidget *parent) :
-    ToolButtonEx(parent)
-{
-    setExtraDataType(Image);
-    setExtraDataFlags(CheckerboardBackground);
-
-    connect(this, SIGNAL(clicked()), this, SLOT(On_Clicked()));
-}
-
-void ImageButton::setImage(const QImage & i)
-{
-    if (i == image())
-        return;
-    ToolButtonEx::setImage(i);
-    emit imageChanged(i);
-}
-
-void ImageButton::On_Clicked()
-{
-    QString fileName;
-    fileName = getOpenFileName(this, "images", freeimageGetOpenFilterString());
-    if (fileName.isEmpty())
-        return;
-
-    QImage img = freeimageLoadAs32Bits(fileName, true);
-    if (img.isNull())
-    {
-        QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
-        return;
-    }
-
-    setImage(img);
-}
+void setAnitoolsStyle();
 
 }}
+
+#endif // ANITOOLS_WIDGETS_STYLE_H

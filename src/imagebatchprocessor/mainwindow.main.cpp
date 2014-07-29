@@ -166,19 +166,26 @@ void MainWindow::mainLoad()
     mMainWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
     mMainWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
                                          "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-                                         "stop:0 rgba(0, 0, 0, .4), stop:.2 rgba(0, 0, 0, .32)"
-                                         ", stop:.4 rgba(0, 0, 0, .16), stop:.6 rgba(0, 0, 0, .05)"
-                                         ", stop:.8 rgba(0, 0, 0, .01), stop:1 rgba(0, 0, 0, .0)); }");
+                                         "stop:0 rgba(0, 0, 0, .4),"
+                                         "stop:.2 rgba(0, 0, 0, .32),"
+                                         "stop:.4 rgba(0, 0, 0, .16),"
+                                         "stop:.6 rgba(0, 0, 0, .05),"
+                                         "stop:.8 rgba(0, 0, 0, .01),"
+                                         "stop:1 rgba(0, 0, 0, .0)); }");
     mMainWidgetDummyFade1->setAutoFillBackground(true);
+
     // Image Filter Plugin Loader
     mMainImageFilterPluginLoader.load(QApplication::applicationDirPath() + "/plugins");
+
     // General
     qApp->installEventFilter(this);
+
     // File System Watcher Image Filter List Pressets
     mMainWatcherImageFilterListPresets = new QFileSystemWatcher(this);
-    mMainWatcherImageFilterListPresets->addPath(QApplication::applicationDirPath() + "/presets/image filter list");
+    mMainWatcherImageFilterListPresets->addPath(QApplication::applicationDirPath() + "/presets/imagefilterlists");
     connect(mMainWatcherImageFilterListPresets, SIGNAL(directoryChanged(QString)),
             this, SLOT(On_mMainWatcherImageFilterListPresets_directoryChanged(QString)));
+
     // Image Filter List Pressets
     mainReloadImageFilterListPresets();
 }
@@ -197,7 +204,7 @@ void MainWindow::mainUnload()
 
 void MainWindow::mainReloadImageFilterListPresets()
 {
-    QDir dir(QApplication::applicationDirPath() + "/presets/image filter list");
+    QDir dir(QApplication::applicationDirPath() + "/presets/imagefilterlists");
     if (!dir.exists())
         return;
 

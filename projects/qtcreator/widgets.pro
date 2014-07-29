@@ -59,7 +59,9 @@ SOURCES += \
     ../../src/widgets/outputlevelsslider.cpp \
     ../../src/widgets/outputlevelswidget.cpp \
     ../../src/widgets/anchorpositionbox.cpp \
-    ../../src/widgets/curves.cpp
+    ../../src/widgets/curves.cpp \
+    ../../src/widgets/style.cpp \
+    ../../src/widgets/filedialog.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -80,7 +82,9 @@ HEADERS += \
     ../../src/widgets/outputlevelsslider.h \
     ../../src/widgets/outputlevelswidget.h \
     ../../src/widgets/anchorpositionbox.h \
-    ../../src/widgets/curves.h
+    ../../src/widgets/curves.h \
+    ../../src/widgets/style.h \
+    ../../src/widgets/filedialog.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
@@ -91,3 +95,6 @@ FORMS += \
     ../../src/widgets/affinetransformationlist.ui \
     ../../src/widgets/inputlevelswidget.ui \
     ../../src/widgets/outputlevelswidget.ui
+
+OTHER_FILES += \
+    ../../src/widgets/resources/style/style.css

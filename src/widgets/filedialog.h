@@ -19,49 +19,28 @@
 **
 ****************************************************************************/
 
-#include <QMessageBox>
+#ifndef ANITOOLS_WIDGETS_FILEDIALOG_H
+#define ANITOOLS_WIDGETS_FILEDIALOG_H
 
-#include "imagebutton.h"
-#include "filedialog.h"
-#include "../imgproc/freeimage.h"
+#include <QString>
+#include <QWidget>
+#include <QFileDialog>
 
 namespace anitools {
 namespace widgets {
 
-using namespace anitools::imgproc;
+QString getOpenFileName(QWidget * parent = 0,
+                        const QString & fileType = QString(),
+                        const QString & filter = QString(),
+                        QString * selectedFilter = 0,
+                        QFileDialog::Options options = 0);
 
-ImageButton::ImageButton(QWidget *parent) :
-    ToolButtonEx(parent)
-{
-    setExtraDataType(Image);
-    setExtraDataFlags(CheckerboardBackground);
-
-    connect(this, SIGNAL(clicked()), this, SLOT(On_Clicked()));
-}
-
-void ImageButton::setImage(const QImage & i)
-{
-    if (i == image())
-        return;
-    ToolButtonEx::setImage(i);
-    emit imageChanged(i);
-}
-
-void ImageButton::On_Clicked()
-{
-    QString fileName;
-    fileName = getOpenFileName(this, "images", freeimageGetOpenFilterString());
-    if (fileName.isEmpty())
-        return;
-
-    QImage img = freeimageLoadAs32Bits(fileName, true);
-    if (img.isNull())
-    {
-        QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
-        return;
-    }
-
-    setImage(img);
-}
+QString getSaveFileName(QWidget * parent = 0,
+                        const QString & fileType = QString(),
+                        const QString & filter = QString(),
+                        QString * selectedFilter = 0,
+                        QFileDialog::Options options = 0);
 
 }}
+
+#endif // ANITOOLS_WIDGETS_FILEDIALOG_H

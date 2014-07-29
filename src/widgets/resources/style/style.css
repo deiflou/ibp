@@ -1,0 +1,77 @@
+QToolTip {
+	color: rgb(128, 128, 128);
+	background-color: palette(dark);
+        border: 1px solid palette(shadow);
+	padding: 0px 5px;
+}
+
+.cFlatOptionButton:!checked
+{
+	background-color:  palette(dark);
+}
+.cFlatOptionButton:!checked:pressed
+{
+	background-color:  palette(shadow);
+}
+.cFlatOptionButton:checked
+{
+	background-color:  palette(highlight);
+	color: palette(highlighted-text);
+}
+.cFlatOptionButton:checked:pressed
+{
+	background-color:  palette(shadow);
+	color: palette(button-text);
+}
+.cFlatOptionButton:disabled
+{
+	background-color: palette(dark);
+	color: palette(mid);
+}
+.cFlatOptionButton
+{
+	padding: 1px 4px 1px 4px;
+	margin: 0px;
+	spacing: 0px;
+	border-radius: 1px;
+}
+
+QScrollBar
+{
+    border: 0;
+    background: palette(dark);
+    margin: 0;
+    padding: 0;
+}
+QScrollBar:horizontal
+{
+    height: 5px;
+}
+QScrollBar:vertical
+{
+    width: 5px;
+}
+QScrollBar::handle
+{
+    border-radius:1px;
+}
+QScrollBar::handle:horizontal
+{
+    background: palette(highlight);
+    min-width:20px;
+}
+QScrollBar::handle:vertical
+{
+    background: palette(highlight);
+    min-height:20px;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal,
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical
+{
+    width:0;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+    background: palette(dark);
+}

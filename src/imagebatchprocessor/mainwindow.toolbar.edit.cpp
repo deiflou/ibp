@@ -30,8 +30,10 @@
 #include "ui_mainwindow.h"
 #include "../imgproc/freeimage.h"
 #include "../misc/configurationmanager.h"
+#include "../widgets/filedialog.h"
 
 using namespace anitools::misc;
+using namespace anitools::widgets;
 
 void MainWindow::toolbarEditLoad()
 {
@@ -246,14 +248,13 @@ void MainWindow::toolbarEditReloadImageFilterListPresets()
 void MainWindow::on_mToolbarEditButtonLoadImage_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, QString(), QString(), freeimageGetOpenFilterString());
-    if (fileName.isEmpty()) return;
+    fileName = getOpenFileName(this, "images", freeimageGetOpenFilterString());
+
+    if (fileName.isEmpty())
+        return;
 
     if (!viewEditLoadInputImage(fileName))
-    {
         QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
-        return;
-    }
 }
 
 void MainWindow::on_mToolbarEditButtonLoadImage_menuButtonPressed()
@@ -274,8 +275,10 @@ void MainWindow::on_mToolbarEditButtonLoadImage_menuButtonPressed()
 void MainWindow::on_mToolbarEditButtonSaveImage_clicked()
 {
     QString fileName, filter;
-    fileName = QFileDialog::getSaveFileName(this, QString(), QString(), freeimageGetSaveFilterString(), &filter);
-    if (fileName.isEmpty()) return;
+    fileName = getSaveFileName(this, "images", freeimageGetSaveFilterString(), &filter);
+
+    if (fileName.isEmpty())
+        return;
 
     if (!viewEditSaveOutputImage(fileName, filter))
         QMessageBox::information(this, QString(), tr("An error has happen while saving the file to disk."));
@@ -290,10 +293,11 @@ void MainWindow::on_mToolbarEditButtonLoadFilters_clicked()
                 return;
 
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, QString(), QString(),
-                                            tr("Anitools Image Filter List (*.ifl);;") +
-                                            tr("All Files (*)"));
-    if (fileName.isEmpty()) return;
+    fileName = getOpenFileName(this, "imagefilterlists", tr("Anitools Image Filter List (*.ifl);;") +
+                                                         tr("All Files (*)"));
+
+    if (fileName.isEmpty())
+        return;
 
 
     if (!viewEditLoadImageFilterList(fileName))
@@ -333,16 +337,20 @@ void MainWindow::On_mToolbarEditButtonLoadFiltersAction_triggered()
 bool MainWindow::on_mToolbarEditButtonSaveFilters_clicked()
 {
     QString name, description, fileName;
+
     name = QInputDialog::getText(this, QString(), tr("Write a name for this image filter list."));
     if (name.isNull())
         return false;
+
     description = QInputDialog::getText(this, QString(), tr("Write a description for this image filter list."));
     if (description.isNull())
         return false;
-    fileName = QFileDialog::getSaveFileName(this, QString(), QString(),
-                                            tr("Anitools Image Filter List (*.ifl);;") +
-                                            tr("All Files (*)"));
-    if (fileName.isEmpty()) return false;
+
+    fileName = getSaveFileName(this, "imagefilterlists", tr("Anitools Image Filter List (*.ifl);;") +
+                                                         tr("All Files (*)"));
+
+    if (fileName.isEmpty())
+        return false;
 
     mViewEditImageFilterList.setName(name);
     mViewEditImageFilterList.setDescription(description);

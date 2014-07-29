@@ -59,8 +59,8 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-    double sigmaS = (mRadius + 1.0) / 3.;
-    double sigmaR = (100 - mEdgePreservation) * 255. / 100.;
+    double sigmaS = (mRadius + .5) / 2.45;
+    double sigmaR = (100 - mEdgePreservation) * 255. / 100. * 2;
 
     cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
     cv::Mat msrcbgr(msrc.rows, msrc.cols, CV_8UC3);
