@@ -31,6 +31,8 @@ win32 {
     }
 }
 
+include(3rdparty.pri)
+
 SOURCES += \
     ../../src/plugins/imagefilterpluginloader.cpp
 

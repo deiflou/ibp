@@ -33,6 +33,7 @@ win32 {
     }
 }
 
+include(3rdparty.pri)
 LIBS += -lFreeImage -llcms2
 
 SOURCES += \

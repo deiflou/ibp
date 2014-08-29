@@ -20,6 +20,8 @@ TEMPLATE = lib
 
 TARGET = anitools.imagefilter.morphology
 
+include(3rdparty.pri)
+
 win32 {
     CONFIG(debug, debug|release) {
         DLLDESTDIR = ../../bin/win32/debug/plugins

@@ -37,54 +37,16 @@ using namespace anitools::widgets;
 
 void MainWindow::toolbarEditLoad()
 {
-    // Load Image Button
-    ui->mToolbarEditButtonLoadImage->setText(tr("Load Image"));
-    ui->mToolbarEditButtonLoadImage->setIcon(QIcon(":/imagebatchprocessor/icons/loadImage"));
-    ui->mToolbarEditButtonLoadImage->setIconSize(QSize(22, 22));
-    ui->mToolbarEditButtonLoadImage->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    ui->mToolbarEditButtonLoadImage->setAutoRaise(true);
-    ui->mToolbarEditButtonLoadImage->setPopupMode(QToolButton::DelayedPopup);
-    ui->mToolbarEditButtonLoadImage->setTextElideMode(Qt::ElideMiddle);
-    ui->mToolbarEditButtonLoadImage->setMaximumTextWidth(100);
-
     // Save Image Button
     ui->mToolbarEditButtonSaveImage->setEnabled(!mViewEditOutputImage.isNull());
 
-    // Image Folder List PopUp
-    mToolbarEditImageFolderListPopUp = new ImageFolderListPopUp(this);
-    mToolbarEditImageFolderListPopUp->hide();
-    connect(mToolbarEditImageFolderListPopUp, SIGNAL(fileSelected(QString)),
-            this, SLOT(On_mToolbarEditImageFolderListPopUp_fileSelected(QString)));
-    connect(mToolbarEditImageFolderListPopUp, SIGNAL(contentsChanged()),
-            this, SLOT(On_mToolbarEditImageFolderListPopUp_contentsChanged()));
-    mToolbarEditImageFolderListPopUp->installEventFilter(this);
-
     // Add Filter Button
-    ui->mToolbarEditButtonAddFilter->setText("");
-    QIcon mToolbarEditButtonAddFilterIcon;
-    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilter");
-    mToolbarEditButtonAddFilterIcon.addFile(":/imagebatchprocessor/icons/addImageFilterDisabled",
-                                            QSize(), QIcon::Disabled);
-    ui->mToolbarEditButtonAddFilter->setIcon(mToolbarEditButtonAddFilterIcon);
-    ui->mToolbarEditButtonAddFilter->setIconSize(QSize(22, 22));
-    ui->mToolbarEditButtonAddFilter->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    ui->mToolbarEditButtonAddFilter->setAutoRaise(true);
-    ui->mToolbarEditButtonAddFilter->setPopupMode(QToolButton::InstantPopup);
     if (mMainImageFilterPluginLoader.count() > 0)
         toolbarEditPopulateAddFilterMenu();
     else
         ui->mToolbarEditButtonAddFilter->setEnabled(false);
 
     // Load Filters Button
-    ui->mToolbarEditButtonLoadFilters->setText("");
-    QIcon mToolbarEditButtonLoadFiltersIcon;
-    mToolbarEditButtonLoadFiltersIcon.addFile(":/imagebatchprocessor/icons/loadImageFilters");
-    mToolbarEditButtonLoadFiltersIcon.addFile(":/imagebatchprocessor/icons/loadImageFiltersDisabled",
-                                              QSize(), QIcon::Disabled);
-    ui->mToolbarEditButtonLoadFilters->setIcon(mToolbarEditButtonLoadFiltersIcon);
-    ui->mToolbarEditButtonLoadFilters->setIconSize(QSize(22, 22));
-    ui->mToolbarEditButtonLoadFilters->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    ui->mToolbarEditButtonLoadFilters->setAutoRaise(true);
     if (mMainImageFilterPluginLoader.count() == 0)
         ui->mToolbarEditButtonLoadFilters->setEnabled(false);
     toolbarEditReloadImageFilterListPresets();
@@ -97,61 +59,6 @@ void MainWindow::toolbarEditLoad()
 void MainWindow::toolbarEditUnload()
 {
 
-}
-
-void MainWindow::toolbarEditEventFilter(QObject *o, QEvent *e)
-{
-    if (o == this)
-    {
-        if (e->type() == QEvent::Resize)
-        {
-            QRect r;
-
-            // Toolbar Edit
-            r = rect();
-            r.adjust(32, ui->mToolbarEditButtonLoadImage->mapTo(this,
-                         ui->mToolbarEditButtonLoadImage->rect().bottomLeft()).y() - 4 + 1, -32, -32);
-            mToolbarEditImageFolderListPopUp->move(r.topLeft());
-            mToolbarEditImageFolderListPopUp->resize(r.size());
-        }
-    }
-
-    if (e->type() == QEvent::MouseButtonPress)
-    {
-        if (mToolbarEditImageFolderListPopUp->isVisible())
-        {
-            QWidget * w = qobject_cast<QWidget*>(o);
-            QMouseEvent * me = (QMouseEvent*)e;
-            if (w && !mToolbarEditImageFolderListPopUp->rect().adjusted(0, ImageFolderListPopUp::arrowSize, 0, 0).
-                    contains(w->mapTo(this, me->pos()) - mToolbarEditImageFolderListPopUp->pos()))
-            {
-                if (w == ui->mToolbarEditButtonLoadImage)
-                {
-                    QStyleOptionToolButton opt;
-                    ui->mToolbarEditButtonLoadImage->initStyleOption(&opt);
-                    QRect r = ui->mToolbarEditButtonLoadImage->style()->subControlRect(QStyle::CC_ToolButton,
-                                                                                       &opt,
-                                                                                       QStyle::SC_ToolButtonMenu,
-                                                                                       this);
-                    if (r.contains(me->pos()))
-                        return;
-                }
-                mToolbarEditImageFolderListPopUp->hide();
-            }
-        }
-    }
-
-    if (o == mToolbarEditImageFolderListPopUp)
-    {
-        if (e->type() == QEvent::Show)
-        {
-            ui->mToolbarEditButtonLoadImage->setMenuButtonDown(true);
-        }
-        else if (e->type() == QEvent::Hide)
-        {
-            ui->mToolbarEditButtonLoadImage->setMenuButtonDown(false);
-        }
-    }
 }
 
 bool toolbarEditAddFilterActionSorter(QAction * a1, QAction * a2)
@@ -257,21 +164,6 @@ void MainWindow::on_mToolbarEditButtonLoadImage_clicked()
         QMessageBox::information(this, QString(), tr("The selected file has an unsupported format."));
 }
 
-void MainWindow::on_mToolbarEditButtonLoadImage_menuButtonPressed()
-{
-    if (mToolbarEditImageFolderListPopUp->isVisible())
-    {
-        mToolbarEditImageFolderListPopUp->hide();
-        return;
-    }
-    mToolbarEditImageFolderListPopUp->setArrowPos(
-                ui->mToolbarEditButtonLoadImage->mapTo(this,
-                QPoint(ui->mToolbarEditButtonLoadImage->width() >> 1, 0)).x() -
-                mToolbarEditImageFolderListPopUp->x());
-    mToolbarEditImageFolderListPopUp->raise();
-    mToolbarEditImageFolderListPopUp->show();
-}
-
 void MainWindow::on_mToolbarEditButtonSaveImage_clicked()
 {
     QString fileName, filter;
@@ -337,13 +229,16 @@ void MainWindow::On_mToolbarEditButtonLoadFiltersAction_triggered()
 bool MainWindow::on_mToolbarEditButtonSaveFilters_clicked()
 {
     QString name, description, fileName;
+    bool ok;
 
-    name = QInputDialog::getText(this, QString(), tr("Write a name for this image filter list."));
-    if (name.isNull())
+    name = QInputDialog::getText(this, QString(), tr("Write a name for this image filter list."), QLineEdit::Normal,
+                                 QString(), &ok);
+    if (!ok)
         return false;
 
-    description = QInputDialog::getText(this, QString(), tr("Write a description for this image filter list."));
-    if (description.isNull())
+    description = QInputDialog::getText(this, QString(), tr("Write a description for this image filter list."),
+                                        QLineEdit::Normal, QString(), &ok);
+    if (!ok)
         return false;
 
     fileName = getSaveFileName(this, "imagefilterlists", tr("Anitools Image Filter List (*.ifl);;") +
@@ -376,23 +271,6 @@ void MainWindow::on_mToolbarEditButtonHSplitter_toggled(bool checked)
     if (!checked)
         return;
     ui->mViewEditSplitterPreview->setOrientation(Qt::Horizontal);
-}
-
-void MainWindow::On_mToolbarEditImageFolderListPopUp_fileSelected(const QString &fileName)
-{
-    mToolbarEditImageFolderListPopUp->hide();
-    viewEditLoadInputImage(fileName);
-}
-
-void MainWindow::On_mToolbarEditImageFolderListPopUp_contentsChanged()
-{
-    if (mToolbarEditImageFolderListPopUp->countAvailableFiles() > 0)
-        ui->mToolbarEditButtonLoadImage->setPopupMode(QToolButton::MenuButtonPopup);
-    else
-    {
-        mToolbarEditImageFolderListPopUp->hide();
-        ui->mToolbarEditButtonLoadImage->setPopupMode(QToolButton::DelayedPopup);
-    }
 }
 
 void MainWindow::On_mToolbarEditButtonAddFilterAction_triggered()

@@ -105,32 +105,53 @@ void Curves::paintEvent(QPaintEvent *e)
     Q_UNUSED(e)
 
     QPainter p(this);
-    QRect r = this->rect();
-    QSize plotSize = r.size();
-    if (mShowBars) plotSize.setHeight(plotSize.height() - TOTAL_BAR_SIZE - SEPARATOR_SIZE);
+    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
+    QRect plotRect = r;
+    if (mShowBars)
+        plotRect.setHeight(plotRect.height() - TOTAL_BAR_SIZE - SEPARATOR_SIZE);
 
-    if (mSplineInterpolator && !mFunctionValuesCalculated) calculateFunctionValues();
+    if (mSplineInterpolator && !mFunctionValuesCalculated)
+        calculateFunctionValues();
 
     // overall background
-    p.fillRect(QRect(QPoint(0, 0), plotSize), palette().color(QPalette::Button));
+    //p.fillRect(QRect(QPoint(0, 0), plotSize), palette().color(QPalette::Button));
 
     // plot
-    if (plotSize.isValid())
+    if (plotRect.isValid())
     {
-        p.setClipRect(QRect(QPoint(0, 0), plotSize));
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        p.setPen(Qt::NoPen);
+        // shadow
+        p.setBrush(QColor(0, 0, 0, 32));
+        p.drawRoundedRect(plotRect.adjusted(-2, -1, 2, 3), 3, 3);
+        p.drawRoundedRect(plotRect.adjusted(-1, 0, 1, 2), 2, 2);
+        p.setBrush(QColor(0, 0, 0, 50));
+        p.drawRoundedRect(plotRect.adjusted(0, 1, 0, 1), 1, 1);
+        // plot
+        p.setClipRect(plotRect);
         // background
-        p.fillRect(QRect(QPoint(0, 0), plotSize), palette().color(QPalette::Dark));
+        p.setBrush(palette().color(QPalette::Dark).darker(150));
+        p.drawRoundedRect(r, 1, 1);
         // grid lines
+        p.setRenderHint(QPainter::Antialiasing, false);
         p.setPen(QPen(palette().color(QPalette::Mid), 1, Qt::DotLine));
-        p.drawLine(plotSize.width() * 0.25, 0, plotSize.width() * 0.25, plotSize.height());
-        p.drawLine(plotSize.width() * 0.50, 0, plotSize.width() * 0.50, plotSize.height());
-        p.drawLine(plotSize.width() * 0.75, 0, plotSize.width() * 0.75, plotSize.height());
-        p.drawLine(0, plotSize.height() * 0.25, plotSize.width(), plotSize.height() * 0.25);
-        p.drawLine(0, plotSize.height() * 0.50, plotSize.width(), plotSize.height() * 0.50);
-        p.drawLine(0, plotSize.height() * 0.75, plotSize.width(), plotSize.height() * 0.75);
+        p.drawLine(plotRect.left() + plotRect.width() * 0.25, plotRect.top(),
+                   plotRect.left() + plotRect.width() * 0.25, plotRect.top() + plotRect.height());
+        p.drawLine(plotRect.left() + plotRect.width() * 0.50, plotRect.top(),
+                   plotRect.left() + plotRect.width() * 0.50, plotRect.top() + plotRect.height());
+        p.drawLine(plotRect.left() + plotRect.width() * 0.75, plotRect.top(),
+                   plotRect.left() + plotRect.width() * 0.75, plotRect.top() + plotRect.height());
+        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.25,
+                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.25);
+        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.50,
+                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.50);
+        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.75,
+                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.75);
         // base line
         p.setRenderHint(QPainter::Antialiasing);
-        p.drawLine(0, plotSize.height(), plotSize.width(), 0);
+        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height(),
+                   plotRect.left() + plotRect.width(), plotRect.top());
 
         if (mSplineInterpolator)
         {
@@ -138,9 +159,10 @@ void Curves::paintEvent(QPaintEvent *e)
             QPen pen(palette().color(QPalette::Light), 1.5);
             pen.setCosmetic(true);
             p.setPen(pen);
-            p.setBrush(QColor(255, 255, 255, 16));
-            p.scale(plotSize.width(), -(plotSize.height()));
-            p.translate(0.0, -1.0);
+            p.setBrush(QColor(255, 255, 255, 12));
+            p.translate(LEFT_MARGIN, TOP_MARGIN);
+            p.scale(plotRect.width(), -(plotRect.height()));
+            p.translate(0, -1.0);
             p.drawPolygon(mPolygon);
             p.resetTransform();
 
@@ -151,8 +173,8 @@ void Curves::paintEvent(QPaintEvent *e)
             for (int i = 0; i < mSplineInterpolator->size(); i++)
             {
                 knot = mSplineInterpolator->knot(i);
-                knot.setX(knot.x() * (plotSize.width() - 1));
-                knot.setY(plotSize.height() - 1 - knot.y() * (plotSize.height() - 1));
+                knot.setX(knot.x() * (plotRect.width() - 1) + LEFT_MARGIN);
+                knot.setY(plotRect.height() - 1 - knot.y() * (plotRect.height() - 1) + TOP_MARGIN);
                 p.setPen(palette().color(QPalette::Shadow));
                 p.setBrush(i == mKnotSelected - 1 ? hlc : QColor(0, 0, 0, 64));
                 p.drawEllipse(QPointF(knot.x(), knot.y()), KNOT_RADIUS, KNOT_RADIUS);
@@ -171,23 +193,27 @@ void Curves::paintEvent(QPaintEvent *e)
     // bars
     if (mShowBars)
     {
+        QRect barsRect = r.adjusted(0, plotRect.height() + SEPARATOR_SIZE, 0, 0);
+        p.setRenderHint(QPainter::Antialiasing);
         p.setRenderHint(QPainter::SmoothPixmapTransform);
-        p.drawImage(QRect(0, this->height() - TOTAL_BAR_SIZE, this->width(), BAR_SIZE), mBar1);
-        p.drawImage(QRect(0, this->height() - BAR_SIZE, this->width(), BAR_SIZE), mBar2);
-        p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-    }
-
-    // border
-    p.setPen(palette().color(QPalette::Shadow));
-    p.drawRect(QRect(QPoint(0, 0), plotSize).adjusted(0, 0, -1, -1));
-    p.setPen(palette().color(QPalette::Light));
-    p.drawRect(QRect(QPoint(0, 0), plotSize).adjusted(1, 1, -2, -2));
-    if (mShowBars)
-    {
-        p.setPen(palette().color(QPalette::Shadow));
-        p.drawRect(0, this->height() - TOTAL_BAR_SIZE, this->width() - 1, TOTAL_BAR_SIZE - 1);
-        p.setPen(palette().color(QPalette::Light));
-        p.drawRect(1, this->height() - TOTAL_BAR_SIZE + 1, this->width() - 3, TOTAL_BAR_SIZE - 3);
+        p.setPen(Qt::NoPen);
+        // shadow
+        p.setBrush(QColor(0, 0, 0, 16));
+        p.drawRoundedRect(barsRect.adjusted(-2, -1, 2, 3), 3, 3);
+        p.drawRoundedRect(barsRect.adjusted(-1, 0, 1, 2), 2, 2);
+        p.drawRoundedRect(barsRect.adjusted(0, 1, 0, 1), 1, 1);
+        // top bar
+        p.setClipRect(barsRect.adjusted(0, 0, 0, -BAR_SIZE + 1));
+        p.setBrushOrigin(barsRect.left() - 1, barsRect.top() - 1);
+        QBrush b(mBar1);
+        b.setTransform(QTransform(barsRect.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
+        p.setBrush(b);
+        p.drawRoundedRect(barsRect, 1, 1);
+        // bottom bar
+        p.setClipRect(barsRect.adjusted(0, BAR_SIZE, 0, 0));
+        b.setTextureImage(mBar2);
+        p.setBrush(b);
+        p.drawRoundedRect(barsRect, 1, 1);
     }
 }
 

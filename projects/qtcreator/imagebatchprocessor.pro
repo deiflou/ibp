@@ -20,6 +20,8 @@ QT += widgets
 TARGET = anitools.imagebatchprocessor
 TEMPLATE = app
 
+include(3rdparty.pri)
+
 win32 {
     QT += winextras
     CONFIG(debug, debug|release) {
@@ -47,13 +49,10 @@ SOURCES += ../../src/imagebatchprocessor/main.cpp \
            ../../src/imagebatchprocessor/mainwindow.main.cpp \
            ../../src/imagebatchprocessor/mainwindow.toolbar.batch.cpp \
            ../../src/imagebatchprocessor/mainwindow.view.batch.cpp \
-           ../../src/imagebatchprocessor/mainwindow.view.edit.cpp \
-           ../../src/imagebatchprocessor/imagefolderlistpopup.cpp
+           ../../src/imagebatchprocessor/mainwindow.view.edit.cpp
 
-HEADERS += ../../src/imagebatchprocessor/mainwindow.h \
-           ../../src/imagebatchprocessor/imagefolderlistpopup.h
+HEADERS += ../../src/imagebatchprocessor/mainwindow.h
 
-FORMS += ../../src/imagebatchprocessor/mainwindow.ui \
-         ../../src/imagebatchprocessor/imagefolderlistpopup.ui
+FORMS += ../../src/imagebatchprocessor/mainwindow.ui
 
 RESOURCES += ../../src/imagebatchprocessor/imagebatchprocessor.qrc

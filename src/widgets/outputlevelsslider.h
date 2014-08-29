@@ -33,7 +33,7 @@ class OutputLevelsSlider : public QWidget
 
 private:
     static const int LEFT_MARGIN = 4;
-    static const int TOP_MARGIN = 0;
+    static const int TOP_MARGIN = 1;
     static const int RIGHT_MARGIN = 4;
     static const int BOTTOM_MARGIN = 6;
     static const int HANDLE_HEIGHT = 8;

@@ -37,6 +37,8 @@ win32 {
     }
 }
 
+include(3rdparty.pri)
+
 INCLUDEPATH += ../../src/widgets
 
 SOURCES += \

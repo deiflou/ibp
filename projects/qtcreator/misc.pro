@@ -31,6 +31,8 @@ win32 {
     }
 }
 
+include(3rdparty.pri)
+
 SOURCES += \
     ../../src/misc/nativeeventfilter.cpp \
     ../../src/misc/basesplineinterpolator.cpp \

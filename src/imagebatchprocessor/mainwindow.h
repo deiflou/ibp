@@ -63,8 +63,6 @@ private:
     Ui::MainWindow *ui;
 
     // Main
-    QWidget * mMainWidgetDummyFade1;
-
     ImageFilterPluginLoader mMainImageFilterPluginLoader;
     QFileSystemWatcher * mMainWatcherImageFilterListPresets;
     struct MainImageFilterListPresetsInfo
@@ -83,12 +81,10 @@ private:
     void mainReloadImageFilterListPresets();
 
     // Toolbar Edit
-    ImageFolderListPopUp * mToolbarEditImageFolderListPopUp;
     QMenu * mToolbarEditButtonLoadFiltersMenu;
 
     void toolbarEditLoad();
     void toolbarEditUnload();
-    void toolbarEditEventFilter(QObject *o, QEvent *e);
 
     void toolbarEditPopulateAddFilterMenu();
 
@@ -103,7 +99,6 @@ private:
     FIBITMAP * mViewEditInputImageFI;
     QString mViewEditInputImageFilename;
     ImageFilterList mViewEditImageFilterList;
-    QWidget * mViewEditWidgetDummyFade1;
     bool mViewEditIsLoadingImageFilterList;
     bool mViewEditImageFilterListIsDirty;
     QGraphicsOpacityEffect * mViewEditContainerInputZoomOpacityEffect, * mViewEditContainerOutputZoomOpacityEffect;
@@ -131,7 +126,6 @@ private slots:
 
     // Toolbar Edit
     void on_mToolbarEditButtonLoadImage_clicked();
-    void on_mToolbarEditButtonLoadImage_menuButtonPressed();
     void on_mToolbarEditButtonSaveImage_clicked();
 
     void on_mToolbarEditButtonVSplitter_toggled(bool checked);
@@ -140,9 +134,6 @@ private slots:
     void on_mToolbarEditButtonLoadFilters_clicked();
     void On_mToolbarEditButtonLoadFiltersAction_triggered();
     bool on_mToolbarEditButtonSaveFilters_clicked();
-
-    void On_mToolbarEditImageFolderListPopUp_fileSelected(const QString & fileName);
-    void On_mToolbarEditImageFolderListPopUp_contentsChanged();
 
     void On_mToolbarEditButtonAddFilterAction_triggered();
 

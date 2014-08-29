@@ -69,24 +69,7 @@ void MainWindow::viewEditLoad()
     ui->mViewEditSplitterMain->setStretchFactor(0, 1);
     ui->mViewEditSplitterMain->setStretchFactor(1, 0);
 
-    // Widget Dummy Fade
-    mViewEditWidgetDummyFade1 = new QWidget(this);
-    mViewEditWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
-    QColor buttonColor = this->palette().color(QPalette::Button);
-    QString buttonColorStr = QString::number(buttonColor.red()) + "," +
-                             QString::number(buttonColor.green()) + "," +
-                             QString::number(buttonColor.blue());
-    mViewEditWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
-                                             "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-                                             "stop:0 rgba(" + buttonColorStr + ", 0.),"
-                                             "stop:.2 rgba(" + buttonColorStr + ", .02),"
-                                             "stop:.4 rgba(" + buttonColorStr + ", .11),"
-                                             "stop:.6 rgba(" + buttonColorStr + ", .37),"
-                                             "stop:.8 rgba(" + buttonColorStr + ", .78),"
-                                             "stop:1 rgba(" + buttonColorStr + ", 1.)); }");
-    mViewEditWidgetDummyFade1->setAutoFillBackground(true);
-
-
+    // Event filters
     ui->mViewEditWidgetListScrollArea->installEventFilter(this);
     ui->mViewEditWidgetList->installEventFilter(this);
 
@@ -191,12 +174,6 @@ void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)
                                                 ui->mViewEditWidgetListScrollArea->verticalScrollBar()->width() : 0));
         }
 
-        QRect r = ui->mViewEditWidgetList->rect();
-
-        mViewEditWidgetDummyFade1->move(this->width() - ui->mViewEditWidgetListScrollArea->width(),
-                                        this->height() - 24);
-        mViewEditWidgetDummyFade1->resize(r.width(), 24);
-
         return;
     }
     if (o == ui->mViewEditContainerInputZoom)
@@ -233,7 +210,6 @@ bool MainWindow::viewEditLoadInputImage(const QString &fileName)
     mViewEditInputImageFilename = fileName;
 
     QFileInfo fi(fileName);
-    ui->mToolbarEditButtonLoadImage->setText(fi.fileName());
     ui->mToolbarEditButtonLoadImage->setToolTip("<p style='white-space:pre;'>" +
                                                 tr("Load Image") + "<br/><i>" +
                                                 tr("Current") + ": " + fi.fileName() + "</i></p>");
@@ -243,8 +219,6 @@ bool MainWindow::viewEditLoadInputImage(const QString &fileName)
     ui->mViewEditSliderInputZoom->setEnabled(true);
     ui->mViewEditComboInputZoom->setEnabled(true);
     mViewEditImageFilterList.setInputImage(mViewEditInputImage);
-
-    mToolbarEditImageFolderListPopUp->setFolder(QFileInfo(fileName).path());
 
     return true;
 }

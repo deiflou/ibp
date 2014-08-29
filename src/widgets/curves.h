@@ -81,6 +81,11 @@ private:
     static const int TOTAL_BAR_SIZE = BAR_SIZE * 2;
     static const int SEPARATOR_SIZE = 5;
 
+    static const int LEFT_MARGIN = 2;
+    static const int TOP_MARGIN = 1;
+    static const int RIGHT_MARGIN = 2;
+    static const int BOTTOM_MARGIN = 3;
+
     SplineInterpolator * mSplineInterpolator;
     InterpolationMode mInterpolationMode;
 

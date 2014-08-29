@@ -35,7 +35,7 @@ private:
     static const double LOG_1OVER2 = -0.69314718055994530941723212145818;
     static const double POW_1OVER2_TEN = 0.0009765625;
     static const int LEFT_MARGIN = 4;
-    static const int TOP_MARGIN = 0;
+    static const int TOP_MARGIN = 1;
     static const int RIGHT_MARGIN = 4;
     static const int BOTTOM_MARGIN = 6;
     static const int HANDLE_HEIGHT = 8;

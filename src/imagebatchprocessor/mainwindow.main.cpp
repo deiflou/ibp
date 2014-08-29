@@ -37,17 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow),
     // Main
-    mMainWidgetDummyFade1(0),
     mMainWatcherImageFilterListPresets(0),
     // Toolbar Edit
-    mToolbarEditImageFolderListPopUp(0),
     mToolbarEditButtonLoadFiltersMenu(0),
     // View Edit
     mViewEditInputImage(),
     mViewEditOutputImage(),
     mViewEditInputImageFI(0),
     mViewEditInputImageFilename(),
-    mViewEditWidgetDummyFade1(0),
     mViewEditIsLoadingImageFilterList(false),
     mViewEditImageFilterListIsDirty(false)
 
@@ -76,12 +73,7 @@ void MainWindow::resizeEvent(QResizeEvent *e)
 {
     Q_UNUSED(e);
 
-    toolbarEditEventFilter((QObject*)this, (QEvent*)e);
     viewEditEventFilter((QObject*)this, (QEvent*)e);
-
-    // Dummy fade widget
-    mMainWidgetDummyFade1->move(0, ui->mMainContainerTop->height());
-    mMainWidgetDummyFade1->resize(this->width(), 16);
 
     // Window size & state
     if (this->windowState() == Qt::WindowNoState)
@@ -153,7 +145,6 @@ void MainWindow::showEvent(QShowEvent *e)
 
 bool MainWindow::eventFilter(QObject *o, QEvent *e)
 {
-    toolbarEditEventFilter(o, e);
     viewEditEventFilter(o, e);
 
     return QWidget::eventFilter(o, e);
@@ -161,19 +152,6 @@ bool MainWindow::eventFilter(QObject *o, QEvent *e)
 
 void MainWindow::mainLoad()
 {
-    // Widgets Dummy Fade
-    mMainWidgetDummyFade1 = new QWidget(this);
-    mMainWidgetDummyFade1->setAttribute(Qt::WA_TransparentForMouseEvents);
-    mMainWidgetDummyFade1->setStyleSheet("QWidget { background-color:"
-                                         "qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,"
-                                         "stop:0 rgba(0, 0, 0, .4),"
-                                         "stop:.2 rgba(0, 0, 0, .32),"
-                                         "stop:.4 rgba(0, 0, 0, .16),"
-                                         "stop:.6 rgba(0, 0, 0, .05),"
-                                         "stop:.8 rgba(0, 0, 0, .01),"
-                                         "stop:1 rgba(0, 0, 0, .0)); }");
-    mMainWidgetDummyFade1->setAutoFillBackground(true);
-
     // Image Filter Plugin Loader
     mMainImageFilterPluginLoader.load(QApplication::applicationDirPath() + "/plugins");
 
@@ -237,7 +215,7 @@ void MainWindow::on_mMainButtonEdit_toggled(bool checked)
 {
     if (!checked)
         return;
-    ui->mMainContainerToolbars->setFixedWidth(ui->mToolbarEdit->minimumSizeHint().width());
+    ui->mMainContainerToolbars->setFixedHeight(ui->mToolbarEdit->minimumSizeHint().height());
     ui->mMainContainerToolbars->setCurrentWidget(ui->mToolbarEdit);
     ui->mMainContainerViews->setCurrentWidget(ui->mViewEdit);
 }
@@ -246,7 +224,7 @@ void MainWindow::on_mMainButtonBatch_toggled(bool checked)
 {
     if (!checked)
         return;
-    ui->mMainContainerToolbars->setFixedWidth(ui->mToolbarBatch->minimumSizeHint().width());
+    ui->mMainContainerToolbars->setFixedHeight(ui->mToolbarBatch->minimumSizeHint().height());
     ui->mMainContainerToolbars->setCurrentWidget(ui->mToolbarBatch);
     ui->mMainContainerViews->setCurrentWidget(ui->mViewBatch);
 }

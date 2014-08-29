@@ -38,11 +38,11 @@ InputLevelsSlider::InputLevelsSlider(QWidget *parent) :
     mHandlePressed(0),
     mHandleSelected(1)
 {
-    QGraphicsDropShadowEffect * shadow = new QGraphicsDropShadowEffect();
-    shadow->setOffset(0, 1);
-    shadow->setBlurRadius(12);
-    shadow->setColor(QColor(0, 0, 0, 128));
-    this->setGraphicsEffect(shadow);
+//    QGraphicsDropShadowEffect * shadow = new QGraphicsDropShadowEffect();
+//    shadow->setOffset(0, 1);
+//    shadow->setBlurRadius(12);
+//    shadow->setColor(QColor(0, 0, 0, 128));
+//    this->setGraphicsEffect(shadow);
 
     setFocusPolicy(Qt::StrongFocus);
 
@@ -137,15 +137,23 @@ void InputLevelsSlider::paintEvent(QPaintEvent *e)
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.setPen(Qt::NoPen);
-    p.setClipRect(r.adjusted(0, 0, 0, -r.center().y()));
+    // paint back shadow
+    p.setBrush(QColor(0, 0, 0, 16));
+    p.drawRoundedRect(r.adjusted(-2, -1, 2, 3), 3, 3);
+    p.drawRoundedRect(r.adjusted(-1, 0, 1, 2), 2, 2);
+    p.drawRoundedRect(r.adjusted(0, 1, 0, 1), 1, 1);
+    // paint identity function
+    p.setClipRect(r.adjusted(0, 0, 0, -r.center().y() + 1));
     p.setBrush(grd);
     p.drawRoundedRect(r, 1, 1);
+    // paint function
     p.setClipRect(r.adjusted(0, r.center().y(), 0, 0));
     p.setBrushOrigin(LEFT_MARGIN - 1, TOP_MARGIN - 1);
     QBrush b(mFunction);
     b.setTransform(QTransform(r.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
     p.setBrush(b);
     p.drawRoundedRect(r, 1, 1);
+
     p.setClipping(false);
     p.setRenderHint(QPainter::Antialiasing, false);
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);

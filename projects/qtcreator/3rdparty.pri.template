@@ -15,30 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-QT += widgets
-
-TEMPLATE = lib
-
-TARGET = anitools.imagefilter.flip
-
-include(3rdparty.pri)
-
 win32 {
-    CONFIG(debug, debug|release) {
-        DLLDESTDIR = ../../bin/win32/debug/plugins
-        LIBS += -L../../lib/win32/imgproc/debug -lanitools.imgproc
-    } else {
-        DLLDESTDIR = ../../bin/win32/release/plugins
-        LIBS += -L../../lib/win32/imgproc/release -lanitools.imgproc
-    }
+#opencv
+    INCLUDEPATH += 
+    LIBS += 
+
+#lcms2
+    INCLUDEPATH += 
+    LIBS += 
+
+#freeimage
+    INCLUDEPATH 
+    LIBS += 
+
+#eigen3
+    INCLUDEPATH 
 }
-
-SOURCES += ../../src/imagefilter_flip/filter.cpp \
-           ../../src/imagefilter_flip/main.cpp \
-           ../../src/imagefilter_flip/filterwidget.cpp
-
-HEADERS += ../../src/imagefilter_flip/filter.h \
-           ../../src/imagefilter_flip/filterwidget.h
-
-FORMS += ../../src/imagefilter_flip/filterwidget.ui
-

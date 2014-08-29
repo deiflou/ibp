@@ -23,6 +23,7 @@
 #include <QStyle>
 #include <QPalette>
 #include <QFile>
+#include <QFont>
 #include <QTextStream>
 
 #include "style.h"
@@ -33,6 +34,7 @@ namespace widgets {
 void setAnitoolsStyle()
 {
     static QPalette darkPalette;
+    static QFont font;
     static QString styleSheet = "";
     static bool isInitialized = false;
     if (!isInitialized)
@@ -49,7 +51,6 @@ void setAnitoolsStyle()
         darkPalette.setColor(QPalette::BrightText, Qt::red);
         darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
 
-        darkPalette.setColor(QPalette::Highlight, QColor(227, 0, 79));
         darkPalette.setColor(QPalette::Highlight, QColor(0, 180, 230));
         darkPalette.setColor(QPalette::HighlightedText, Qt::black);
 
@@ -65,10 +66,14 @@ void setAnitoolsStyle()
             QTextStream ts(&f);
             styleSheet = ts.readAll();
         }
+
+        font = qApp->font();
+        font.setPointSize(7);
     }
     qApp->setPalette(darkPalette);
     qApp->setStyleSheet(styleSheet);
     qApp->setStyle("fusion");
+    qApp->setFont(font);
 }
 
 }}
