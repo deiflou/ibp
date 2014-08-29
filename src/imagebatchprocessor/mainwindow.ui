@@ -52,7 +52,7 @@
 }
 #mMainContainerTop QToolButton:disabled, #mMainContainerTop QToolButton::menu-button:disabled
 {
-	background-color: palette(dark);
+	background-color: palette(button);
 	color: palette(mid);
 }
 #mMainContainerTop QToolButton, #mMainContainerTop QToolButton::menu-button

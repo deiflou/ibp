@@ -25,7 +25,7 @@
 #include <QMoveEvent>
 #include <QWindowStateChangeEvent>
 #include <QGraphicsDropShadowEffect>
-//#include <QDebug>
+#include <QDir>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"

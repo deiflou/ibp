@@ -31,7 +31,6 @@
 #include "../imgproc/imagefilterlist.h"
 #include "../plugins/imagefilterpluginloader.h"
 
-#include "imagefolderlistpopup.h"
 #include "../widgets/widgetlist.h"
 
 using namespace anitools::plugins;

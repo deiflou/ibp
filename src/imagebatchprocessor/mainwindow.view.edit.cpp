@@ -21,7 +21,8 @@
 
 #include <QScrollBar>
 #include <QGraphicsOpacityEffect>
-#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
 #include <math.h>
 
 #include "mainwindow.h"
