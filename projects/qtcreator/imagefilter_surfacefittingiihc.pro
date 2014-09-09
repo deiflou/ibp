@@ -35,7 +35,12 @@ win32 {
 LIBS += -lopencv_core300 -lopencv_imgproc300
 
 SOURCES += ../../src/imagefilter_surfacefittingiihc/filter.cpp \
-           ../../src/imagefilter_surfacefittingiihc/main.cpp
+           ../../src/imagefilter_surfacefittingiihc/main.cpp \
+    ../../src/imagefilter_surfacefittingiihc/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_surfacefittingiihc/filter.h
+HEADERS += ../../src/imagefilter_surfacefittingiihc/filter.h \
+    ../../src/imagefilter_surfacefittingiihc/filterwidget.h
+
+FORMS += \
+    ../../src/imagefilter_surfacefittingiihc/filterwidget.ui
 

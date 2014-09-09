@@ -23,10 +23,6 @@
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"
-#include "../imgproc/freeimage.h"
-#include "../widgets/toolbuttonex.h"
-
-using namespace anitools::widgets;
 
 FilterWidget::FilterWidget(QWidget *parent) :
     QWidget(parent),
@@ -34,10 +30,6 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
-    ui->mButtonImage->setExtraDataFlags(ToolButtonEx::ExtraDataFlags(ToolButtonEx::ImageStretched |
-                                                                     ToolButtonEx::ImageKeepAspectRatio |
-                                                                     ToolButtonEx::ImageStretchOnlyIfBiggerThanButton |
-                                                                     ToolButtonEx::CheckerboardBackground));
 }
 
 FilterWidget::~FilterWidget()
@@ -45,14 +37,14 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setImage(const QImage &i)
+void FilterWidget::setFeatureSize(int fs)
 {
-    if (i == ui->mButtonImage->image())
+    if (ui->mSpinFeatureSize->value() == fs)
         return;
     mEmitSignals = false;
-    ui->mButtonImage->setImage(i);
+    ui->mSpinFeatureSize->setValue(fs);
     mEmitSignals = true;
-    emit imageChanged(i);
+    emit featureSizeChanged(fs);
 }
 
 void FilterWidget::setOutputMode(Filter::OutputMode om)
@@ -69,9 +61,19 @@ void FilterWidget::setOutputMode(Filter::OutputMode om)
     emit outputModeChanged(om);
 }
 
-void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)
+
+void FilterWidget::on_mSliderFeatureSize_valueChanged(int value)
 {
-    emit imageChanged(i);
+    ui->mSpinFeatureSize->setValue(value);
+    if (mEmitSignals)
+        emit featureSizeChanged(value);
+}
+
+void FilterWidget::on_mSpinFeatureSize_valueChanged(int arg1)
+{
+    ui->mSliderFeatureSize->setValue(arg1);
+    if (mEmitSignals)
+        emit featureSizeChanged(arg1);
 }
 
 void FilterWidget::on_mButtonOutputModeCorrectedImage_toggled(bool c)

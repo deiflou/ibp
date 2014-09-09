@@ -13,20 +13,25 @@ The goal is to make a series of simple applications that will help in the develo
 - To apply a list of effects to a list of images (useful if you want to transform/filter/modify a folder with hundreds of frames). The goal here is to provide the application with a set of filters that will help to achieve animation specific effects (non-uniform illumination correction, keying and so on).
 This tool is under development. Here are some snapshots:
 
- [![](/doc/images/readme01-thumb.jpg)](/doc/images/readme01.jpg)
+  [![](/doc/images/readme01-thumb.jpg)](/doc/images/readme01.jpg)
  
- The previous image shows the use of a generic color correction filter list.
+  The previous image shows the use of a generic color correction filter list.
 
- [![](/doc/images/readme02-thumb.jpg)](/doc/images/readme02.jpg) [![](/doc/images/readme03-thumb.jpg)](/doc/images/readme03.jpg)
+  [![](/doc/images/readme02-thumb.jpg)](/doc/images/readme02.jpg) [![](/doc/images/readme03-thumb.jpg)](/doc/images/readme03.jpg)
  
- Generic illumination correction filter list. The first image shows levels correction with no intensity inhomogeneity (IIH) correction. The second image applies a IIH correction filter before adjusting the levels,
+  The previous images show a generic illumination correction filter list. The first image shows levels correction with no intensity inhomogeneity (IIH) correction. The second image applies a IIH correction filter before adjusting the levels.
 
 - To make a capturing application, with options for digital camera, webcam, and others. The application must have a simple yet versatile timeline interface (multilayer, sound layers, xsheet functionality, etc.). It must also have some other helper tools like arc planning and exporting capabilities.
-This is not being developed yet.
 
-- To make other more complex applications like a powerful palette/color chart editor; a vectorization tool that converts the frames to a geometric representation and finds correspondences between frames; an autocoloring tool that automatically paints the frames besed on one reference frame; an inbetweening tool that creates the mising frames between two given frames.
-This tools require a lot of research and knowledge, so they will be the last ones.
+  This is not being developed yet.
+
+- To make some utility applications such as a powerful palette/color chart editor; a chronometer with x-sheet functionality; an arc planning app with motion tracking capabilities.
+  
+  This small (yet powerful) applications can also be implemented as Android/iPhone apps.
+- To make other more complex applications like a vectorization tool that converts the frames to a geometric representation and finds correspondences between frames; an autocoloring tool that automatically paints the frames besed on one reference frame; an inbetweening tool that creates the mising frames between two given frames.
+
+  This tools require a lot of research and knowledge, so they will be the last ones.
 
 Why?
 ----
-There are to reasons why I am making these applications. The first one is to help me in some specific tasks as I animate. The second one is to help other people that want to make an animation on their own and to minimize the time they spend in tedious tasks, like coloring and capturing.
+There are two reasons why I am making these applications. The first one is to help me in some specific tasks and minimize the amount of time required to do some repetitive work as I animate. The second one is to help other people that want to make an animation on their own and to minimize the time they spend in tedious tasks, like coloring and capturing.

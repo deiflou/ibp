@@ -27,7 +27,8 @@
 #include "../misc/util.h"
 
 Filter::Filter() :
-    mImage()
+    mImage(),
+    mOutputMode(CorrectedImage)
 {
 }
 
@@ -40,6 +41,7 @@ ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
     f->mImage = mImage;
+    f->mOutputMode = mOutputMode;
     return f;
 }
 
@@ -76,11 +78,24 @@ QImage Filter::process(const QImage &inputImage)
     bitsHSLsl = bitsHSL;
     bitsHSLbgsl = bitsHSLbg;
     totalPixels = w * h;
-    while (totalPixels--)
+    if (mOutputMode == CorrectedImage)
     {
-        bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][bitsHSLbgsl->l] * mean / 255, 255);;
-        bitsHSLsl++;
-        bitsHSLbgsl++;
+        while (totalPixels--)
+        {
+            bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][bitsHSLbgsl->l] * mean / 255, 255);
+            bitsHSLsl++;
+            bitsHSLbgsl++;
+        }
+    }
+    else
+    {
+        while (totalPixels--)
+        {
+            bitsHSLsl->h = bitsHSLsl->s = 0;
+            bitsHSLsl->l = bitsHSLbgsl->l;
+            bitsHSLsl++;
+            bitsHSLbgsl++;
+        }
     }
 
     QImage i = inputImage.copy();
@@ -94,12 +109,23 @@ QImage Filter::process(const QImage &inputImage)
 bool Filter::loadParameters(QSettings &s)
 {
     QVariant v;
+    QString outputModeStr;
+    OutputMode outputMode;
 
     v = s.value("image", QImage());
     if (!v.isValid() || !v.canConvert<QImage>())
         return false;
 
+    outputModeStr = s.value("outputmode", "correctedimage").toString();
+    if (outputModeStr == "correctedimage")
+        outputMode = CorrectedImage;
+    else if (outputModeStr == "iihcorrectionmodel")
+        outputMode = IIHCorrectionModel;
+    else
+        return false;
+
     setImage(v.value<QImage>());
+    setOutputMode(outputMode);
 
     return true;
 }
@@ -107,16 +133,19 @@ bool Filter::loadParameters(QSettings &s)
 bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("image", mImage);
+    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-
     fw->setImage(mImage);
+    fw->setOutputMode(mOutputMode);
     connect(this, SIGNAL(imageChanged(QImage)), fw, SLOT(setImage(QImage)));
+    connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)), fw, SLOT(setOutputMode(Filter::OutputMode)));
     connect(fw, SIGNAL(imageChanged(QImage)), this, SLOT(setImage(QImage)));
+    connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)), this, SLOT(setOutputMode(Filter::OutputMode)));
     return fw;
 }
 
@@ -129,5 +158,14 @@ void Filter::setImage(const QImage &i)
     else
         mImage = i;
     emit imageChanged(i);
+    emit parametersChanged();
+}
+
+void Filter::setOutputMode(Filter::OutputMode om)
+{
+    if (om == mOutputMode)
+        return;
+    mOutputMode = om;
+    emit outputModeChanged(om);
     emit parametersChanged();
 }

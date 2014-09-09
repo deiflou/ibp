@@ -25,6 +25,7 @@
 #include <limits>
 
 #include "filter.h"
+#include "filterwidget.h"
 #include "../imgproc/lut.h"
 #include "../imgproc/types.h"
 #include "../imgproc/colorconversion.h"
@@ -37,7 +38,8 @@
 #define MATRIXCOLUMNS ((DEGREE + 1) * (DEGREE + 2) / 2 - 1)
 #define BLURKERNELSIZE 5
 
-Filter::Filter()
+Filter::Filter() :
+    mOutputMode(CorrectedImage)
 {
 }
 
@@ -47,7 +49,9 @@ Filter::~Filter()
 
 ImageFilter *Filter::clone()
 {
-    return new Filter();
+    Filter * f = new Filter();
+    f->mOutputMode = mOutputMode;
+    return f;
 }
 
 extern "C" QHash<QString, QString> getAnitoolsPluginInfo();
@@ -133,16 +137,18 @@ QImage Filter::process(const QImage &inputImage)
     cv::Sobel(mMatDouble, mGradientX, -1, 1, 0);
     cv::Sobel(mMatDouble, mGradientY, -1, 0, 1);
 
-    // Apply weights to the gradient
+    // Calculate weights
+    register int row = 0, column = 0, totalPixels = sw * sh;
+    Eigen::DiagonalMatrix<float, Eigen::Dynamic> ls_W(totalPixels * 2);
     for (y = 0; y < sh; y++)
     {
         mbits321 = (double *)mGradientX.ptr(y);
         mbits322 = (double *)mGradientY.ptr(y);
         for (x = 0; x < sw; x++)
         {
-            weight = exp(-sqrt((*mbits321) * (*mbits321) + (*mbits322) * (*mbits322)) / MIUSQR);
-            *mbits321 *= weight;
-            *mbits322 *= weight;
+            weight = sqrt(exp(-sqrt((*mbits321) * (*mbits321) + (*mbits322) * (*mbits322)) / MIUSQR));
+            ls_W.diagonal()[row] = ls_W.diagonal()[row + totalPixels] = weight;
+            row++;
             mbits321++;
             mbits322++;
         }
@@ -150,7 +156,8 @@ QImage Filter::process(const QImage &inputImage)
 
     // Surface fitting using eigen
     // First set up the matrix A and the vector b for least squares fitting with the gradient image
-    register int row = 0, column = 0, totalPixels = sw * sh;
+    row = 0;
+    column = 0;
     Eigen::MatrixXf ls_A(totalPixels * 2, MATRIXCOLUMNS);
     Eigen::VectorXf ls_b(totalPixels * 2);
     Eigen::VectorXf ls_x;
@@ -183,11 +190,12 @@ QImage Filter::process(const QImage &inputImage)
         }
     }
     // Solve...
-    ls_x = ls_A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
+    ls_x = (ls_W * ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_W * ls_b);
 
     // Set up the matrix A and the vector b for least squares fitting with the blurred image
-    ls_A = Eigen::MatrixXf(totalPixels * 1, 2);
+    ls_A = Eigen::MatrixXf(totalPixels, 2);
     ls_b = Eigen::VectorXf(totalPixels);
+    ls_W.diagonal().conservativeResize(totalPixels);
     register double value;
     row = 0;
     for (y = 0; y < sh; y++)
@@ -214,7 +222,7 @@ QImage Filter::process(const QImage &inputImage)
         }
     }
     // Solve...
-    ls_x = ls_A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
+    ls_x = (ls_W * ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_W * ls_b);
 
     // Create the IIH model image
     row = 0;
@@ -255,16 +263,35 @@ QImage Filter::process(const QImage &inputImage)
     else
         mlchannel = mMatUChar;
 
-    // Divide lightness channel
-    for (y = 0; y < h; y++)
+    // Make output image
+    if (mOutputMode == CorrectedImage)
     {
-        bitsHSLsl = bitsHSL + y * w;
-        mbits8 = mlchannel.ptr(y);
-        for (x = 0; x < w; x++)
+        // Divide lightness channel
+        for (y = 0; y < h; y++)
         {
-            bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][*mbits8] * mean / 255, 255);
-            bitsHSLsl++;
-            mbits8++;
+            bitsHSLsl = bitsHSL + y * w;
+            mbits8 = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][*mbits8] * mean / 255, 255);
+                bitsHSLsl++;
+                mbits8++;
+            }
+        }
+    }
+    else
+    {
+        for (y = 0; y < h; y++)
+        {
+            bitsHSLsl = bitsHSL + y * w;
+            mbits8 = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->h = bitsHSLsl->s = 0;
+                bitsHSLsl->l = *mbits8;
+                bitsHSLsl++;
+                mbits8++;
+            }
         }
     }
 
@@ -278,18 +305,42 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
-    Q_UNUSED(s)
+    QString outputModeStr;
+    OutputMode outputMode;
+
+    outputModeStr = s.value("outputmode", "correctedimage").toString();
+    if (outputModeStr == "correctedimage")
+        outputMode = CorrectedImage;
+    else if (outputModeStr == "iihcorrectionmodel")
+        outputMode = IIHCorrectionModel;
+    else
+        return false;
+
+    setOutputMode(outputMode);
+
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
-    Q_UNUSED(s)
+    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
-    Q_UNUSED(parent)
-    return(0);
+    FilterWidget * fw = new FilterWidget(parent);
+    fw->setOutputMode(mOutputMode);
+    connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)), fw, SLOT(setOutputMode(Filter::OutputMode)));
+    connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)), this, SLOT(setOutputMode(Filter::OutputMode)));
+    return fw;
+}
+
+void Filter::setOutputMode(Filter::OutputMode om)
+{
+    if (om == mOutputMode)
+        return;
+    mOutputMode = om;
+    emit outputModeChanged(om);
+    emit parametersChanged();
 }

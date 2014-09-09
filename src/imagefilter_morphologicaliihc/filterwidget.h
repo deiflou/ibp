@@ -23,7 +23,6 @@
 #define FILTERWIDGET_H
 
 #include <QWidget>
-#include <QImage>
 
 #include "filter.h"
 
@@ -44,15 +43,16 @@ private:
     bool mEmitSignals;
 
 signals:
-    void imageChanged(const QImage & i);
+    void featureSizeChanged(int fs);
     void outputModeChanged(Filter::OutputMode om);
 
 public slots:
-    void setImage(const QImage & i);
+    void setFeatureSize(int fs);
     void setOutputMode(Filter::OutputMode om);
 
 private slots:
-    void on_mButtonImage_imageChanged(const QImage &i);
+    void on_mSliderFeatureSize_valueChanged(int value);
+    void on_mSpinFeatureSize_valueChanged(int arg1);
     void on_mButtonOutputModeCorrectedImage_toggled(bool c);
     void on_mButtonOutputModeIIHCorrectionModel_toggled(bool c);
 };

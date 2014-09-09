@@ -35,7 +35,12 @@ win32 {
 LIBS += -lopencv_core300 -lopencv_imgproc300
 
 SOURCES += ../../src/imagefilter_lowpassiihc/filter.cpp \
-           ../../src/imagefilter_lowpassiihc/main.cpp
+           ../../src/imagefilter_lowpassiihc/main.cpp \
+    ../../src/imagefilter_lowpassiihc/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_lowpassiihc/filter.h
+HEADERS += ../../src/imagefilter_lowpassiihc/filter.h \
+    ../../src/imagefilter_lowpassiihc/filterwidget.h
+
+FORMS += \
+    ../../src/imagefilter_lowpassiihc/filterwidget.ui
 

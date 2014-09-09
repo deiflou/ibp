@@ -35,7 +35,12 @@ win32 {
 LIBS += -lopencv_core300 -lopencv_imgproc300
 
 SOURCES += ../../src/imagefilter_morphologicaliihc/filter.cpp \
-           ../../src/imagefilter_morphologicaliihc/main.cpp
+           ../../src/imagefilter_morphologicaliihc/main.cpp \
+    ../../src/imagefilter_morphologicaliihc/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_morphologicaliihc/filter.h
+HEADERS += ../../src/imagefilter_morphologicaliihc/filter.h \
+    ../../src/imagefilter_morphologicaliihc/filterwidget.h
+
+FORMS += \
+    ../../src/imagefilter_morphologicaliihc/filterwidget.ui
 

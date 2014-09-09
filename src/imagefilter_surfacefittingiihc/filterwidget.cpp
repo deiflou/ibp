@@ -23,10 +23,6 @@
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"
-#include "../imgproc/freeimage.h"
-#include "../widgets/toolbuttonex.h"
-
-using namespace anitools::widgets;
 
 FilterWidget::FilterWidget(QWidget *parent) :
     QWidget(parent),
@@ -34,25 +30,11 @@ FilterWidget::FilterWidget(QWidget *parent) :
     mEmitSignals(true)
 {
     ui->setupUi(this);
-    ui->mButtonImage->setExtraDataFlags(ToolButtonEx::ExtraDataFlags(ToolButtonEx::ImageStretched |
-                                                                     ToolButtonEx::ImageKeepAspectRatio |
-                                                                     ToolButtonEx::ImageStretchOnlyIfBiggerThanButton |
-                                                                     ToolButtonEx::CheckerboardBackground));
 }
 
 FilterWidget::~FilterWidget()
 {
     delete ui;
-}
-
-void FilterWidget::setImage(const QImage &i)
-{
-    if (i == ui->mButtonImage->image())
-        return;
-    mEmitSignals = false;
-    ui->mButtonImage->setImage(i);
-    mEmitSignals = true;
-    emit imageChanged(i);
 }
 
 void FilterWidget::setOutputMode(Filter::OutputMode om)
@@ -67,11 +49,6 @@ void FilterWidget::setOutputMode(Filter::OutputMode om)
         ui->mButtonOutputModeIIHCorrectionModel->setChecked(true);
     mEmitSignals = true;
     emit outputModeChanged(om);
-}
-
-void FilterWidget::on_mButtonImage_imageChanged(const QImage & i)
-{
-    emit imageChanged(i);
 }
 
 void FilterWidget::on_mButtonOutputModeCorrectedImage_toggled(bool c)

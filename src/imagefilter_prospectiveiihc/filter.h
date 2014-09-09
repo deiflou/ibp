@@ -38,6 +38,12 @@ class Filter : public ImageFilter
     Q_OBJECT
 
 public:
+    enum OutputMode
+    {
+        CorrectedImage,
+        IIHCorrectionModel
+    };
+
     Filter();
     ~Filter();
     ImageFilter * clone();
@@ -49,12 +55,15 @@ public:
 
 private:
     QImage mImage;
+    OutputMode mOutputMode;
 
 signals:
     void imageChanged(const QImage & i);
+    void outputModeChanged(Filter::OutputMode om);
 
 public slots:
     void setImage(const QImage & i);
+    void setOutputMode(Filter::OutputMode om);
 };
 
 #endif // FILTER_H

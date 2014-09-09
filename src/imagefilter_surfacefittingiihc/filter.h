@@ -38,6 +38,12 @@ class Filter : public ImageFilter
     Q_OBJECT
 
 public:
+    enum OutputMode
+    {
+        CorrectedImage,
+        IIHCorrectionModel
+    };
+
     Filter();
     ~Filter();
     ImageFilter * clone();
@@ -46,6 +52,16 @@ public:
     bool loadParameters(QSettings & s);
     bool saveParameters(QSettings & s);
     QWidget * widget(QWidget *parent = 0);
+
+private:
+    OutputMode mOutputMode;
+
+signals:
+    void outputModeChanged(Filter::OutputMode om);
+
+public slots:
+    void setOutputMode(Filter::OutputMode om);
+
 };
 
 #endif // FILTER_H
