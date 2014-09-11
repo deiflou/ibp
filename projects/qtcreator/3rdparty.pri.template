@@ -25,9 +25,13 @@ win32 {
     LIBS += 
 
 #freeimage
-    INCLUDEPATH 
+    INCLUDEPATH +=
     LIBS += 
 
 #eigen3
-    INCLUDEPATH 
+    INCLUDEPATH +=
+
+#itk
+    INCLUDEPATH +=
+    LIBS +=
 }

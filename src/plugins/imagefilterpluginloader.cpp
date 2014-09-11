@@ -21,6 +21,7 @@
 
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include "imagefilterpluginloader.h"
 
