@@ -131,7 +131,7 @@ QImage Filter::process(const QImage &inputImage)
             mlchannelsl = mlchannel.ptr(y);
             for (x = 0; x < w; x++)
             {
-                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][*mlchannelsl] * mean / 255, 255);
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mlchannelsl, 255)] * mean / 255, 255);
                 bitsHSLsl++;
                 mlchannelsl++;
             }

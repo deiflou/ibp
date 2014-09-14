@@ -82,7 +82,7 @@ QImage Filter::process(const QImage &inputImage)
     {
         while (totalPixels--)
         {
-            bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][bitsHSLbgsl->l] * mean / 255, 255);
+            bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, bitsHSLbgsl->l, 255)] * mean / 255, 255);
             bitsHSLsl++;
             bitsHSLbgsl++;
         }

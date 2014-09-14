@@ -35,7 +35,7 @@
 #include "../imgproc/colorconversion.h"
 #include "../misc/util.h"
 
-#define MAX_IMAGE_SIZE 64
+#define MAX_IMAGE_SIZE 128
 
 Filter::Filter() :
     mGridSize(3),
@@ -144,7 +144,7 @@ QImage Filter::process(const QImage &inputImage)
         mbits8 = mInitial.ptr(y);
         for (x = 0; x < sw; x++)
         {
-            *initialImagePtr = (*mbits8) + 1;
+            *initialImagePtr = ((*mbits8) + 1) / 255.;
             mbits8++;
             initialImagePtr++;
         }
@@ -156,7 +156,6 @@ QImage Filter::process(const QImage &inputImage)
     numberOfControlPoints.Fill(mGridSize + 1);
     correcter->SetNumberOfControlPoints(numberOfControlPoints);
     correcter->SetSplineOrder(AT_minimum(mGridSize, 3));
-    correcter->SetConvergenceThreshold(0.0000001);
     correcter->SetInput(initialImage);
 
     try
@@ -218,7 +217,7 @@ QImage Filter::process(const QImage &inputImage)
     {
         for (x = 0; x < sw; x++)
         {
-            *initialImagePtr = AT_clamp(0, ls_x(0) + (*initialImagePtr) * ls_x(1), 255);
+            *initialImagePtr = ls_x(0) + (*initialImagePtr) * ls_x(1);
             initialImagePtr++;
         }
     }
@@ -272,7 +271,7 @@ QImage Filter::process(const QImage &inputImage)
             mbits8 = mlchannel.ptr(y);
             for (x = 0; x < w; x++)
             {
-                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][*mbits8] * mean / 255, 255);
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mbits8, 255)] * mean / 255, 255);
                 bitsHSLsl++;
                 mbits8++;
             }

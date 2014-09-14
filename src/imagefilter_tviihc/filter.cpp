@@ -20,8 +20,15 @@
 ****************************************************************************/
 
 #include <opencv2/imgproc.hpp>
+#include <tina/sys/sysPro.h>
+#include <tina/sys/sysDef.h>
+#include <tina/image/imgDef.h>
+#include <tina/image/imgPro.h>
+#include <tina/medical/medDef.h>
+#include <tina/medical/medPro.h>
 #include <Eigen/Dense>
-#include <limits>
+
+#include <QDebug>
 
 #include "filter.h"
 #include "filterwidget.h"
@@ -30,14 +37,10 @@
 #include "../imgproc/colorconversion.h"
 #include "../misc/util.h"
 
-#define MAX_IMAGE_SIZE 128
-#define DEGREE 3
-#define MIU .5
-#define MIUSQR (MIU * MIU)
-#define MATRIXCOLUMNS ((DEGREE + 1) * (DEGREE + 2) / 2 - 1)
-#define BLURKERNELSIZE 5
+#define MAX_IMAGE_SIZE 256
 
 Filter::Filter() :
+    mGridSize(3),
     mOutputMode(CorrectedImage)
 {
 }
@@ -49,6 +52,7 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
+    f->mGridSize = mGridSize;
     f->mOutputMode = mOutputMode;
     return f;
 }
@@ -64,12 +68,10 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    register int x, y, w = inputImage.width(), h = inputImage.height(), mean = 0, sw, sh, i, j;
+    register int x, y, w = inputImage.width(), h = inputImage.height(), mean = 0, sw, sh;
     register HSL * bitsHSL = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLsl;
     cv::Mat mlchannel(h, w, CV_8UC1);
     register unsigned char * mbits8;
-    register double * mbits321, * mbits322;
-    register double weight;
 
     // Convert to HSL
     convertBGRToHSL(inputImage.bits(), (unsigned char *)bitsHSL, w * h);
@@ -112,155 +114,96 @@ QImage Filter::process(const QImage &inputImage)
         mInitial = mlchannel;
     }
 
-    // Remove noise
-    cv::Mat mMatUChar(sh, sw, CV_8UC1);
-    cv::GaussianBlur(mInitial, mMatUChar, cv::Size(BLURKERNELSIZE, BLURKERNELSIZE), 0);
+    // ---------------------------
+    // Tina Vision Bias Correction
+    // ---------------------------
 
-    // Convert to float and scale
-    cv::Mat mMatDouble(sh, sw, CV_64FC1);
+    Imrect * tvInitialImage = im_alloc(sh, sw, 0, uchar_v);
+    for (y = 0; y < sh; y++)
+        memcpy(((unsigned char **)tvInitialImage->data)[y], mInitial.ptr(y), sw);
+
+    Imrect * tvFinalImage = xy_norm(tvInitialImage, 1, 10, 0);
+    im_free(tvInitialImage);
+
+    float * tvImagePtr;
+
+    // Set up the matrix A and the vector b for least squares fitting with the initial image
+    register int row = 0;
+    int totalPixels = sw * sh;
+    Eigen::MatrixXf ls_A = Eigen::MatrixXf(totalPixels, 2);
+    Eigen::VectorXf ls_b = Eigen::VectorXf(totalPixels);
+
     for (y = 0; y < sh; y++)
     {
-        mbits8 = mMatUChar.ptr(y);
-        mbits321 = (double *)mMatDouble.ptr(y);
+        mbits8 = mInitial.ptr(y);
+        tvImagePtr = ((float **)tvFinalImage->data)[y];
         for (x = 0; x < sw; x++)
         {
-            *mbits321 = (*mbits8) / 255.;
+            ls_A(row, 0) = 1;
+            ls_A(row, 1) = *tvImagePtr;
+            ls_b(row) = *mbits8;
+
+            tvImagePtr++;
             mbits8++;
-            mbits321++;
-        }
-    }
-
-    // Get the gradient of the blurred image
-    cv::Mat mGradientX(sh, sw, CV_64FC1);
-    cv::Mat mGradientY(sh, sw, CV_64FC1);
-    cv::Sobel(mMatDouble, mGradientX, -1, 1, 0);
-    cv::Sobel(mMatDouble, mGradientY, -1, 0, 1);
-
-    // Calculate weights
-    register int row = 0, column = 0, totalPixels = sw * sh;
-    Eigen::DiagonalMatrix<float, Eigen::Dynamic> ls_W(totalPixels * 2);
-    for (y = 0; y < sh; y++)
-    {
-        mbits321 = (double *)mGradientX.ptr(y);
-        mbits322 = (double *)mGradientY.ptr(y);
-        for (x = 0; x < sw; x++)
-        {
-            weight = sqrt(exp(-sqrt((*mbits321) * (*mbits321) + (*mbits322) * (*mbits322)) / MIUSQR));
-            ls_W.diagonal()[row] = ls_W.diagonal()[row + totalPixels] = weight;
-            row++;
-            mbits321++;
-            mbits322++;
-        }
-    }
-
-    // Surface fitting using eigen
-    // First set up the matrix A and the vector b for least squares fitting with the gradient image
-    row = 0;
-    column = 0;
-    Eigen::MatrixXf ls_A(totalPixels * 2, MATRIXCOLUMNS);
-    Eigen::VectorXf ls_b(totalPixels * 2);
-    Eigen::VectorXf ls_x;
-
-    for (y = 0; y < sh; y++)
-    {
-        mbits321 = (double *)mGradientX.ptr(y);
-        mbits322 = (double *)mGradientY.ptr(y);
-        for (x = 0; x < sw; x++)
-        {
-            column = 0;
-            // Fill matrix A with the monomial terms of the polynomial surface
-            for (i = 1; i <= DEGREE; i++)
-            {
-                for (j = 0; j <= i; j++)
-                {
-                    ls_A(row, column) = (i - j) * (x == 0 ? 1 : pow(x, i - j - 1)) * (y == 0 ? 1 : pow(y, j));
-                    ls_A(row + totalPixels, column) = j * (x == 0 ? 1 : pow(x, i - j)) * (y == 0 ? 1 : pow(y, j - 1));
-
-                    column++;
-                }
-            }
-            // Fill vector b with the image gradient values
-            ls_b(row) = *mbits321;
-            ls_b(row + totalPixels) = *mbits322;
-
-            mbits321++;
-            mbits322++;
             row++;
         }
     }
     // Solve...
-    ls_x = (ls_W * ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_W * ls_b);
-
-    // Set up the matrix A and the vector b for least squares fitting with the blurred image
-    ls_A = Eigen::MatrixXf(totalPixels, 2);
-    ls_b = Eigen::VectorXf(totalPixels);
-    ls_W.diagonal().conservativeResize(totalPixels);
-    register double value;
-    row = 0;
+    Eigen::VectorXf ls_x = (ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
     for (y = 0; y < sh; y++)
     {
-        mbits321 = (double *)mMatDouble.ptr(y);
+        tvImagePtr = ((float **)tvFinalImage->data)[y];
         for (x = 0; x < sw; x++)
         {
-            column = 0;
-            value = 0.;
-            for (i = 1; i <= DEGREE; i++)
-            {
-                for (j = 0; j <= i; j++)
-                {
-                    value += ls_x(column) * (x == 0 ? 1 : pow(x, i - j)) * (y == 0 ? 1 : pow(y, j));
-                    column++;
-                }
-            }
-            ls_A(row, 0) = value;
-            ls_A(row, 1) = 1;
-            ls_b(row) = *mbits321;
-
-            mbits321++;
-            row++;
-        }
-    }
-    // Solve...
-    ls_x = (ls_W * ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_W * ls_b);
-
-    // Create the IIH model image
-    row = 0;
-    for (y = 0; y < sh; y++)
-    {
-        mbits321 = (double *)mMatDouble.ptr(y);
-        for (x = 0; x < sw; x++)
-        {
-            *mbits321 = ls_A(row, 0) * ls_x(0) + ls_x(1);
-
-            mbits321++;
-            row++;
+            *tvImagePtr = ls_x(0) + (*tvImagePtr) * ls_x(1);
+            tvImagePtr++;
         }
     }
 
     // Remap due to out of range values and scale
-    double minIIH, maxIIH, minIIHc, maxIIHc;
-    cv::minMaxLoc(mMatDouble, &minIIH, &maxIIH);
-    minIIHc = AT_clamp(0., minIIH, 1.);
-    maxIIHc = AT_clamp(0., maxIIH, 1.);
+    double minIIH = 10000, maxIIH = -10000, minIIHc, maxIIHc, range1, range2;
+
     for (y = 0; y < sh; y++)
     {
-        mbits321 = (double *)mMatDouble.ptr(y);
-        mbits8 = mMatUChar.ptr(y);
+        tvImagePtr = ((float **)tvFinalImage->data)[y];
         for (x = 0; x < sw; x++)
         {
-            *mbits8 = round((minIIHc + ((*mbits321) - minIIH) * (maxIIHc - minIIHc) / (maxIIH - minIIH)) * 255.);
+            if ((*tvImagePtr) > maxIIH)
+                maxIIH = (*tvImagePtr);
+            if ((*tvImagePtr) < minIIH)
+                minIIH = (*tvImagePtr);
+            tvImagePtr++;
+        }
+    }
+    minIIHc = AT_clamp(0., minIIH, 255.);
+    maxIIHc = AT_clamp(0., maxIIH, 255.);
+    range1 = maxIIH - minIIH;
+    range2 = maxIIHc - minIIHc;
+    for (y = 0; y < sh; y++)
+    {
+        mbits8 = mInitial.ptr(y);
+        tvImagePtr = ((float **)tvFinalImage->data)[y];
+        for (x = 0; x < sw; x++)
+        {
+            *mbits8 = round((minIIHc + ((*tvImagePtr) - minIIH) * range2 / range1));
             mean += *mbits8;
             mbits8++;
-            mbits321++;
+            tvImagePtr++;
         }
     }
     mean /= totalPixels;
 
+    im_free(tvFinalImage);
+
+    // ----------------------------------
+    // End of Tina Vision Bias Correction
+    // ----------------------------------
+
     // Resample
     if (w != sw || h != sh)
-        cv::resize(mMatUChar, mlchannel, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
+        cv::resize(mInitial, mlchannel, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
     else
-        mlchannel = mMatUChar;
+        mlchannel = mInitial;
 
     // Make output image
     if (mOutputMode == CorrectedImage)
@@ -304,8 +247,14 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
+    int gridSize;
     QString outputModeStr;
     OutputMode outputMode;
+    bool ok;
+
+    gridSize = s.value("gridsize", 3).toUInt(&ok);
+    if (!ok || gridSize > 10 || gridSize < 1)
+        return false;
 
     outputModeStr = s.value("outputmode", "correctedimage").toString();
     if (outputModeStr == "correctedimage")
@@ -316,12 +265,14 @@ bool Filter::loadParameters(QSettings &s)
         return false;
 
     setOutputMode(outputMode);
+    setGridSize(gridSize);
 
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
+    s.setValue("gridsize", mGridSize);
     s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
     return true;
 }
@@ -329,10 +280,22 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
+    fw->setGridSize(mGridSize);
     fw->setOutputMode(mOutputMode);
+    connect(this, SIGNAL(gridSizeChanged(int)), fw, SLOT(setGridSize(int)));
     connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)), fw, SLOT(setOutputMode(Filter::OutputMode)));
+    connect(fw, SIGNAL(gridSizeChanged(int)), this, SLOT(setGridSize(int)));
     connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)), this, SLOT(setOutputMode(Filter::OutputMode)));
     return fw;
+}
+
+void Filter::setGridSize(int gs)
+{
+    if (gs == mGridSize)
+        return;
+    mGridSize = gs;
+    emit gridSizeChanged(gs);
+    emit parametersChanged();
 }
 
 void Filter::setOutputMode(Filter::OutputMode om)
