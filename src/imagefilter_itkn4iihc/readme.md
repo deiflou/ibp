@@ -1,2 +1,2 @@
 This image filter uses the Insight Segmentation and Registration Toolkit (ITK).
-More info here: [](http://www.itk.org/)
+More info here: [http://www.itk.org/](http://www.itk.org/)
