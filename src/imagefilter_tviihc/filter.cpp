@@ -39,8 +39,34 @@
 
 #define MAX_IMAGE_SIZE 256
 
+Imrect * modified_xy_normf(Imrect *im, double constant, double sigma, double thresh)
+{
+   Imrect *im1,*im2,*imdx,*imdy;
+   Imrect *imxs,*imys,*corr;
+
+   im1 = im_square(im);
+
+   smooth_slopes(constant,sigma,im1,&imdx,&imdy,&corr,&imxs,&imys);
+   im_free(im1);
+   enf_integ(&imdx,&imdy,corr,imxs,imys);
+   im_free(corr);
+   im2 = im_integrate(imdx,imdy);
+
+   im_free(imxs); im_free(imys);
+   im_free(imdx);
+   im_free(imdy);
+   if (im2 == NULL)
+   {
+      error("imcalc_xy_norm:  image not in calculator ",warning);
+            return(NULL);
+   }
+
+   return im2;
+}
+
 Filter::Filter() :
-    mGridSize(3),
+    mRefinement(10),
+    mSmoothness(10),
     mOutputMode(CorrectedImage)
 {
 }
@@ -52,7 +78,8 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
-    f->mGridSize = mGridSize;
+    f->mRefinement = mRefinement;
+    f->mSmoothness = mSmoothness;
     f->mOutputMode = mOutputMode;
     return f;
 }
@@ -122,14 +149,17 @@ QImage Filter::process(const QImage &inputImage)
     for (y = 0; y < sh; y++)
         memcpy(((unsigned char **)tvInitialImage->data)[y], mInitial.ptr(y), sw);
 
-    Imrect * tvFinalImage = xy_norm(tvInitialImage, 1, 10, 0);
+    Imrect * tvBiasImage = modified_xy_normf(tvInitialImage, mRefinement, mSmoothness, 0);
     im_free(tvInitialImage);
+    Imrect * tvExpImage = im_exp(tvBiasImage);
+    im_free(tvBiasImage);
 
     float * tvImagePtr;
+    Imrect * tvFinalImage = tvExpImage;
+    int totalPixels = sw * sh;
 
     // Set up the matrix A and the vector b for least squares fitting with the initial image
     register int row = 0;
-    int totalPixels = sw * sh;
     Eigen::MatrixXf ls_A = Eigen::MatrixXf(totalPixels, 2);
     Eigen::VectorXf ls_b = Eigen::VectorXf(totalPixels);
 
@@ -150,6 +180,7 @@ QImage Filter::process(const QImage &inputImage)
     }
     // Solve...
     Eigen::VectorXf ls_x = (ls_A).jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(ls_b);
+
     for (y = 0; y < sh; y++)
     {
         tvImagePtr = ((float **)tvFinalImage->data)[y];
@@ -247,13 +278,17 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
-    int gridSize;
+    int refinement, smoothness;
     QString outputModeStr;
     OutputMode outputMode;
     bool ok;
 
-    gridSize = s.value("gridsize", 3).toUInt(&ok);
-    if (!ok || gridSize > 10 || gridSize < 1)
+    refinement = s.value("refinement", 0).toUInt(&ok);
+    if (!ok || refinement > 100 || refinement < 1)
+        return false;
+
+    smoothness = s.value("smoothness", 0).toUInt(&ok);
+    if (!ok || smoothness > 100 || smoothness < 1)
         return false;
 
     outputModeStr = s.value("outputmode", "correctedimage").toString();
@@ -265,14 +300,16 @@ bool Filter::loadParameters(QSettings &s)
         return false;
 
     setOutputMode(outputMode);
-    setGridSize(gridSize);
+    setRefinement(refinement);
+    setSmoothness(smoothness);
 
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("gridsize", mGridSize);
+    s.setValue("refinement", mRefinement);
+    s.setValue("smoothness", mSmoothness);
     s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
     return true;
 }
@@ -280,21 +317,33 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setGridSize(mGridSize);
+    fw->setRefinement(mRefinement);
+    fw->setSmoothness(mSmoothness);
     fw->setOutputMode(mOutputMode);
-    connect(this, SIGNAL(gridSizeChanged(int)), fw, SLOT(setGridSize(int)));
+    connect(this, SIGNAL(refinementChanged(int)), fw, SLOT(setRefinement(int)));
+    connect(this, SIGNAL(smoothnessChanged(int)), fw, SLOT(setSmoothness(int)));
     connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)), fw, SLOT(setOutputMode(Filter::OutputMode)));
-    connect(fw, SIGNAL(gridSizeChanged(int)), this, SLOT(setGridSize(int)));
+    connect(fw, SIGNAL(refinementChanged(int)), this, SLOT(setRefinement(int)));
+    connect(fw, SIGNAL(smoothnessChanged(int)), this, SLOT(setSmoothness(int)));
     connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)), this, SLOT(setOutputMode(Filter::OutputMode)));
     return fw;
 }
 
-void Filter::setGridSize(int gs)
+void Filter::setRefinement(int v)
 {
-    if (gs == mGridSize)
+    if (v == mRefinement)
         return;
-    mGridSize = gs;
-    emit gridSizeChanged(gs);
+    mRefinement = v;
+    emit refinementChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setSmoothness(int v)
+{
+    if (v == mSmoothness)
+        return;
+    mSmoothness = v;
+    emit smoothnessChanged(v);
     emit parametersChanged();
 }
 

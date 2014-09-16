@@ -54,15 +54,17 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    int mGridSize;
+    int mRefinement, mSmoothness;
     OutputMode mOutputMode;
 
 signals:
-    void gridSizeChanged(int gs);
+    void refinementChanged(int v);
+    void smoothnessChanged(int v);
     void outputModeChanged(Filter::OutputMode om);
 
 public slots:
-    void setGridSize(int gs);
+    void setRefinement(int v);
+    void setSmoothness(int v);
     void setOutputMode(Filter::OutputMode om);
 
 };
