@@ -37,28 +37,28 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Refinement:</string>
+        <string>Grid Size:</string>
        </property>
       </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <property name="spacing">
-        <number>5</number>
+        <number>1</number>
        </property>
        <property name="leftMargin">
         <number>10</number>
        </property>
        <item>
-        <widget class="QSlider" name="mSliderRefinement">
+        <widget class="QSlider" name="mSliderGridSize">
          <property name="minimum">
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>10</number>
          </property>
          <property name="value">
-          <number>10</number>
+          <number>3</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -66,64 +66,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="mSpinRefinement">
+        <widget class="QSpinBox" name="mSpinGridSize">
          <property name="minimum">
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
           <number>10</number>
          </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Smoothness:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="spacing">
-        <number>5</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QSlider" name="mSliderSmoothness">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
          <property name="value">
-          <number>10</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="mSpinSmoothness">
-         <property name="suffix">
-          <string/>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>10</number>
+          <number>3</number>
          </property>
         </widget>
        </item>

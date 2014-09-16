@@ -43,20 +43,16 @@ private:
     bool mEmitSignals;
 
 signals:
-    void refinementChanged(int v);
-    void smoothnessChanged(int v);
+    void gridSizeChanged(int gs);
     void outputModeChanged(Filter::OutputMode om);
 
 public slots:
-    void setRefinement(int v);
-    void setSmoothness(int v);
+    void setGridSize(int gs);
     void setOutputMode(Filter::OutputMode om);
 
 private slots:
-    void on_mSliderRefinement_valueChanged(int value);
-    void on_mSpinRefinement_valueChanged(int arg1);
-    void on_mSliderSmoothness_valueChanged(int value);
-    void on_mSpinSmoothness_valueChanged(int arg1);
+    void on_mSliderGridSize_valueChanged(int value);
+    void on_mSpinGridSize_valueChanged(int arg1);
     void on_mButtonOutputModeCorrectedImage_toggled(bool c);
     void on_mButtonOutputModeIIHCorrectionModel_toggled(bool c);
 };

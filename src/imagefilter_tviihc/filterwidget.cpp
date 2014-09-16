@@ -37,24 +37,14 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setRefinement(int v)
+void FilterWidget::setGridSize(int gs)
 {
-    if (ui->mSpinRefinement->value() == v)
+    if (ui->mSpinGridSize->value() == gs)
         return;
     mEmitSignals = false;
-    ui->mSpinRefinement->setValue(v);
+    ui->mSpinGridSize->setValue(gs);
     mEmitSignals = true;
-    emit refinementChanged(v);
-}
-
-void FilterWidget::setSmoothness(int v)
-{
-    if (ui->mSpinSmoothness->value() == v)
-        return;
-    mEmitSignals = false;
-    ui->mSpinSmoothness->setValue(v);
-    mEmitSignals = true;
-    emit smoothnessChanged(v);
+    emit gridSizeChanged(gs);
 }
 
 void FilterWidget::setOutputMode(Filter::OutputMode om)
@@ -71,32 +61,18 @@ void FilterWidget::setOutputMode(Filter::OutputMode om)
     emit outputModeChanged(om);
 }
 
-void FilterWidget::on_mSliderRefinement_valueChanged(int value)
+void FilterWidget::on_mSliderGridSize_valueChanged(int value)
 {
-    ui->mSpinRefinement->setValue(value);
+    ui->mSpinGridSize->setValue(value);
     if (mEmitSignals)
-        emit refinementChanged(value);
+        emit gridSizeChanged(value);
 }
 
-void FilterWidget::on_mSpinRefinement_valueChanged(int arg1)
+void FilterWidget::on_mSpinGridSize_valueChanged(int arg1)
 {
-    ui->mSliderRefinement->setValue(arg1);
+    ui->mSliderGridSize->setValue(arg1);
     if (mEmitSignals)
-        emit refinementChanged(arg1);
-}
-
-void FilterWidget::on_mSliderSmoothness_valueChanged(int value)
-{
-    ui->mSpinSmoothness->setValue(value);
-    if (mEmitSignals)
-        emit smoothnessChanged(value);
-}
-
-void FilterWidget::on_mSpinSmoothness_valueChanged(int arg1)
-{
-    ui->mSliderSmoothness->setValue(arg1);
-    if (mEmitSignals)
-        emit smoothnessChanged(arg1);
+        emit gridSizeChanged(arg1);
 }
 
 void FilterWidget::on_mButtonOutputModeCorrectedImage_toggled(bool c)
