@@ -38,6 +38,17 @@ class Filter : public ImageFilter
     Q_OBJECT
 
 public:
+    enum Distribution
+    {
+        Uniform,
+        Gaussian
+    };
+    enum ColorMode
+    {
+        Monochromatic,
+        Color
+    };
+
     Filter();
     ~Filter();
     ImageFilter * clone();
@@ -48,23 +59,20 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    double mRadius;
-    int mAmount;
-    int mThreshold;
-
-    int mThresholdLut[256];
-
-    void makeThresholdLut();
+    double mAmount;
+    Distribution mDistribution;
+    ColorMode mColorMode;
+    unsigned int mSeed;
 
 signals:
-    void radiusChanged(double v);
-    void amountChanged(int v);
-    void thresholdChanged(int v);
+    void amountChanged(double v);
+    void distributionChanged(Filter::Distribution v);
+    void colorModeChanged(Filter::ColorMode v);
 
 public slots:
-    void setRadius(double v);
-    void setAmount(int v);
-    void setThreshold(int v);
+    void setAmount(double v);
+    void setDistribution(Filter::Distribution v);
+    void setColorMode(Filter::ColorMode v);
 };
 
 #endif // FILTER_H

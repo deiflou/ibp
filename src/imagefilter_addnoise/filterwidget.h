@@ -19,52 +19,46 @@
 **
 ****************************************************************************/
 
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef FILTERWIDGET_H
+#define FILTERWIDGET_H
 
-#include <QObject>
-#include <QHash>
-#include <QString>
-#include <QImage>
-#include <QSettings>
 #include <QWidget>
 
-#include "../imgproc/imagefilter.h"
+#include "filter.h"
 
-using namespace anitools::imgproc;
+namespace Ui {
+class FilterWidget;
+}
 
-class Filter : public ImageFilter
+class FilterWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Filter();
-    ~Filter();
-    ImageFilter * clone();
-    QHash<QString, QString> info();
-    QImage process(const QImage & inputImage);
-    bool loadParameters(QSettings & s);
-    bool saveParameters(QSettings & s);
-    QWidget * widget(QWidget *parent = 0);
+    explicit FilterWidget(QWidget *parent = 0);
+    ~FilterWidget();
 
 private:
-    double mRadius;
-    int mAmount;
-    int mThreshold;
-
-    int mThresholdLut[256];
-
-    void makeThresholdLut();
+    Ui::FilterWidget *ui;
+    bool mEmitSignals;
 
 signals:
-    void radiusChanged(double v);
-    void amountChanged(int v);
-    void thresholdChanged(int v);
+    void amountChanged(double v);
+    void distributionChanged(Filter::Distribution v);
+    void colorModeChanged(Filter::ColorMode v);
 
 public slots:
-    void setRadius(double v);
-    void setAmount(int v);
-    void setThreshold(int v);
+    void setAmount(double v);
+    void setDistribution(Filter::Distribution v);
+    void setColorMode(Filter::ColorMode v);
+
+private slots:
+    void on_mSliderAmount_valueChanged(int v);
+    void on_mSpinAmount_valueChanged(double v);
+    void on_mButtonDistributionUniform_toggled(bool v);
+    void on_mButtonDistributionGaussian_toggled(bool v);
+    void on_mButtonColorModeMonochromatic_toggled(bool v);
+    void on_mButtonColorModeColor_toggled(bool v);
 };
 
-#endif // FILTER_H
+#endif // FILTERWIDGET_H

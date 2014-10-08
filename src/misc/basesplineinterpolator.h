@@ -34,9 +34,9 @@ public:
     BaseSplineInterpolator();
     ~BaseSplineInterpolator();
 
-    virtual const SplineInterpolatorKnots &knots();
-    virtual const SplineInterpolatorKnot &knot(int i);
-    virtual int size();
+    virtual const SplineInterpolatorKnots &knots() const;
+    virtual const SplineInterpolatorKnot &knot(int i) const;
+    virtual int size() const;
     virtual bool setKnots(const SplineInterpolatorKnots &k);
     virtual bool setKnot(int i, const SplineInterpolatorKnot &k);
     virtual bool setKnot(int i, double nx, double ny);
@@ -49,8 +49,8 @@ public:
 
     virtual double f(double x) = 0;
 
-    virtual ExtrapolationMode floorExtrapolationMode();
-    virtual ExtrapolationMode ceilExtrapolationMode();
+    virtual ExtrapolationMode floorExtrapolationMode() const;
+    virtual ExtrapolationMode ceilExtrapolationMode() const;
     virtual void setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c);
 
 protected:

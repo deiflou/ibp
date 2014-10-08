@@ -26,11 +26,17 @@
 #include "../imgproc/types.h"
 #include "../misc/util.h"
 
+#define EXPONENTIALSIGMOIDSIZE 7.5
+#define THRESHOLDSIGMOIDSIZE 128
+
+using namespace anitools::imgproc;
+
 Filter::Filter() :
     mRadius(0.0),
     mAmount(0),
     mThreshold(0)
 {
+    makeThresholdLut();
 }
 
 Filter::~Filter()
@@ -44,6 +50,7 @@ ImageFilter *Filter::clone()
     f->mRadius = mRadius;
     f->mAmount = mAmount;
     f->mThreshold = mThreshold;
+    f->makeThresholdLut();
     return f;
 }
 
@@ -73,7 +80,7 @@ QImage Filter::process(const QImage &inputImage)
     BGRA * bits82 = (BGRA *)i.bits();
     register int totalPixels = inputImage.height() * inputImage.width();
     register int diffR, diffG, diffB;
-    register int amount = mAmount, threshold = mThreshold;
+    register int amount = mAmount;
 
     while (totalPixels--)
     {
@@ -81,20 +88,12 @@ QImage Filter::process(const QImage &inputImage)
         diffG = bits81->g - bits82->g;
         diffB = bits81->b - bits82->b;
 
-        if (abs(diffR) > threshold)
-            bits82->r = AT_clamp(0, bits81->r + diffR * amount / 100, 255);
-        else
-            bits82->r = bits81->r;
-        if (abs(diffG) > threshold)
-            bits82->g = AT_clamp(0, bits81->g + diffG * amount / 100, 255);
-        else
-            bits82->g = bits81->g;
-        if (abs(diffB) > threshold)
-            bits82->b = AT_clamp(0, bits81->b + diffB * amount / 100, 255);
-        else
-            bits82->b = bits81->b;
+        bits82->r = AT_clamp(0, bits81->r + diffR * amount * mThresholdLut[abs(diffR)] / 25500, 255);
+        bits82->g = AT_clamp(0, bits81->g + diffG * amount * mThresholdLut[abs(diffG)] / 25500, 255);
+        bits82->b = AT_clamp(0, bits81->b + diffB * amount * mThresholdLut[abs(diffB)] / 25500, 255);
 
         bits82->a = bits81->a;
+
         bits81++;
         bits82++;
     }
@@ -105,17 +104,17 @@ QImage Filter::process(const QImage &inputImage)
 bool Filter::loadParameters(QSettings &s)
 {
     double radius;
-    unsigned int amount;
-    unsigned int threshold;
+    int amount;
+    int threshold;
     bool ok;
     radius = s.value("radius", 0.0).toDouble(&ok);
     if (!ok || radius < 0 || radius > 100)
         return false;
-    amount = s.value("amount", 0).toUInt(&ok);
-    if (!ok)
+    amount = s.value("amount", 0).toInt(&ok);
+    if (!ok || amount < 0 || amount > 500)
         return false;
-    threshold = s.value("threshold", 0).toUInt(&ok);
-    if (!ok)
+    threshold = s.value("threshold", 0).toInt(&ok);
+    if (!ok || threshold < 0 || threshold > 255)
         return false;
     setRadius(radius);
     setAmount(amount);
@@ -138,12 +137,19 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setAmount(mAmount);
     fw->setThreshold(mThreshold);
     connect(this, SIGNAL(radiusChanged(double)), fw, SLOT(setRadius(double)));
-    connect(this, SIGNAL(amountChanged(uint)), fw, SLOT(setAmount(uint)));
-    connect(this, SIGNAL(thresholdChanged(uint)), fw, SLOT(setThreshold(uint)));
+    connect(this, SIGNAL(amountChanged(int)), fw, SLOT(setAmount(int)));
+    connect(this, SIGNAL(thresholdChanged(int)), fw, SLOT(setThreshold(int)));
     connect(fw, SIGNAL(radiusChanged(double)), this, SLOT(setRadius(double)));
-    connect(fw, SIGNAL(amountChanged(uint)), this, SLOT(setAmount(uint)));
-    connect(fw, SIGNAL(thresholdChanged(uint)), this, SLOT(setThreshold(uint)));
+    connect(fw, SIGNAL(amountChanged(int)), this, SLOT(setAmount(int)));
+    connect(fw, SIGNAL(thresholdChanged(int)), this, SLOT(setThreshold(int)));
     return fw;
+}
+
+void Filter::makeThresholdLut()
+{
+    for (int i = 0; i < 256; i++)
+        mThresholdLut[i] = round(255. / (1. + exp(-EXPONENTIALSIGMOIDSIZE * 2. *
+                                                  (i - mThreshold) / THRESHOLDSIGMOIDSIZE)));
 }
 
 void Filter::setRadius(double v)
@@ -155,7 +161,7 @@ void Filter::setRadius(double v)
     emit parametersChanged();
 }
 
-void Filter::setAmount(unsigned int v)
+void Filter::setAmount(int v)
 {
     if (v == mAmount)
         return;
@@ -164,11 +170,12 @@ void Filter::setAmount(unsigned int v)
     emit parametersChanged();
 }
 
-void Filter::setThreshold(unsigned int v)
+void Filter::setThreshold(int v)
 {
     if (v == mThreshold)
         return;
     mThreshold = v;
+    makeThresholdLut();
     emit thresholdChanged(v);
     emit parametersChanged();
 }

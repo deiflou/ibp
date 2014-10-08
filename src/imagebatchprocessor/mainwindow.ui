@@ -125,7 +125,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
        <widget class="QWidget" name="mMainContainerTop" native="true">
         <property name="minimumSize">
          <size>
-          <width>49</width>
+          <width>56</width>
           <height>0</height>
          </size>
         </property>
@@ -832,7 +832,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>717</width>
+                   <width>711</width>
                    <height>569</height>
                   </rect>
                  </property>
@@ -873,7 +873,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="mButtonGroupMainChangeSection"/>
   <buttongroup name="mButtonGroupToolbarEditSplitter"/>
+  <buttongroup name="mButtonGroupMainChangeSection"/>
  </buttongroups>
 </ui>

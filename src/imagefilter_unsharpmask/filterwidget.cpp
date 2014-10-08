@@ -47,7 +47,7 @@ void FilterWidget::setRadius(double v)
     emit radiusChanged(v);
 }
 
-void FilterWidget::setAmount(unsigned int v)
+void FilterWidget::setAmount(int v)
 {
     if (ui->mSpinAmount->value() == v)
         return;
@@ -57,7 +57,7 @@ void FilterWidget::setAmount(unsigned int v)
     emit amountChanged(v);
 }
 
-void FilterWidget::setThreshold(unsigned int v)
+void FilterWidget::setThreshold(int v)
 {
     if (ui->mSpinThreshold->value() == v)
         return;

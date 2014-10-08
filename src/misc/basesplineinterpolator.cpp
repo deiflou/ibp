@@ -35,16 +35,16 @@ BaseSplineInterpolator::~BaseSplineInterpolator()
 {
 }
 
-const SplineInterpolatorKnots & BaseSplineInterpolator::knots()
+const SplineInterpolatorKnots & BaseSplineInterpolator::knots() const
 {
     return mKnots;
 }
-const SplineInterpolatorKnot & BaseSplineInterpolator::knot(int i)
+const SplineInterpolatorKnot & BaseSplineInterpolator::knot(int i) const
 {
     return mKnots.at(i);
 }
 
-int BaseSplineInterpolator::size()
+int BaseSplineInterpolator::size() const
 {
     return mKnots.size();
 }
@@ -145,11 +145,11 @@ bool BaseSplineInterpolator::removeKnot(int i)
     return true;
 }
 
-SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::floorExtrapolationMode()
+SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::floorExtrapolationMode() const
 {
     return mFloorExtrapolationMode;
 }
-SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::ceilExtrapolationMode()
+SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::ceilExtrapolationMode() const
 {
     return mCeilExtrapolationMode;
 }

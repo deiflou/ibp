@@ -19,52 +19,35 @@
 **
 ****************************************************************************/
 
-#ifndef FILTER_H
-#define FILTER_H
-
-#include <QObject>
 #include <QHash>
-#include <QString>
-#include <QImage>
-#include <QSettings>
-#include <QWidget>
 
+#include "filter.h"
 #include "../imgproc/imagefilter.h"
 
 using namespace anitools::imgproc;
 
-class Filter : public ImageFilter
+#ifdef Q_OS_WIN32
+#define ANITOOLS_EXPORT __declspec(dllexport)
+#else
+#define ANITOOLS_EXPORT
+#endif
+
+extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
-    Q_OBJECT
+    QHash<QString, QString> info;
 
-public:
-    Filter();
-    ~Filter();
-    ImageFilter * clone();
-    QHash<QString, QString> info();
-    QImage process(const QImage & inputImage);
-    bool loadParameters(QSettings & s);
-    bool saveParameters(QSettings & s);
-    QWidget * widget(QWidget *parent = 0);
+    info.insert("id", "anitools.imagefilter.addnoise");
+    info.insert("version", "0.1.0");
+    info.insert("name", QObject::tr("Add Noise"));
+    info.insert("description", QObject::tr("Add uniform or gaussian distributed noise to the image"));
+    info.insert("tags", QObject::tr("Noise"));
+    info.insert("author", QObject::tr("Deif Lou"));
+    info.insert("copyright", QObject::tr(""));
+    info.insert("url", QObject::tr(""));
+    return info;
+}
 
-private:
-    double mRadius;
-    int mAmount;
-    int mThreshold;
-
-    int mThresholdLut[256];
-
-    void makeThresholdLut();
-
-signals:
-    void radiusChanged(double v);
-    void amountChanged(int v);
-    void thresholdChanged(int v);
-
-public slots:
-    void setRadius(double v);
-    void setAmount(int v);
-    void setThreshold(int v);
-};
-
-#endif // FILTER_H
+extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
+{
+    return new Filter();
+}

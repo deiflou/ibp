@@ -44,13 +44,13 @@ private:
 
 signals:
     void radiusChanged(double v);
-    void amountChanged(unsigned int v);
-    void thresholdChanged(unsigned int v);
+    void amountChanged(int v);
+    void thresholdChanged(int v);
 
 public slots:
     void setRadius(double v);
-    void setAmount(unsigned int v);
-    void setThreshold(unsigned int v);
+    void setAmount(int v);
+    void setThreshold(int v);
 
 private slots:
     void on_mSliderRadius_valueChanged(int v);
