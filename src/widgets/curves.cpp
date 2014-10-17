@@ -22,9 +22,11 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QVBoxLayout>
 #include <math.h>
 
 #include "curves.h"
+#include "../misc/util.h"
 #include "../misc/nearestneighborsplineinterpolator.h"
 #include "../misc/linearsplineinterpolator.h"
 #include "../misc/cubicsplineinterpolator.h"
@@ -32,364 +34,411 @@
 namespace anitools {
 namespace widgets {
 
+const QSize Curves::kKnotSize(10, 10);
+
 Curves::Curves(QWidget *parent) :
     QWidget(parent),
+    mZoomFactor(1.),
+    mOffset(0.),
+    mIsPeriodic(false),
+    mIsInputEnabled(true),
+    mInputStatus(NoStatus),
+    mKnotIndex(-1),
     mSplineInterpolator(0),
     mInterpolationMode(Cubic),
-    mKnotSelected(1),
-    mKnotPressed(0),
-    mBar1(256, 1, QImage::Format_ARGB32),
-    mBar2(256, 1, QImage::Format_ARGB32),
-    mFunctionValuesCalculated(false),
-    mShowBars(true)
+    mPaintDelegate(0),
+    mWidgetState(QStyle::State_None),
+    mKnotStates(2, QStyle::State_None),
+    mScrollBar(0),
+    mEmitScrolbarSignals(true)
 {
+    this->setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
-    for (int i = 0; i < 256; i++)
-    {
-        mBar1.setPixel(i, 0, qRgb(i, i, i));
-        mBar2.setPixel(i, 0, qRgb(i, i, i));
-    }
+
     mSplineInterpolator = new CubicSplineInterpolator();
+    mSplineInterpolator->addKnot(0., 0.);
+    mSplineInterpolator->addKnot(1., 1.);
+
+    mScrollBar = new QScrollBar(Qt::Horizontal, this);
+    mScrollBar->hide();
+    QVBoxLayout * layout = new QVBoxLayout(this);
+    layout->setContentsMargins(kLeftMargin, kTopMargin, kRightMargin, kBottomMargin);
+    layout->addStretch(1);
+    layout->addWidget(mScrollBar);
+
+    this->connect(mScrollBar, SIGNAL(valueChanged(int)), this, SLOT(On_mScrollBar_valueChanged(int)));
+    mScrollBar->installEventFilter(this);
+
+    updateScrollBar();
 }
 
-SplineInterpolatorKnots Curves::knots() const
+void Curves::updateScrollBar()
 {
-    return mSplineInterpolator->knots();
+    int w = graphRect().width();
+    mScrollBar->setRange(0, w * mZoomFactor - w);
+    mScrollBar->setValue(mOffset);
+    mScrollBar->setPageStep(w);
 }
 
-void Curves::setKnots(const SplineInterpolatorKnots &k)
+QRect Curves::rectWithoutMargins() const
 {
-    if (mSplineInterpolator->knots() == k)
+    return this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin,
+                                 -kBottomMargin - (mZoomFactor > 1. ? mScrollBar->height() : 0));
+}
+
+QRect Curves::graphRect() const
+{
+    return mPaintDelegate ? mPaintDelegate->graphRect(rectWithoutMargins()) : rectWithoutMargins();
+}
+
+int Curves::knotUnderCoords(const QPoint &p, bool addKnotIfPossible)
+{
+    QRect gr = graphRect();
+    double kx, ky;
+    const double rx = (kKnotSize.width() / 2.) / ((double)gr.width() * mZoomFactor);
+    const double ry = (kKnotSize.height() / 2.) / ((double)gr.height());
+    const double x = mapToSplineInterpolator(p.x());
+    const double y = 1. - (p.y() - gr.top()) / ((double)gr.height());
+    const double minimumDistance = kMinimumDistanceToAddKnot / ((double)gr.height());
+    int index = -1;
+
+    for (int i = 0; i < mSplineInterpolator->size() - mIsPeriodic ? 1 : 0; i++)
+    {
+        kx = mSplineInterpolator->knot(i).x();
+        ky = mSplineInterpolator->knot(i).y();
+        if (x > kx - rx && x < kx + rx && y > ky - ry && y < ky + ry)
+            return i;
+    }
+
+    if (addKnotIfPossible && mSplineInterpolator->size() < kMaximumNumberOfKnots &&
+        fabs(AT_clamp(0., mSplineInterpolator->f(x), 1.) - y) < minimumDistance)
+    {
+        if (!mSplineInterpolator->addKnot(x, y, false, &index) || index == -1)
+            return -1;
+
+        const double min = index > 0 ?
+                    mSplineInterpolator->knot(index - 1).x() + kMinimumDistanceBetweenKnots : 0.;
+        const double max = index < mSplineInterpolator->size() - 1 ?
+                    mSplineInterpolator->knot(index + 1).x() - kMinimumDistanceBetweenKnots : 1.;
+        mSplineInterpolator->setKnot(index, AT_clamp(min, x, max), AT_clamp(0., y, 1.));
+
+        if (mIsPeriodic && index == 0)
+            mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1,
+                                         AT_clamp(min, x, max) + 1., AT_clamp(0., y, 1.));
+
+        if (mKnotIndex >= index)
+            mKnotIndex++;
+        mKnotStates.insert(index, QStyle::State_None);
+        if (mPaintDelegate)
+            mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+        emit knotsChanged(mSplineInterpolator->knots());
+        update();
+        return index;
+    }
+
+    return -1;
+}
+
+void Curves::paintEvent(QPaintEvent *)
+{
+    if (!mPaintDelegate)
         return;
-
-    mSplineInterpolator->setKnots(k);
-    mKnotSelected = 1;
-    mFunctionValuesCalculated = false;
-    repaint();
-    emit knotsChanged(k);
-    emit selectedKnotChanged(mKnotSelected - 1);
-}
-
-Curves::InterpolationMode Curves::interpolationMode() const
-{
-    return mInterpolationMode;
-}
-
-void Curves::setInterpolationMode(InterpolationMode m)
-{
-    if (mInterpolationMode == m)
-        return;
-
-    mInterpolationMode = m;
-
-    SplineInterpolatorKnots k = mSplineInterpolator->knots();
-    delete mSplineInterpolator;
-
-    if (mInterpolationMode == NearestNeighbor)
-        mSplineInterpolator = new NearestNeighborSplineInterpolator();
-    else if (mInterpolationMode == Linear)
-        mSplineInterpolator = new LinearSplineInterpolator();
-    else
-        mSplineInterpolator = new CubicSplineInterpolator();
-
-    mSplineInterpolator->setKnots(k);
-
-    mFunctionValuesCalculated = false;
-    repaint();
-
-    emit interpolationModeChanged(m);
-}
-
-void Curves::paintEvent(QPaintEvent *e)
-{
-    Q_UNUSED(e)
 
     QPainter p(this);
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
-    QRect plotRect = r;
-    if (mShowBars)
-        plotRect.setHeight(plotRect.height() - TOTAL_BAR_SIZE - SEPARATOR_SIZE);
+    p.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
 
-    if (mSplineInterpolator && !mFunctionValuesCalculated)
-        calculateFunctionValues();
+    // shadow
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor(0, 0, 0, 32));
+    p.drawRoundedRect(r.adjusted(-2, -1, 2, 3), 3, 3);
+    p.drawRoundedRect(r.adjusted(-1, 0, 1, 2), 2, 2);
+    p.setBrush(QColor(0, 0, 0, 50));
+    p.drawRoundedRect(r.adjusted(0, 1, 0, 1), 1, 1);
 
-    // overall background
-    //p.fillRect(QRect(QPoint(0, 0), plotSize), palette().color(QPalette::Button));
+    // ----
+    QStyle::State widgetState = mWidgetState |
+                                (isEnabled() ? QStyle::State_Enabled : QStyle::State_None) |
+                                (hasFocus() ? QStyle::State_HasFocus : QStyle::State_None) |
+                                (!mIsInputEnabled ? QStyle::State_ReadOnly : QStyle::State_None);
 
-    // plot
-    if (plotRect.isValid())
-    {
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
-        p.setPen(Qt::NoPen);
-        // shadow
-        p.setBrush(QColor(0, 0, 0, 32));
-        p.drawRoundedRect(plotRect.adjusted(-2, -1, 2, 3), 3, 3);
-        p.drawRoundedRect(plotRect.adjusted(-1, 0, 1, 2), 2, 2);
-        p.setBrush(QColor(0, 0, 0, 50));
-        p.drawRoundedRect(plotRect.adjusted(0, 1, 0, 1), 1, 1);
-        // plot
-        p.setClipRect(plotRect);
-        // background
-        p.setBrush(palette().color(QPalette::Dark).darker(150));
-        p.drawRoundedRect(r, 1, 1);
-        // grid lines
-        p.setRenderHint(QPainter::Antialiasing, false);
-        p.setPen(QPen(palette().color(QPalette::Mid), 1, Qt::DotLine));
-        p.drawLine(plotRect.left() + plotRect.width() * 0.25, plotRect.top(),
-                   plotRect.left() + plotRect.width() * 0.25, plotRect.top() + plotRect.height());
-        p.drawLine(plotRect.left() + plotRect.width() * 0.50, plotRect.top(),
-                   plotRect.left() + plotRect.width() * 0.50, plotRect.top() + plotRect.height());
-        p.drawLine(plotRect.left() + plotRect.width() * 0.75, plotRect.top(),
-                   plotRect.left() + plotRect.width() * 0.75, plotRect.top() + plotRect.height());
-        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.25,
-                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.25);
-        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.50,
-                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.50);
-        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height() * 0.75,
-                   plotRect.left() + plotRect.width(), plotRect.top() + plotRect.height() * 0.75);
-        // base line
-        p.setRenderHint(QPainter::Antialiasing);
-        p.drawLine(plotRect.left(), plotRect.top() + plotRect.height(),
-                   plotRect.left() + plotRect.width(), plotRect.top());
+    // ----
+    if (mZoomFactor > 1.)
+        r.adjust(0, 0, 0, -mScrollBar->height());
 
-        if (mSplineInterpolator)
-        {
-            // curve
-            QPen pen(palette().color(QPalette::Light), 1.5);
-            pen.setCosmetic(true);
-            p.setPen(pen);
-            p.setBrush(QColor(255, 255, 255, 12));
-            p.translate(LEFT_MARGIN, TOP_MARGIN);
-            p.scale(plotRect.width(), -(plotRect.height()));
-            p.translate(0, -1.0);
-            p.drawPolygon(mPolygon);
-            p.resetTransform();
+    // clip
+    QPainterPath clippingPath;
+    clippingPath.addRoundedRect(r, 1, 1);
+    p.setClipPath(clippingPath);
 
-            // knots
-            SplineInterpolatorKnot knot;
-            QColor hlc = palette().highlight().color();
-            hlc.setAlpha(this->hasFocus() ? 212 : 128);
-            for (int i = 0; i < mSplineInterpolator->size(); i++)
-            {
-                knot = mSplineInterpolator->knot(i);
-                knot.setX(knot.x() * (plotRect.width() - 1) + LEFT_MARGIN);
-                knot.setY(plotRect.height() - 1 - knot.y() * (plotRect.height() - 1) + TOP_MARGIN);
-                p.setPen(palette().color(QPalette::Shadow));
-                p.setBrush(i == mKnotSelected - 1 ? hlc : QColor(0, 0, 0, 64));
-                p.drawEllipse(QPointF(knot.x(), knot.y()), KNOT_RADIUS, KNOT_RADIUS);
-                p.setPen(palette().color(QPalette::Light));
-                p.setBrush(Qt::transparent);
-                p.drawEllipse(QPointF(knot.x(), knot.y()), KNOT_RADIUS - 1, KNOT_RADIUS - 1);
-            }
-        }
+    // background
+    mPaintDelegate->paintBackground(p, this, r, widgetState);
 
-        p.setClipping(false);
-    }
+    // graph
+    QRect graphRectCopy = graphRect();
+    QPolygonF poly;
+    for (int i = r.left(); i <= r.right(); i++)
+        poly.append(QPointF(i, 1. - valueAt(mapToSplineInterpolator(i))));
+    mPaintDelegate->paintGraph(poly, p, this, r, widgetState);
 
-    p.setRenderHint(QPainter::Antialiasing, false);
-    p.setBrush(Qt::transparent);
-
-    // bars
-    if (mShowBars)
-    {
-        QRect barsRect = r.adjusted(0, plotRect.height() + SEPARATOR_SIZE, 0, 0);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
-        p.setPen(Qt::NoPen);
-        // shadow
-        p.setBrush(QColor(0, 0, 0, 16));
-        p.drawRoundedRect(barsRect.adjusted(-2, -1, 2, 3), 3, 3);
-        p.drawRoundedRect(barsRect.adjusted(-1, 0, 1, 2), 2, 2);
-        p.drawRoundedRect(barsRect.adjusted(0, 1, 0, 1), 1, 1);
-        // top bar
-        p.setClipRect(barsRect.adjusted(0, 0, 0, -BAR_SIZE + 1));
-        p.setBrushOrigin(barsRect.left() - 1, barsRect.top() - 1);
-        QBrush b(mBar1);
-        b.setTransform(QTransform(barsRect.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
-        p.setBrush(b);
-        p.drawRoundedRect(barsRect, 1, 1);
-        // bottom bar
-        p.setClipRect(barsRect.adjusted(0, BAR_SIZE, 0, 0));
-        b.setTextureImage(mBar2);
-        p.setBrush(b);
-        p.drawRoundedRect(barsRect, 1, 1);
-    }
+    // knots
+    QVector<QPointF> knotPositions;
+    if (graphRectCopy.width() >= kMinimumSizeForInput &&
+        graphRectCopy.height() >= kMinimumSizeForInput)
+        for (int i = 0; i < mSplineInterpolator->size() - mIsPeriodic ? 1 : 0; i++)
+            knotPositions << QPointF(mapFromSplineInterpolator(mSplineInterpolator->knot(i).x()),
+                                     (1. - mSplineInterpolator->knot(i).y()) * graphRectCopy.height() +
+                                     graphRectCopy.top());
+    mPaintDelegate->paintKnots(knotPositions, mKnotStates, kKnotSize, p, this, r, widgetState);
 }
 
-void Curves::mousePressEvent(QMouseEvent *e)
+void Curves::mousePressEvent(QMouseEvent * e)
 {
-    if (!mSplineInterpolator) return;
-    if (mKnotPressed != 0 || (!(e->buttons() & Qt::LeftButton) && !(e->buttons() & Qt::RightButton)))
+    if (!mIsInputEnabled || mInputStatus != NoStatus)
         return;
 
-    QSize plotSize = this->size();
-    if (mShowBars)
+    int index;
+    bool b = false;
+
+    if (e->button() == Qt::LeftButton)
     {
-        plotSize.setHeight(plotSize.height() - TOTAL_BAR_SIZE - SEPARATOR_SIZE);
-        if (e->y() >= plotSize.height()) return;
+        if (mKnotIndex > -1)
+            mKnotStates[mKnotIndex] &= ~QStyle::State_Selected;
+
+        // add a knot and check if there is a knot in this position
+        index = knotUnderCoords(e->pos(), true);
+        b = index != mKnotIndex;
+        if (index != -1)
+        {
+            mKnotIndex = index;
+            mInputStatus = DraggingKnot;
+            mKnotStates[mKnotIndex] |= QStyle::State_Selected | QStyle::State_Sunken;
+            update();
+            if (b)
+                emit selectedKnotChanged(mKnotIndex);
+            return;
+        }
+        // clicked in non-input area, deselect selected item
+        mKnotIndex = -1;
+        mInputStatus = NoStatus;
+        update();
+        if (b)
+            emit selectedKnotChanged(mKnotIndex);
+        return;
     }
 
-    int knotDist;
-    int knotPressed = 0;
-    SplineInterpolatorKnot knot;
-    for (int i = 0; i < mSplineInterpolator->size(); i++)
+    if (e->button() == Qt::RightButton && mSplineInterpolator->size() > (mIsPeriodic ? 3 : 2))
     {
-        knot = mSplineInterpolator->knot(i);
-        knot.setX(knot.x() * (plotSize.width() - 1));
-        knot.setY((plotSize.height() -1) - knot.y() * (plotSize.height() -1));
-
-        knotDist = sqrt((e->x() - knot.x()) * (e->x() - knot.x()) +
-                        (e->y() - knot.y()) * (e->y() - knot.y()));
-        if (knotDist <= KNOT_MOUSE_DISTANCE)
+        index = knotUnderCoords(e->pos());
+        if (index != -1)
         {
-            knotPressed = i + 1;
-            break;
-        }
-    }
-
-    if (e->buttons() & Qt::LeftButton)
-    {
-        mKnotPressed = knotPressed;
-        if (mKnotPressed > 0 && mKnotPressed != mKnotSelected)
-        {
-            mKnotSelected = mKnotPressed;
-            repaint();
-            emit selectedKnotChanged(mKnotSelected - 1);
-        }
-        else if (mKnotPressed == 0 && mSplineInterpolator->size() < MAX_N_KNOTS)
-        {
-            double x, y;
-            x = (double)e->x() / (plotSize.width() - 1);
-            y = (double)((plotSize.height() - 1) - e->y()) / (plotSize.height() - 1);
-            for (int i = 0; i < mSplineInterpolator->size() - 1; i++)
+            mKnotStates.remove(index);
+            if (index == mKnotIndex)
             {
-                if (x > mSplineInterpolator->knot(i).x() + MINIMUM_DISTANCE_BETWEEN_KNOTS &&
-                    x < mSplineInterpolator->knot(i + 1).x() - MINIMUM_DISTANCE_BETWEEN_KNOTS)
-                {
-                    mSplineInterpolator->addKnot(SplineInterpolatorKnot(x, y));
-                    mKnotSelected = mKnotPressed = i + 2;
-                    mFunctionValuesCalculated = false;
-                    repaint();
-                    emit knotsChanged(mSplineInterpolator->knots());
-                    break;
-                }
+                mKnotIndex = -1;
+                b = true;
             }
-        }
-    }
-    else
-    {
-        if (knotPressed > 1 && knotPressed < mSplineInterpolator->size())
-        {
-            mSplineInterpolator->removeKnot(knotPressed - 1);
-            if (mKnotSelected >= knotPressed) mKnotSelected--;
-            mFunctionValuesCalculated = false;
-            repaint();
-            emit selectedKnotChanged(mKnotSelected - 1);
+            else if (mKnotIndex > index)
+            {
+                mKnotIndex--;
+                b = true;
+            }
+
+            mSplineInterpolator->removeKnot(index);
+
+            if (mIsPeriodic && index == 0)
+                mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1,
+                                             mSplineInterpolator->knot(0).x() + 1.,
+                                             mSplineInterpolator->knot(0).y());
+
+            if (mPaintDelegate)
+                mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+            update();
             emit knotsChanged(mSplineInterpolator->knots());
+            if (b)
+                emit selectedKnotChanged(mKnotIndex);
+            return;
         }
     }
 }
-void Curves::mouseReleaseEvent(QMouseEvent *e)
+
+void Curves::mouseReleaseEvent(QMouseEvent * e)
 {
-    if (!mSplineInterpolator) return;
-    if (e->buttons() & Qt::LeftButton)
+    if (!mIsInputEnabled)
         return;
 
-    mKnotPressed = 0;
+    if (e->button() == Qt::LeftButton)
+    {
+        for (int i = 0; i < mKnotStates.size(); i++)
+            mKnotStates[i] &= ~QStyle::State_Sunken;
+        mInputStatus = NoStatus;
+        mouseMoveEvent(e);
+    }
 }
-void Curves::mouseMoveEvent(QMouseEvent *e)
+
+void Curves::mouseMoveEvent(QMouseEvent * e)
 {
-    if (!mSplineInterpolator) return;
-    if (mKnotPressed == 0 || !(e->buttons() & Qt::LeftButton))
+    if (!mIsInputEnabled)
         return;
 
-    QSize plotSize = this->size();
-    if (mShowBars) plotSize.setHeight(plotSize.height() - TOTAL_BAR_SIZE);
+    mWidgetState = mWidgetState | QStyle::State_MouseOver;
 
-    double x, y, minX, maxX;
+    // dragging knot
+    if (mInputStatus == DraggingKnot && mKnotIndex > -1 && e->buttons() & Qt::LeftButton)
+    {
+        QRect gr = graphRect();
+        QPointF position = e->pos();
 
-    x = (double)e->x() / (plotSize.width() - 1);
-    y = (double)((plotSize.height() - 1) - e->y()) / (plotSize.height() - 1);
+        const double min = mKnotIndex > 0 ?
+                    mSplineInterpolator->knot(mKnotIndex - 1).x() + kMinimumDistanceBetweenKnots : 0.;
+        const double max = AT_minimum(1., mKnotIndex < mSplineInterpolator->size() - 1 ?
+                    mSplineInterpolator->knot(mKnotIndex + 1).x() - kMinimumDistanceBetweenKnots : 1.);
 
-    minX = mKnotSelected == 1 ?
-                0.0 : mSplineInterpolator->knot(mKnotSelected - 2).x() + MINIMUM_DISTANCE_BETWEEN_KNOTS;
-    maxX = mKnotSelected == mSplineInterpolator->size() ?
-                1.0 : mSplineInterpolator->knot(mKnotSelected).x() - MINIMUM_DISTANCE_BETWEEN_KNOTS;
+        position.setX(AT_clamp(min, mapToSplineInterpolator(position.x()), max));
+        position.setY(AT_clamp(0., 1. - (position.y() - gr.top()) / (double)gr.height(), 1.));
+        mSplineInterpolator->setKnot(mKnotIndex, position.x(), position.y());
 
-    mSplineInterpolator->setKnot(mKnotSelected - 1, qBound(minX, x, maxX), qBound(0.0, y, 1.0));
+        if (mIsPeriodic && mKnotIndex == 0)
+            mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1,
+                                         AT_maximum(1.001, position.x() + 1.),
+                                         position.y());
 
-    mFunctionValuesCalculated = false;
+        if (mPaintDelegate)
+            mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
 
-    repaint();
+        update();
+        emit knotsChanged(mSplineInterpolator->knots());
+        return;
+    }
 
-    emit knotsChanged(mSplineInterpolator->knots());
+    // not dragging
+    this->unsetCursor();
+
+    if (!rectWithoutMargins().contains(e->pos()))
+        return;
+
+    for (int i = 0; i < mKnotStates.size(); i++)
+        mKnotStates[i] &= ~QStyle::State_MouseOver;
+
+    const int index = knotUnderCoords(e->pos());
+    if (index != -1)
+        mKnotStates[index] |= QStyle::State_MouseOver;
+
+    update();
 }
-void Curves::focusInEvent(QFocusEvent *e)
+
+void Curves::leaveEvent(QEvent *)
 {
-    repaint();
-    QWidget::focusInEvent(e);
+    mWidgetState = mWidgetState & ~QStyle::State_MouseOver;
+    for (int i = 0; i < mKnotStates.size(); i++)
+        mKnotStates[i] &= ~QStyle::State_MouseOver;
+    unsetCursor();
+    update();
 }
-void Curves::focusOutEvent(QFocusEvent *e)
+
+void Curves::resizeEvent(QResizeEvent * e)
 {
-    repaint();
-    QWidget::focusOutEvent(e);
+    if (e->oldSize().isEmpty())
+        return;
+    setOffset(mOffset * e->size().width() / e->oldSize().width());
+}
+
+bool Curves::eventFilter(QObject *o, QEvent *e)
+{
+    if (o == mScrollBar && e->type() == QEvent::Enter)
+        leaveEvent(e);
+    return false;
 }
 
 void Curves::keyPressEvent(QKeyEvent *e)
 {
-    if (!mSplineInterpolator) return;
-    double clampValue;
-    SplineInterpolatorKnot k = mSplineInterpolator->knot(mKnotSelected - 1);
+    if (mKnotIndex == -1)
+        return;
+
+    SplineInterpolatorKnot k = mSplineInterpolator->knot(mKnotIndex);
+    const double min = mKnotIndex > 0 ?
+                mSplineInterpolator->knot(mKnotIndex - 1).x() + kMinimumDistanceBetweenKnots : 0.;
+    const double max = AT_minimum(1., mKnotIndex < mSplineInterpolator->size() - 1 ?
+                mSplineInterpolator->knot(mKnotIndex + 1).x() - kMinimumDistanceBetweenKnots : 1.);
+
     switch (e->key())
     {
     case Qt::Key_Right:
         if (e->modifiers() & Qt::ControlModifier)
         {
-            mKnotSelected++;
-            if (mKnotSelected > mSplineInterpolator->size()) mKnotSelected = mSplineInterpolator->size();
-            repaint();
-            emit selectedKnotChanged(mKnotSelected - 1);
+            mKnotStates[mKnotIndex] &= ~QStyle::State_Selected;
+
+            mKnotIndex++;
+            if (mKnotIndex == mSplineInterpolator->size() - (mIsPeriodic ? 1 : 0))
+                mKnotIndex--;
+
+            mKnotStates[mKnotIndex] |= QStyle::State_Selected;
+            update();
+            emit selectedKnotChanged(mKnotIndex);
         }
         else
         {
-            clampValue = mKnotSelected == mSplineInterpolator->size() ?
-                        1.0 :
-                        mSplineInterpolator->knot(mKnotSelected).x() - MINIMUM_DISTANCE_BETWEEN_KNOTS;
-            mSplineInterpolator->setKnot(mKnotSelected - 1, qMin(k.x() + KEYPRESS_INCREMENT, clampValue), k.y());
-            mFunctionValuesCalculated = false;
-            repaint();
+            k.setX(AT_clamp(min, k.x() + kKeypressIncrement, max));
+            mSplineInterpolator->setKnot(mKnotIndex, k);
+
+            if (mIsPeriodic && mKnotIndex == 0)
+                mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1, AT_maximum(1.001, k.x() + 1.), k.y());
+
+            if (mPaintDelegate)
+                mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+            update();
             emit knotsChanged(mSplineInterpolator->knots());
         }
         break;
     case Qt::Key_Left:
         if (e->modifiers() & Qt::ControlModifier)
         {
-            mKnotSelected--;
-            if (mKnotSelected < 1) mKnotSelected = 1;
-            repaint();
-            emit selectedKnotChanged(mKnotSelected - 1);
+            mKnotStates[mKnotIndex] &= ~QStyle::State_Selected;
+
+            mKnotIndex--;
+            if (mKnotIndex == -1)
+                mKnotIndex = 0;
+
+            mKnotStates[mKnotIndex] |= QStyle::State_Selected;
+            update();
+            emit selectedKnotChanged(mKnotIndex);
         }
         else
         {
-            clampValue = mKnotSelected == 1 ?
-                        0.0 : mSplineInterpolator->knot(mKnotSelected - 2).x() + MINIMUM_DISTANCE_BETWEEN_KNOTS;
-            mSplineInterpolator->setKnot(mKnotSelected - 1, qMax(k.x() - KEYPRESS_INCREMENT, clampValue), k.y());
-            mFunctionValuesCalculated = false;
-            repaint();
+            k.setX(AT_clamp(min, k.x() - kKeypressIncrement, max));
+            mSplineInterpolator->setKnot(mKnotIndex, k);
+
+            if (mIsPeriodic && mKnotIndex == 0)
+                mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1, AT_maximum(1.001, k.x() + 1.), k.y());
+
+            if (mPaintDelegate)
+                mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+            update();
             emit knotsChanged(mSplineInterpolator->knots());
         }
         break;
     case Qt::Key_Up:
-        mSplineInterpolator->setKnot(mKnotSelected - 1, k.x(), qMin(k.y() + KEYPRESS_INCREMENT, 1.0));
-        mFunctionValuesCalculated = false;
-        repaint();
+        k.setY(AT_minimum(k.y() + kKeypressIncrement, 1.));
+        mSplineInterpolator->setKnot(mKnotIndex, k);
+
+        if (mIsPeriodic && mKnotIndex == 0)
+            mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1, k.x() + 1., k.y());
+
+        if (mPaintDelegate)
+            mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+        update();
         emit knotsChanged(mSplineInterpolator->knots());
         break;
     case Qt::Key_Down:
-        mSplineInterpolator->setKnot(mKnotSelected - 1, k.x(), qMax(k.y() - KEYPRESS_INCREMENT, 0.0));
-        mFunctionValuesCalculated = false;
-        repaint();
+        k.setY(AT_maximum(k.y() - kKeypressIncrement, 0.));
+        mSplineInterpolator->setKnot(mKnotIndex, k);
+
+        if (mIsPeriodic && mKnotIndex == 0)
+            mSplineInterpolator->setKnot(mSplineInterpolator->size() - 1, k.x() + 1., k.y());
+
+        if (mPaintDelegate)
+            mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+        update();
         emit knotsChanged(mSplineInterpolator->knots());
         break;
     default:
@@ -398,89 +447,250 @@ void Curves::keyPressEvent(QKeyEvent *e)
     }
 }
 
-void Curves::calculateFunctionValues()
+double Curves::zoomFactor() const
 {
-    if (mSplineInterpolator->size() < 1) return;
-
-    const double step = 1.0 / 255.0;
-    double xPos, yPos;
-    int i, gray;
-    mPolygon.clear();
-    for (i = 0; i < mSplineInterpolator->size() - 1; i++)
-    {
-        for (xPos = mSplineInterpolator->knot(i).x(); xPos < mSplineInterpolator->knot(i + 1).x(); xPos += step)
-        {
-            yPos = mSplineInterpolator->f(xPos);
-            mPolygon.append(QPointF(xPos, yPos));
-            gray = qBound(0.0, round(yPos * 255.0), 255.0);
-            mBar2.setPixel(round(xPos * 255.0), 0, qRgb(gray, gray, gray));
-        }
-    }
-
-    mPolygon.prepend(QPointF(-0.01, mSplineInterpolator->f(-0.01)));
-    mPolygon.prepend(QPointF(-0.01, -0.01));
-    mPolygon.append(mSplineInterpolator->knot(mSplineInterpolator->size() - 1));
-    mPolygon.append(QPointF(1.01, mSplineInterpolator->f(1.01)));
-    mPolygon.append(QPointF(1.01, -0.01));
-
-    gray = qBound(0.0, round(mSplineInterpolator->knot(0).y() * 255.0), 255.0);
-    for (i = 0; i < round(mSplineInterpolator->knot(0).x() * 255.0); i++)
-        mBar2.setPixel(i, 0, qRgb(gray, gray, gray));
-    gray = qBound(0.0, round(mSplineInterpolator->knot(mSplineInterpolator->size() - 1).y() * 255.0), 255.0);
-    for (i = round(mSplineInterpolator->knot(mSplineInterpolator->size() - 1).x() * 255.0); i < 256; i++)
-        mBar2.setPixel(i, 0, qRgb(gray, gray, gray));
-
-    mFunctionValuesCalculated = true;
+    return mZoomFactor;
 }
 
-
-QSize Curves::optimalSizeForWidth(int w) const
+double Curves::offset() const
 {
-    return QSize(w, mShowBars ? w + TOTAL_BAR_SIZE : w);
+    return mOffset;
+}
+
+bool Curves::isPeriodic() const
+{
+    return mIsPeriodic;
+}
+
+bool Curves::isInputEnabled() const
+{
+    return mIsInputEnabled;
+}
+
+const SplineInterpolatorKnots & Curves::knots() const
+{
+    return mSplineInterpolator->knots();
 }
 
 int Curves::selectedKnotIndex() const
 {
-    return mKnotSelected - 1;
+    return mKnotIndex;
 }
 
-SplineInterpolatorKnot Curves::selectedKnot() const
+const SplineInterpolatorKnot & Curves::selectedKnot() const
 {
-    return mSplineInterpolator->knot(selectedKnotIndex());
+    return mSplineInterpolator->knot(mKnotIndex);
+}
+
+Curves::InterpolationMode Curves::interpolationMode() const
+{
+    return mInterpolationMode;
+}
+
+CurvesPaintDelegate *Curves::paintDelegate() const
+{
+    return mPaintDelegate;
+}
+
+double Curves::valueAt(double v)
+{
+    return AT_clamp(0., mSplineInterpolator->f(v), 1.);
+}
+
+double Curves::mapToSplineInterpolator(double v) const
+{
+    QRect r = graphRect();
+    return (v - r.left() + mOffset) / ((r.width() - 1) * mZoomFactor);
+}
+
+double Curves::mapFromSplineInterpolator(double v) const
+{
+    QRect r = graphRect();
+    return (v * (r.width() - 1) * mZoomFactor) - mOffset + r.left();
+}
+
+void Curves::setZoomFactor(double v)
+{
+    if (qFuzzyCompare(mZoomFactor, v))
+        return;
+    double oldZoomFactor = mZoomFactor;
+    mZoomFactor = v;
+    if (v > 1.)
+        setOffset(mOffset * mZoomFactor / oldZoomFactor);
+    else
+        center();
+    mScrollBar->setVisible(mZoomFactor > 1.);
+    updateScrollBar();
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::ZoomFactorChanged, this, rectWithoutMargins());
+    update();
+    emit zoomFactorChanged(v);
+}
+
+void Curves::setOffset(double v)
+{
+    if (qFuzzyCompare(mOffset, v))
+        return;
+    int w = graphRect().width();
+    mOffset = AT_clamp(0., v, w * mZoomFactor - w);
+    mEmitScrolbarSignals = false;
+    updateScrollBar();
+    mEmitScrolbarSignals = true;
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::OffsetChanged, this, rectWithoutMargins());
+    update();
+    emit offsetChanged(v);
+}
+
+void Curves::center()
+{
+    int w = graphRect().width();
+    setOffset((w * mZoomFactor - w) / 2);
+}
+
+void Curves::fit()
+{
+    setZoomFactor(1.);
+    center();
+}
+
+void Curves::setPeriodic(bool v)
+{
+    if (mIsPeriodic == v)
+        return;
+    mIsPeriodic = v;
+
+    if (mIsPeriodic)
+    {
+        mSplineInterpolator->addKnot(AT_maximum(1.001, mSplineInterpolator->knot(0).x() + 1.),
+                                     mSplineInterpolator->knot(0).y());
+        mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Repeat,
+                                                  SplineInterpolator::ExtrapolationMode_Repeat);
+        if (mInterpolationMode == Cubic)
+            ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
+                                                    CubicSplineInterpolator::EndPointConditions_Periodic,
+                                                    CubicSplineInterpolator::EndPointConditions_Periodic);
+    }
+    else
+    {
+        mSplineInterpolator->removeKnot(mSplineInterpolator->size() - 1);
+        mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Clamp,
+                                                  SplineInterpolator::ExtrapolationMode_Clamp);
+        ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
+                                                  CubicSplineInterpolator::EndPointConditions_Natural,
+                                                  CubicSplineInterpolator::EndPointConditions_Natural);
+    }
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::PeriodicChanged, this, rectWithoutMargins());
+
+    update();
+    emit periodicChanged(v);
+}
+
+void Curves::setInputEnabled(bool v)
+{
+    if (mIsInputEnabled == v)
+        return;
+    mIsInputEnabled = v;
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::InputEnabledChanged, this, rectWithoutMargins());
+    update();
+    emit inputEnabledChanged(v);
+}
+
+void Curves::setKnots(const SplineInterpolatorKnots &k)
+{
+    mSplineInterpolator->setKnots(k);
+    if (mKnotIndex != -1)
+        mKnotStates[mKnotIndex] &= ~QStyle::State_Selected;
+    mKnotIndex = -1;
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+    update();
+    emit knotsChanged(k);
+    emit selectedKnotChanged(mKnotIndex);
 }
 
 void Curves::setSelectedKnot(double x, double y)
 {
-    double minX, maxX;
-    minX = mKnotSelected == 1 ?
-             0.0 : mSplineInterpolator->knot(mKnotSelected - 2).x() + MINIMUM_DISTANCE_BETWEEN_KNOTS;
-    maxX = mKnotSelected == mSplineInterpolator->size() ?
-             1.0 : mSplineInterpolator->knot(mKnotSelected).x() - MINIMUM_DISTANCE_BETWEEN_KNOTS;
+    const double min = mKnotIndex > 0 ?
+                mSplineInterpolator->knot(mKnotIndex - 1).x() + kMinimumDistanceBetweenKnots : 0.;
+    const double max = mKnotIndex < mSplineInterpolator->size() - 1 ?
+                mSplineInterpolator->knot(mKnotIndex + 1).x() - kMinimumDistanceBetweenKnots : 1.;
 
-    mSplineInterpolator->setKnot(mKnotSelected - 1, qBound(minX, x, maxX), qBound(0.0, y, 1.0));
+    mSplineInterpolator->setKnot(mKnotIndex, AT_clamp(min, x, max), AT_clamp(0., y, 1.));
 
-    mFunctionValuesCalculated = false;
-
-    repaint();
-
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+    update();
     emit knotsChanged(mSplineInterpolator->knots());
 }
 
-void Curves::setSelectedKnot(const SplineInterpolatorKnot & k)
+void Curves::setSelectedKnot(const SplineInterpolatorKnot &k)
 {
-    double minX, maxX;
-    minX = mKnotSelected == 1 ?
-             0.0 : mSplineInterpolator->knot(mKnotSelected - 2).x() + MINIMUM_DISTANCE_BETWEEN_KNOTS;
-    maxX = mKnotSelected == mSplineInterpolator->size() ?
-             1.0 : mSplineInterpolator->knot(mKnotSelected).x() - MINIMUM_DISTANCE_BETWEEN_KNOTS;
+    setSelectedKnot(k.x(), k.y());
+}
 
-    mSplineInterpolator->setKnot(mKnotSelected - 1, qBound(minX, k.x(), maxX), qBound(0.0, k.y(), 1.0));
+void Curves::setInterpolationMode(Curves::InterpolationMode m)
+{
+    if (mInterpolationMode == m)
+        return;
 
-    mFunctionValuesCalculated = false;
+    mInterpolationMode = m;
 
-    repaint();
+    SplineInterpolator * tmpSplineInterpolator = mSplineInterpolator;
 
-    emit knotsChanged(mSplineInterpolator->knots());
+    if (mInterpolationMode == NearestNeighbor)
+        mSplineInterpolator = new NearestNeighborSplineInterpolator();
+    else if (mInterpolationMode == Linear)
+        mSplineInterpolator = new LinearSplineInterpolator();
+    else
+    {
+        mSplineInterpolator = new CubicSplineInterpolator();
+        ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
+                    mIsPeriodic ? CubicSplineInterpolator::EndPointConditions_Periodic :
+                                  CubicSplineInterpolator::EndPointConditions_Natural,
+                    mIsPeriodic ? CubicSplineInterpolator::EndPointConditions_Periodic :
+                                  CubicSplineInterpolator::EndPointConditions_Natural);
+    }
+
+    mSplineInterpolator->setKnots(tmpSplineInterpolator->knots());
+    mSplineInterpolator->setExtrapolationMode(tmpSplineInterpolator->floorExtrapolationMode(),
+                                              tmpSplineInterpolator->ceilExtrapolationMode(),
+                                              tmpSplineInterpolator->floorExtrapolationValue(),
+                                              tmpSplineInterpolator->ceilExtrapolationValue());
+    delete tmpSplineInterpolator;
+
+    if (mPaintDelegate)
+        mPaintDelegate->update(CurvesPaintDelegate::InterpolationModeChanged, this, rectWithoutMargins());
+    update();
+    emit interpolationModeChanged(m);
+}
+
+void Curves::setPaintDelegate(CurvesPaintDelegate *pd)
+{
+    if (pd == mPaintDelegate)
+        return;
+    mPaintDelegate = pd;
+    if (mPaintDelegate)
+    {
+        mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
+        mPaintDelegate->update(CurvesPaintDelegate::ZoomFactorChanged, this, rectWithoutMargins());
+        mPaintDelegate->update(CurvesPaintDelegate::OffsetChanged, this, rectWithoutMargins());
+        mPaintDelegate->update(CurvesPaintDelegate::PeriodicChanged, this, rectWithoutMargins());
+        mPaintDelegate->update(CurvesPaintDelegate::InputEnabledChanged, this, rectWithoutMargins());
+        mPaintDelegate->update(CurvesPaintDelegate::InterpolationModeChanged, this, rectWithoutMargins());
+
+        this->connect(mPaintDelegate, SIGNAL(updateRequired()), this, SLOT(update()));
+    }
+    update();
+    emit paintDelegateChanged(pd);
+}
+
+void Curves::On_mScrollBar_valueChanged(int v)
+{
+    if (mEmitScrolbarSignals)
+        setOffset(v);
 }
 
 }}

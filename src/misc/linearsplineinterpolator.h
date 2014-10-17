@@ -36,8 +36,6 @@ public:
 
 private:
     int getPiece(double x);
-    double floorExtrapolate(double x);
-    double ceilExtrapolate(double x);
 };
 
 }}

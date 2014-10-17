@@ -25,6 +25,9 @@
 #include <QWidget>
 
 #include "filter.h"
+#include "../widgets/levelscurvespaintdelegate.h"
+
+using namespace anitools::widgets;
 
 namespace Ui {
 class FilterWidget;
@@ -41,6 +44,7 @@ public:
 private:
     Ui::FilterWidget *ui;
     bool mEmitSignals;
+    LevelsCurvesPaintDelegate * mCurvesPaintDelegate;
 
 signals:
     void workingChannelChanged(Filter::WorkingChannel s);

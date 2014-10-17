@@ -63,7 +63,8 @@ SOURCES += \
     ../../src/widgets/anchorpositionbox.cpp \
     ../../src/widgets/curves.cpp \
     ../../src/widgets/style.cpp \
-    ../../src/widgets/filedialog.cpp
+    ../../src/widgets/filedialog.cpp \
+    ../../src/widgets/levelscurvespaintdelegate.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -86,7 +87,8 @@ HEADERS += \
     ../../src/widgets/anchorpositionbox.h \
     ../../src/widgets/curves.h \
     ../../src/widgets/style.h \
-    ../../src/widgets/filedialog.h
+    ../../src/widgets/filedialog.h \
+    ../../src/widgets/levelscurvespaintdelegate.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc

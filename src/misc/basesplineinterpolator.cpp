@@ -26,8 +26,10 @@ namespace anitools {
 namespace misc {
 
 BaseSplineInterpolator::BaseSplineInterpolator() :
-    mFloorExtrapolationMode(Clamp),
-    mCeilExtrapolationMode(Clamp)
+    mFloorExtrapolationMode(ExtrapolationMode_Clamp),
+    mCeilExtrapolationMode(ExtrapolationMode_Clamp),
+    mFloorExtrapolationValue(0.),
+    mCeilExtrapolationValue(0.)
 {
 }
 
@@ -98,13 +100,15 @@ bool BaseSplineInterpolator::setKnot(double x, double nx, double ny)
     return setKnot(x, SplineInterpolatorKnot(nx, ny));
 }
 
-bool BaseSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool replace)
+bool BaseSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool replace, int * index)
 {
     for (int i = 0; i < mKnots.size(); i++)
     {
         if (k.x() < mKnots[i].x())
         {
             mKnots.insert(i, k);
+            if (index)
+                *index = i;
             return true;
         }
         else if (k.x() == mKnots[i].x())
@@ -112,18 +116,22 @@ bool BaseSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool repla
             if (replace)
             {
                 mKnots[i].setY(k.y());
+                if (index)
+                    *index = i;
                 return true;
             }
             return false;
         }
     }
     mKnots.insert(mKnots.size(), k);
+    if (index)
+        *index = mKnots.size() - 1;
     return true;
 }
 
-bool BaseSplineInterpolator::addKnot(double nx, double ny, bool replace)
+bool BaseSplineInterpolator::addKnot(double nx, double ny, bool replace, int * index)
 {
-    return addKnot(SplineInterpolatorKnot(nx, ny), replace);
+    return addKnot(SplineInterpolatorKnot(nx, ny), replace, index);
 }
 
 bool BaseSplineInterpolator::removeKnot(double x)
@@ -153,10 +161,20 @@ SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::ceilExtrapolationM
 {
     return mCeilExtrapolationMode;
 }
-void BaseSplineInterpolator::setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c)
+double BaseSplineInterpolator::floorExtrapolationValue() const
+{
+    return mFloorExtrapolationValue;
+}
+double BaseSplineInterpolator::ceilExtrapolationValue() const
+{
+    return mCeilExtrapolationValue;
+}
+void BaseSplineInterpolator::setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c, double fv, double cv)
 {
     mFloorExtrapolationMode = f;
     mCeilExtrapolationMode = c;
+    mFloorExtrapolationValue = fv;
+    mCeilExtrapolationValue = cv;
 }
 
 }}

@@ -42,8 +42,8 @@ public:
     virtual bool setKnot(int i, double nx, double ny);
     virtual bool setKnot(double x, const SplineInterpolatorKnot &k);
     virtual bool setKnot(double x, double nx, double ny);
-    virtual bool addKnot(const SplineInterpolatorKnot &k, bool replace = false);
-    virtual bool addKnot(double nx, double ny, bool replace = false);
+    virtual bool addKnot(const SplineInterpolatorKnot &k, bool replace = false, int * index = 0);
+    virtual bool addKnot(double nx, double ny, bool replace = false, int * index = 0);
     virtual bool removeKnot(double x);
     virtual bool removeKnot(int i);
 
@@ -51,12 +51,16 @@ public:
 
     virtual ExtrapolationMode floorExtrapolationMode() const;
     virtual ExtrapolationMode ceilExtrapolationMode() const;
-    virtual void setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c);
+    virtual double floorExtrapolationValue() const;
+    virtual double ceilExtrapolationValue() const;
+    virtual void setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c, double fv = 0., double cv = 0.);
 
 protected:
     SplineInterpolatorKnots mKnots;
     ExtrapolationMode mFloorExtrapolationMode;
     ExtrapolationMode mCeilExtrapolationMode;
+    double mFloorExtrapolationValue;
+    double mCeilExtrapolationValue;
 };
 
 }}

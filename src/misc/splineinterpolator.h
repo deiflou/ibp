@@ -39,7 +39,11 @@ class SplineInterpolator
 public:
     enum ExtrapolationMode
     {
-        Clamp = 0
+        ExtrapolationMode_Constant,
+        ExtrapolationMode_Clamp,
+        ExtrapolationMode_FollowTangent,
+        ExtrapolationMode_Repeat,
+        ExtrapolationMode_Mirror
     };
 
     virtual ~SplineInterpolator() {}
@@ -52,8 +56,8 @@ public:
     virtual bool setKnot(int i, double nx, double ny) = 0;
     virtual bool setKnot(double x, const SplineInterpolatorKnot &k) = 0;
     virtual bool setKnot(double x, double nx, double ny) = 0;
-    virtual bool addKnot(const SplineInterpolatorKnot &k, bool replace = false) = 0;
-    virtual bool addKnot(double nx, double ny, bool replace = false) = 0;
+    virtual bool addKnot(const SplineInterpolatorKnot &k, bool replace = false, int * index = 0) = 0;
+    virtual bool addKnot(double nx, double ny, bool replace = false, int * index = 0) = 0;
     virtual bool removeKnot(double x) = 0;
     virtual bool removeKnot(int i) = 0;
 
@@ -61,7 +65,9 @@ public:
 
     virtual ExtrapolationMode floorExtrapolationMode() const = 0;
     virtual ExtrapolationMode ceilExtrapolationMode() const = 0;
-    virtual void setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c) = 0;
+    virtual double floorExtrapolationValue() const = 0;
+    virtual double ceilExtrapolationValue() const = 0;
+    virtual void setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c, double fv = 0., double cv = 0.) = 0;
 };
 
 }}

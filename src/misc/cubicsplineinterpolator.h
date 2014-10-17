@@ -19,6 +19,17 @@
 **
 ****************************************************************************/
 
+/****************************************************************************
+**
+** The research and algorithms in part of this class where obtained from
+** the following book:
+**
+** Numerical Methods Using Matlab, 4th Edition, 2004
+** John H. Mathews and Kurtis K. Fink
+** ISBN: 0-13-065248-2
+**
+****************************************************************************/
+
 #ifndef ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR_H
 #define ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR_H
 
@@ -30,6 +41,40 @@ namespace misc {
 class CubicSplineInterpolator : public BaseSplineInterpolator
 {
 public:
+    enum EndPointConditions
+    {
+        // natural = relaxed curve = 2nd derivatives are 0 at end points.
+        // The natural spline is the curve obtained by forcing a flexible elastic rod
+        // through the data points but letting the slope at the ends be free to equilibrate to the
+        // position that minimizes the oscillatory behavior of the curve. It is useful for fitting a
+        // curve to experimental data that are significant to several significant digits.
+        EndPointConditions_Natural,
+        // The 2dn derivatives at the end points are calculated from the
+        // user given 1st derivatives.
+        // The clamped spline involves slope at the ends. This spline can be visualized
+        // as the curve obtained when a flexible elastic rod is forced to pass through the data
+        // points, and the rod is clamped at each end with a fixed slope. This spline would be
+        // useful to a draftsman for drawing a smooth curve through several points.
+        EndPointConditions_Fixed1stDerivatives,
+        // The 2dn derivatives at the end points are given by the user.
+        // Imposing values for S''(a) and S''(b) permits the practitioner to adjust the
+        // curvature at each endpoint.
+        EndPointConditions_Fixed2ndDerivatives,
+        // The 2nd derivatives at the end points are copied from the
+        // 2nd derivatives of the adjacent points.
+        // The assumption that S'''(x) = 0 on the interval [x0, x1] forces the cubic to
+        // degenerate to a quadratic over [x0, x1], and a similar situation occurs over [xN−1, xN].
+        EndPointConditions_Copy,
+        // the 2nd derivatives at the end points are computed by linear
+        // extrapolation using the 2 adjacent points.
+        // the extrapolated spline is equivalent to assuming that the end cubic is an
+        // extension of the adjacent cubic; that is, the spline forms a single cubic curve over the
+        // interval [x0, x2] and another single cubic over the interval [xN−2, xN]
+        EndPointConditions_Extrapolate,
+        // the 2nd derivatives are forced to be equal at the end points
+        EndPointConditions_Periodic
+    };
+
     CubicSplineInterpolator();
 
     bool setKnots(const SplineInterpolatorKnots &k);
@@ -37,22 +82,39 @@ public:
     bool setKnot(int i, double nx, double ny);
     bool setKnot(double x, const SplineInterpolatorKnot &k);
     bool setKnot(double x, double nx, double ny);
-    bool addKnot(const SplineInterpolatorKnot &k, bool replace = false);
-    bool addKnot(double nx, double ny, bool replace = false);
+    bool addKnot(const SplineInterpolatorKnot &k, bool replace = false, int * index = 0);
+    bool addKnot(double nx, double ny, bool replace = false, int * index = 0);
     bool removeKnot(double x);
     bool removeKnot(int i);
 
     double f(double x);
 
-private:
-    bool mDirty;
-    QVector<double> p, u;
+    EndPointConditions floorEndPointConditions() const;
+    EndPointConditions ceilEndPointConditions() const;
+    double floorEndPointConditionsValue() const;
+    double ceilEndPointConditionsValue() const;
+    void setEndPointConditions(EndPointConditions f, EndPointConditions c, double fv = 0., double cv = 0.);
 
-    int getPiece(double x);
-    double floorExtrapolate(double x);
-    double ceilExtrapolate(double x);
+private:
+    struct Coefficients
+    {
+        double a, b, c, d;
+    };
+
+    EndPointConditions mFloorEndPointConditions;
+    EndPointConditions mCeilEndPointConditions;
+    double mFloorEndPointConditionsValue;
+    double mCeilEndPointConditionsValue;
+
+    bool mDirty;
+    QVector<Coefficients> mCoefficients;
+
+    int getPiece(double x) const;
     void calculateCoeficients();
-    inline double F(double x) { return x * x * x - x; }
+    inline double F(double x) const
+    {
+        return x * x * x - x;
+    }
 };
 
 }}

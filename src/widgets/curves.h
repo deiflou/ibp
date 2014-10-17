@@ -23,12 +23,40 @@
 #define ANITOOLS_WIDGETS_CURVES_H
 
 #include <QWidget>
+#include <QStyle>
+#include <QScrollBar>
 #include "../misc/splineinterpolator.h"
 
 using namespace anitools::misc;
 
 namespace anitools {
 namespace widgets {
+
+class Curves;
+class CurvesPaintDelegate : public QObject
+{
+    Q_OBJECT
+
+public:
+    enum UpdateEvent
+    {
+        ZoomFactorChanged, OffsetChanged, PeriodicChanged, InputEnabledChanged, InterpolationModeChanged, KnotsChanged
+    };
+
+    virtual ~CurvesPaintDelegate() {}
+    virtual void update(UpdateEvent e, const Curves * w, const QRect & r) = 0;
+    virtual void paintBackground(QPainter & p, const Curves * w, const QRect & r,
+                                 QStyle::State widgetState) = 0;
+    virtual void paintGraph(const QPolygonF & g, QPainter & p, const Curves * w, const QRect & r,
+                            QStyle::State widgetState) = 0;
+    virtual void paintKnots(const QVector<QPointF> & pts, const QVector<QStyle::State> & sts,
+                            const QSize & s, QPainter & p, const Curves * w, const QRect & r,
+                            QStyle::State widgetState) = 0;
+    virtual QRect graphRect(const QRect & r) const = 0;
+
+signals:
+    void updateRequired();
+};
 
 class Curves : public QWidget
 {
@@ -44,60 +72,91 @@ public:
 
     explicit Curves(QWidget *parent = 0);
 
-    SplineInterpolatorKnots knots() const;
+    double zoomFactor() const;
+    double offset() const;
+    bool isPeriodic() const;
+    bool isInputEnabled() const;
+    const SplineInterpolatorKnots & knots() const;
     int selectedKnotIndex() const;
-    SplineInterpolatorKnot selectedKnot() const;
+    const SplineInterpolatorKnot & selectedKnot() const;
     InterpolationMode interpolationMode() const;
+    CurvesPaintDelegate * paintDelegate() const;
+    double valueAt(double v);
+    double mapToSplineInterpolator(double v) const;
+    double mapFromSplineInterpolator(double v) const;
 
-    QSize optimalSizeForWidth(int w) const;
+protected:
+    void paintEvent(QPaintEvent *);
+    void mousePressEvent(QMouseEvent * e);
+    void mouseReleaseEvent(QMouseEvent * e);
+    void mouseMoveEvent(QMouseEvent * e);
+    void leaveEvent(QEvent *);
+    void resizeEvent(QResizeEvent *);
+    bool eventFilter(QObject * o, QEvent * e);
+    void keyPressEvent(QKeyEvent *e);
+
+private:
+    enum InputStatus
+    {
+        NoStatus, DraggingKnot
+    };
+
+    static const int kLeftMargin = 2;
+    static const int kTopMargin = 1;
+    static const int kRightMargin = 2;
+    static const int kBottomMargin = 3;
+    static const QSize kKnotSize;
+    static const int kMinimumSizeForInput = 50;
+    static const double kKeypressIncrement = 1.0 / 256.0;
+    static const double kMinimumDistanceBetweenKnots = 1.0 / 256.0 * 2.0;
+    static const int kMaximumNumberOfKnots = 19;
+    static const double kMinimumDistanceToAddKnot = 8.;
+
+    double mZoomFactor;
+    double mOffset;
+    bool mIsPeriodic;
+    bool mIsInputEnabled;
+    InputStatus mInputStatus;
+    int mKnotIndex;
+    SplineInterpolator * mSplineInterpolator;
+    InterpolationMode mInterpolationMode;
+    CurvesPaintDelegate * mPaintDelegate;
+    QStyle::State mWidgetState;
+    QVector<QStyle::State> mKnotStates;
+    QScrollBar * mScrollBar;
+    bool mEmitScrolbarSignals;
+
+    void updateScrollBar();
+    QRect rectWithoutMargins() const;
+    QRect graphRect() const;
+    int knotUnderCoords(const QPoint & p, bool addKnotIfPossible = false);
+    void addKnotIfPossible(const QPoint & p);
+
+signals:
+    void zoomFactorChanged(double v);
+    void offsetChanged(double v);
+    void periodicChanged(bool v);
+    void inputEnabledChanged(bool v);
+    void knotsChanged(const SplineInterpolatorKnots & k);
+    void selectedKnotChanged(int i);
+    void interpolationModeChanged(InterpolationMode m);
+    void paintDelegateChanged(CurvesPaintDelegate * pd);
 
 public slots:
+    void setZoomFactor(double v);
+    void setOffset(double v);
+    void center();
+    void fit();
+    void setPeriodic(bool v);
+    void setInputEnabled(bool v);
     void setKnots(const SplineInterpolatorKnots & k);
     void setSelectedKnot(double x, double y);
     void setSelectedKnot(const SplineInterpolatorKnot &k);
     void setInterpolationMode(InterpolationMode m);
+    void setPaintDelegate(CurvesPaintDelegate * pd);
 
-signals:
-    void knotsChanged(const SplineInterpolatorKnots & k);
-    void selectedKnotChanged(int i);
-    void interpolationModeChanged(InterpolationMode m);
-
-protected:
-    void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void focusInEvent(QFocusEvent *e);
-    void focusOutEvent(QFocusEvent *e);
-    void keyPressEvent(QKeyEvent *e);
-
-private:
-    static const int KNOT_RADIUS = 5;
-    static const int KNOT_MOUSE_DISTANCE = KNOT_RADIUS * 2;
-    static const double KEYPRESS_INCREMENT = 1.0 / 256.0;
-    static const double MINIMUM_DISTANCE_BETWEEN_KNOTS = 1.0 / 256.0 * 2.0;
-    static const int MAX_N_KNOTS = 19;
-    static const int BAR_SIZE = 10;
-    static const int TOTAL_BAR_SIZE = BAR_SIZE * 2;
-    static const int SEPARATOR_SIZE = 5;
-
-    static const int LEFT_MARGIN = 2;
-    static const int TOP_MARGIN = 1;
-    static const int RIGHT_MARGIN = 2;
-    static const int BOTTOM_MARGIN = 3;
-
-    SplineInterpolator * mSplineInterpolator;
-    InterpolationMode mInterpolationMode;
-
-    int mKnotSelected, mKnotPressed;
-
-    QPolygonF mPolygon;
-    QImage mBar1, mBar2;
-    bool mFunctionValuesCalculated;
-
-    bool mShowBars;
-
-    void calculateFunctionValues();
+private slots:
+    void On_mScrollBar_valueChanged(int v);
 };
 
 }}

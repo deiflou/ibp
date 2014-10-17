@@ -19,6 +19,8 @@
 **
 ****************************************************************************/
 
+#include <math.h>
+
 #include "linearsplineinterpolator.h"
 
 namespace anitools {
@@ -33,31 +35,55 @@ double LinearSplineInterpolator::f(double x)
 {
     if (mKnots.size() < 1) return 0.0;
 
-    int piece = getPiece(x);
-    if (piece == -1) return floorExtrapolate(x);
-    if (piece == -2) return ceilExtrapolate(x);
+    if (x < mKnots.first().x())
+    {
+        if (mFloorExtrapolationMode == ExtrapolationMode_Constant)
+            return mFloorExtrapolationValue;
+        else if (mFloorExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
+            return ((mKnots[1].y() - mKnots[0].y()) / (mKnots[1].x() - mKnots[0].x())) *
+                   (x - mKnots[0].x()) + mKnots[0].y();
+        else if (mFloorExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
+            x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.last().x();
+        else if (mFloorExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
+        {
+            const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
+            const double b = (x - mKnots.first().x()) / a;
+            x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
+        }
+        else
+            return mKnots.first().y();
+    }
+    else if (x > mKnots.last().x())
+    {
+        if (mCeilExtrapolationMode == ExtrapolationMode_Constant)
+            return mCeilExtrapolationValue;
+        else if (mCeilExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
+            return ((mKnots.last().y() - mKnots[mKnots.size() - 2].y()) /
+                   (mKnots.last().x() - mKnots[mKnots.size() - 2].x())) *
+                   (x - mKnots[mKnots.size() - 2].x()) + mKnots[mKnots.size() - 2].y();
+        else if (mCeilExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
+            x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.first().x();
+        else if (mCeilExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
+        {
+            const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
+            const double b = (x - mKnots.first().x()) / a;
+            x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
+        }
+        else
+            return mKnots.last().y();
+    }
 
-    double t = (x - mKnots[piece].x()) / (mKnots[piece + 1].x() - mKnots[piece].x());
-    return (1.0 - t) * mKnots[piece].y() + t * mKnots[piece + 1].y();
+    int piece = getPiece(x);
+    return ((mKnots[piece + 1].y() - mKnots[piece].y()) / (mKnots[piece + 1].x() - mKnots[piece].x())) *
+           (x - mKnots[piece].x()) + mKnots[piece].y();
 }
 
-// this returns -1 is X is lower than knot[0].x and n if X is higher than knot[n].x
 int LinearSplineInterpolator::getPiece(double x)
 {
-    for (int i = 0; i < mKnots.size(); i++)
-        if (x < mKnots[i].x()) return i - 1;
-    return -2;
-}
-
-double LinearSplineInterpolator::floorExtrapolate(double x)
-{
-    Q_UNUSED(x)
-    return mKnots[0].y();
-}
-double LinearSplineInterpolator::ceilExtrapolate(double x)
-{
-    Q_UNUSED(x)
-    return mKnots[mKnots.size() - 1].y();
+    for (int i = 1; i < mKnots.size(); i++)
+        if (x < mKnots[i].x())
+            return i - 1;
+    return mKnots.size() - 2;
 }
 
 }}

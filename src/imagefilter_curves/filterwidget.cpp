@@ -27,9 +27,12 @@
 FilterWidget::FilterWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FilterWidget),
-    mEmitSignals(true)
+    mEmitSignals(true),
+    mCurvesPaintDelegate(0)
 {
     ui->setupUi(this);
+    mCurvesPaintDelegate = new LevelsCurvesPaintDelegate(this);
+    ui->mWidgetCurves->setPaintDelegate(mCurvesPaintDelegate);
 }
 
 FilterWidget::~FilterWidget()

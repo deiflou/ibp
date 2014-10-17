@@ -41,27 +41,28 @@
 
 Imrect * modified_xy_normf(Imrect *im, double constant, double sigma, double thresh)
 {
-   Imrect *im1,*im2,*imdx,*imdy;
-   Imrect *imxs,*imys,*corr;
+    Q_UNUSED(thresh)
+    Imrect *im1,*im2,*imdx,*imdy;
+    Imrect *imxs,*imys,*corr;
 
-   im1 = im_square(im);
+    im1 = im_square(im);
 
-   smooth_slopes(constant,sigma,im1,&imdx,&imdy,&corr,&imxs,&imys);
-   im_free(im1);
-   enf_integ(&imdx,&imdy,corr,imxs,imys);
-   im_free(corr);
-   im2 = im_integrate(imdx,imdy);
+    smooth_slopes(constant,sigma,im1,&imdx,&imdy,&corr,&imxs,&imys);
+    im_free(im1);
+    enf_integ(&imdx,&imdy,corr,imxs,imys);
+    im_free(corr);
+    im2 = im_integrate(imdx,imdy);
 
-   im_free(imxs); im_free(imys);
-   im_free(imdx);
-   im_free(imdy);
-   if (im2 == NULL)
-   {
-      error("imcalc_xy_norm:  image not in calculator ",warning);
-            return(NULL);
-   }
+    im_free(imxs); im_free(imys);
+    im_free(imdx);
+    im_free(imdy);
+    if (im2 == NULL)
+    {
+    error("imcalc_xy_norm:  image not in calculator ",warning);
+        return(NULL);
+    }
 
-   return im2;
+    return im2;
 }
 
 Filter::Filter() :
