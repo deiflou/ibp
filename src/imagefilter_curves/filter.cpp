@@ -66,6 +66,7 @@ ImageFilter * Filter::clone()
 
         f->makeLUT((WorkingChannel)i);
     }
+    f->mWorkingChannel = mWorkingChannel;
 
     return f;
 }
@@ -128,11 +129,11 @@ bool Filter::loadParameters(QSettings &s)
     else
         return false;
 
-    interpolationModeStr[RGB] = s.value("rgbinterpolationmode", 0).toString();
-    interpolationModeStr[Red] = s.value("redinterpolationmode", 0).toString();
-    interpolationModeStr[Green] = s.value("greeninterpolationmode", 0).toString();
-    interpolationModeStr[Blue] = s.value("blueinterpolationmode", 0).toString();
-    interpolationModeStr[Alpha] = s.value("alphainterpolationmode", 0).toString();
+    interpolationModeStr[RGB] = s.value("rgbinterpolationmode", "smooth").toString();
+    interpolationModeStr[Red] = s.value("redinterpolationmode", "smooth").toString();
+    interpolationModeStr[Green] = s.value("greeninterpolationmode", "smooth").toString();
+    interpolationModeStr[Blue] = s.value("blueinterpolationmode", "smooth").toString();
+    interpolationModeStr[Alpha] = s.value("alphainterpolationmode", "smooth").toString();
     for (int i = 0; i < 5; i++)
     {
         if (interpolationModeStr[i] == "flat")
@@ -145,11 +146,11 @@ bool Filter::loadParameters(QSettings &s)
             return false;
     }
 
-    knotsStr[RGB] = s.value("rgbknots", 0).toString();
-    knotsStr[Red] = s.value("redknots", 0).toString();
-    knotsStr[Green] = s.value("greenknots", 0).toString();
-    knotsStr[Blue] = s.value("blueknots", 0).toString();
-    knotsStr[Alpha] = s.value("alphaknots", 0).toString();
+    knotsStr[RGB] = s.value("rgbknots", "0.0 0.0, 1.0 1.0").toString();
+    knotsStr[Red] = s.value("redknots", "0.0 0.0, 1.0 1.0").toString();
+    knotsStr[Green] = s.value("greenknots", "0.0 0.0, 1.0 1.0").toString();
+    knotsStr[Blue] = s.value("blueknots", "0.0 0.0, 1.0 1.0").toString();
+    knotsStr[Alpha] = s.value("alphaknots", "0.0 0.0, 1.0 1.0").toString();
     for (int i = 0; i < 5; i++)
     {
         knotsList = knotsStr[i].split(QRegularExpression("\\s*,\\s*"), QString::SkipEmptyParts);
@@ -291,7 +292,6 @@ void Filter::setInterpolationMode(Filter::InterpolationMode im)
     makeLUT(mWorkingChannel);
 
     emit interpolationModeChanged(im);
-    emit knotsChanged(mSplineInterpolator[mWorkingChannel]->knots());
     emit parametersChanged();
 }
 

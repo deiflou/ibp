@@ -45,13 +45,10 @@ public:
 
     virtual ~CurvesPaintDelegate() {}
     virtual void update(UpdateEvent e, const Curves * w, const QRect & r) = 0;
-    virtual void paintBackground(QPainter & p, const Curves * w, const QRect & r,
-                                 QStyle::State widgetState) = 0;
-    virtual void paintGraph(const QPolygonF & g, QPainter & p, const Curves * w, const QRect & r,
-                            QStyle::State widgetState) = 0;
-    virtual void paintKnots(const QVector<QPointF> & pts, const QVector<QStyle::State> & sts,
-                            const QSize & s, QPainter & p, const Curves * w, const QRect & r,
-                            QStyle::State widgetState) = 0;
+    virtual void paint(QPainter & p, const Curves * w, const QRect & r,
+                       QStyle::State widgetState, const QPolygonF & graph,
+                       const QVector<QPointF> & knotPos, const QVector<QStyle::State> & knotStates,
+                       const QSize & knotSize) = 0;
     virtual QRect graphRect(const QRect & r) const = 0;
 
 signals:
@@ -108,7 +105,7 @@ private:
     static const QSize kKnotSize;
     static const int kMinimumSizeForInput = 50;
     static const double kKeypressIncrement = 1.0 / 256.0;
-    static const double kMinimumDistanceBetweenKnots = 1.0 / 256.0 * 2.0;
+    static const double kMinimumDistanceBetweenKnots = 1.0 / 256.0 * 3.0;
     static const int kMaximumNumberOfKnots = 19;
     static const double kMinimumDistanceToAddKnot = 8.;
 

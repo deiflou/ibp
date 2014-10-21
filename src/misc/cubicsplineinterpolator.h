@@ -41,38 +41,38 @@ namespace misc {
 class CubicSplineInterpolator : public BaseSplineInterpolator
 {
 public:
-    enum EndPointConditions
+    enum BoundaryConditions
     {
-        // natural = relaxed curve = 2nd derivatives are 0 at end points.
+        // natural = relaxed curve = 2nd derivatives are 0 at end knots.
         // The natural spline is the curve obtained by forcing a flexible elastic rod
         // through the data points but letting the slope at the ends be free to equilibrate to the
         // position that minimizes the oscillatory behavior of the curve. It is useful for fitting a
         // curve to experimental data that are significant to several significant digits.
-        EndPointConditions_Natural,
-        // The 2dn derivatives at the end points are calculated from the
+        BoundaryConditions_Natural,
+        // The 2dn derivatives at the end knots are calculated from the
         // user given 1st derivatives.
         // The clamped spline involves slope at the ends. This spline can be visualized
         // as the curve obtained when a flexible elastic rod is forced to pass through the data
         // points, and the rod is clamped at each end with a fixed slope. This spline would be
         // useful to a draftsman for drawing a smooth curve through several points.
-        EndPointConditions_Fixed1stDerivatives,
-        // The 2dn derivatives at the end points are given by the user.
+        BoundaryConditions_Fixed1stDerivatives,
+        // The 2dn derivatives at the end knots are given by the user.
         // Imposing values for S''(a) and S''(b) permits the practitioner to adjust the
         // curvature at each endpoint.
-        EndPointConditions_Fixed2ndDerivatives,
-        // The 2nd derivatives at the end points are copied from the
+        BoundaryConditions_Fixed2ndDerivatives,
+        // The 2nd derivatives at the end knots are copied from the
         // 2nd derivatives of the adjacent points.
         // The assumption that S'''(x) = 0 on the interval [x0, x1] forces the cubic to
         // degenerate to a quadratic over [x0, x1], and a similar situation occurs over [xN−1, xN].
-        EndPointConditions_Copy,
-        // the 2nd derivatives at the end points are computed by linear
+        BoundaryConditions_Copy,
+        // the 2nd derivatives at the end knots are computed by linear
         // extrapolation using the 2 adjacent points.
         // the extrapolated spline is equivalent to assuming that the end cubic is an
         // extension of the adjacent cubic; that is, the spline forms a single cubic curve over the
         // interval [x0, x2] and another single cubic over the interval [xN−2, xN]
-        EndPointConditions_Extrapolate,
-        // the 2nd derivatives are forced to be equal at the end points
-        EndPointConditions_Periodic
+        BoundaryConditions_Extrapolate,
+        // the 2nd derivatives are forced to be equal at the end knots
+        BoundaryConditions_Periodic
     };
 
     CubicSplineInterpolator();
@@ -89,11 +89,11 @@ public:
 
     double f(double x);
 
-    EndPointConditions floorEndPointConditions() const;
-    EndPointConditions ceilEndPointConditions() const;
-    double floorEndPointConditionsValue() const;
-    double ceilEndPointConditionsValue() const;
-    void setEndPointConditions(EndPointConditions f, EndPointConditions c, double fv = 0., double cv = 0.);
+    BoundaryConditions floorBoundaryConditions() const;
+    BoundaryConditions ceilBoundaryConditions() const;
+    double floorBoundaryConditionsValue() const;
+    double ceilBoundaryConditionsValue() const;
+    void setBoundaryConditions(BoundaryConditions f, BoundaryConditions c, double fv = 0., double cv = 0.);
 
 private:
     struct Coefficients
@@ -101,20 +101,16 @@ private:
         double a, b, c, d;
     };
 
-    EndPointConditions mFloorEndPointConditions;
-    EndPointConditions mCeilEndPointConditions;
-    double mFloorEndPointConditionsValue;
-    double mCeilEndPointConditionsValue;
+    BoundaryConditions mFloorBoundaryConditions;
+    BoundaryConditions mCeilBoundaryConditions;
+    double mFloorBoundaryConditionsValue;
+    double mCeilBoundaryConditionsValue;
 
-    bool mDirty;
+    bool mIsDirty;
     QVector<Coefficients> mCoefficients;
 
     int getPiece(double x) const;
-    void calculateCoeficients();
-    inline double F(double x) const
-    {
-        return x * x * x - x;
-    }
+    void calculateCoefficients();
 };
 
 }}

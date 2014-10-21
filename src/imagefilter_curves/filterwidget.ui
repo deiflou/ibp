@@ -329,90 +329,92 @@
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>10</number>
-         </property>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <property name="spacing">
-            <number>5</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Input Value</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Output Value</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QDoubleSpinBox" name="mSpinInputValue">
-             <property name="minimumSize">
-              <size>
-               <width>50</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="decimals">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <double>255.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QDoubleSpinBox" name="mSpinOutputValue">
-             <property name="minimumSize">
-              <size>
-               <width>50</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="decimals">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <double>255.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+        <widget class="QWidget" name="mWidgetContainerSpins" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <property name="spacing">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Input Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Output Value</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QDoubleSpinBox" name="mSpinInputValue">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>255.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="mSpinOutputValue">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="decimals">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <double>255.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </item>

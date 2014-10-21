@@ -19,8 +19,8 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_WIDGETS_LEVELSCURVESPAINTDELEGATE_H
-#define ANITOOLS_WIDGETS_LEVELSCURVESPAINTDELEGATE_H
+#ifndef ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H
+#define ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H
 
 #include <QImage>
 #include "curves.h"
@@ -31,13 +31,13 @@ using namespace anitools::imgproc;
 namespace anitools {
 namespace widgets {
 
-class LevelsCurvesPaintDelegate : public CurvesPaintDelegate
+class LumaKeyingCurvesPaintDelegate : public CurvesPaintDelegate
 {
     Q_OBJECT
 
 public:
-    explicit LevelsCurvesPaintDelegate(QObject *parent = 0);
-    ~LevelsCurvesPaintDelegate();
+    explicit LumaKeyingCurvesPaintDelegate(QObject *parent = 0);
+    ~LumaKeyingCurvesPaintDelegate();
 
     void update(UpdateEvent e, const Curves * w, const QRect & r);
     void paint(QPainter & p, const Curves * w, const QRect & r,
@@ -46,11 +46,12 @@ public:
                const QSize & knotSize);
     QRect graphRect(const QRect & r) const;
 
-private:
-    static const int kBarSize = 10;
-    static const int kTotalBarSize = kBarSize * 2;
+    bool isInverted() const;
+    void setInverted(bool v);
 
-    QImage mBar1, mBar2;
+private:
+    QImage mCheckerboardImage, mGradientImage;
+    bool mIsInverted;
 
     void paintBackground(QPainter &p, const Curves * w, const QRect & r, QStyle::State widgetState);
     void paintGraph(const QPolygonF & g, QPainter & p, const Curves * w, const QRect & r,
@@ -62,4 +63,4 @@ private:
 
 }}
 
-#endif // ANITOOLS_WIDGETS_LEVELSCURVESPAINTDELEGATE_H
+#endif // ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H

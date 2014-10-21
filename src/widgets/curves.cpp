@@ -110,7 +110,7 @@ int Curves::knotUnderCoords(const QPoint &p, bool addKnotIfPossible)
             return i;
     }
 
-    if (addKnotIfPossible && mSplineInterpolator->size() < kMaximumNumberOfKnots &&
+    if (addKnotIfPossible && mSplineInterpolator->size() - (mIsPeriodic ? 1 : 0) < kMaximumNumberOfKnots &&
         fabs(AT_clamp(0., mSplineInterpolator->f(x), 1.) - y) < minimumDistance)
     {
         if (!mSplineInterpolator->addKnot(x, y, false, &index) || index == -1)
@@ -118,7 +118,7 @@ int Curves::knotUnderCoords(const QPoint &p, bool addKnotIfPossible)
 
         const double min = index > 0 ?
                     mSplineInterpolator->knot(index - 1).x() + kMinimumDistanceBetweenKnots : 0.;
-        const double max = index < mSplineInterpolator->size() - 1 ?
+        const double max = index < mSplineInterpolator->size() - (mIsPeriodic ? 2 : 1) ?
                     mSplineInterpolator->knot(index + 1).x() - kMinimumDistanceBetweenKnots : 1.;
         mSplineInterpolator->setKnot(index, AT_clamp(min, x, max), AT_clamp(0., y, 1.));
 
@@ -171,15 +171,12 @@ void Curves::paintEvent(QPaintEvent *)
     clippingPath.addRoundedRect(r, 1, 1);
     p.setClipPath(clippingPath);
 
-    // background
-    mPaintDelegate->paintBackground(p, this, r, widgetState);
-
     // graph
     QRect graphRectCopy = graphRect();
     QPolygonF poly;
     for (int i = r.left(); i <= r.right(); i++)
-        poly.append(QPointF(i, 1. - valueAt(mapToSplineInterpolator(i))));
-    mPaintDelegate->paintGraph(poly, p, this, r, widgetState);
+        poly.append(QPointF(i, (1. - valueAt(mapToSplineInterpolator(i))) *
+                                graphRectCopy.height() + graphRectCopy.top()));
 
     // knots
     QVector<QPointF> knotPositions;
@@ -189,7 +186,26 @@ void Curves::paintEvent(QPaintEvent *)
             knotPositions << QPointF(mapFromSplineInterpolator(mSplineInterpolator->knot(i).x()),
                                      (1. - mSplineInterpolator->knot(i).y()) * graphRectCopy.height() +
                                      graphRectCopy.top());
-    mPaintDelegate->paintKnots(knotPositions, mKnotStates, kKnotSize, p, this, r, widgetState);
+
+    p.save();
+    mPaintDelegate->paint(p, this, r, widgetState, poly, knotPositions, mKnotStates, kKnotSize);
+    p.restore();
+
+    // focus rect
+    if (widgetState & QStyle::State_HasFocus)
+    {
+        p.setPen(QPen(this->palette().color(QPalette::Highlight), 4));
+        p.setBrush(Qt::NoBrush);
+        p.drawRect(r);
+    }
+
+    // paint if disabled
+    if (!(widgetState & QStyle::State_Enabled))
+    {
+        QColor disabledColor = this->palette().color(QPalette::Button);
+        disabledColor.setAlpha(200);
+        p.fillRect(r, disabledColor);
+    }
 }
 
 void Curves::mousePressEvent(QMouseEvent * e)
@@ -197,8 +213,12 @@ void Curves::mousePressEvent(QMouseEvent * e)
     if (!mIsInputEnabled || mInputStatus != NoStatus)
         return;
 
+    QRect gr = graphRect();
+    if (gr.width() < kMinimumSizeForInput || gr.height() < kMinimumSizeForInput)
+        return;
+
     int index;
-    bool b = false;
+    bool mustEmitSignal = false;
 
     if (e->button() == Qt::LeftButton)
     {
@@ -207,14 +227,14 @@ void Curves::mousePressEvent(QMouseEvent * e)
 
         // add a knot and check if there is a knot in this position
         index = knotUnderCoords(e->pos(), true);
-        b = index != mKnotIndex;
+        mustEmitSignal = index != mKnotIndex;
         if (index != -1)
         {
             mKnotIndex = index;
             mInputStatus = DraggingKnot;
             mKnotStates[mKnotIndex] |= QStyle::State_Selected | QStyle::State_Sunken;
             update();
-            if (b)
+            if (mustEmitSignal)
                 emit selectedKnotChanged(mKnotIndex);
             return;
         }
@@ -222,7 +242,7 @@ void Curves::mousePressEvent(QMouseEvent * e)
         mKnotIndex = -1;
         mInputStatus = NoStatus;
         update();
-        if (b)
+        if (mustEmitSignal)
             emit selectedKnotChanged(mKnotIndex);
         return;
     }
@@ -236,12 +256,12 @@ void Curves::mousePressEvent(QMouseEvent * e)
             if (index == mKnotIndex)
             {
                 mKnotIndex = -1;
-                b = true;
+                mustEmitSignal = true;
             }
             else if (mKnotIndex > index)
             {
                 mKnotIndex--;
-                b = true;
+                mustEmitSignal = true;
             }
 
             mSplineInterpolator->removeKnot(index);
@@ -255,7 +275,7 @@ void Curves::mousePressEvent(QMouseEvent * e)
                 mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
             update();
             emit knotsChanged(mSplineInterpolator->knots());
-            if (b)
+            if (mustEmitSignal)
                 emit selectedKnotChanged(mKnotIndex);
             return;
         }
@@ -479,6 +499,10 @@ int Curves::selectedKnotIndex() const
 
 const SplineInterpolatorKnot & Curves::selectedKnot() const
 {
+    static const SplineInterpolatorKnot nullSplineInterpolatorKnot;
+
+    if (mKnotIndex == -1)
+        return nullSplineInterpolatorKnot;
     return mSplineInterpolator->knot(mKnotIndex);
 }
 
@@ -567,18 +591,18 @@ void Curves::setPeriodic(bool v)
         mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Repeat,
                                                   SplineInterpolator::ExtrapolationMode_Repeat);
         if (mInterpolationMode == Cubic)
-            ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
-                                                    CubicSplineInterpolator::EndPointConditions_Periodic,
-                                                    CubicSplineInterpolator::EndPointConditions_Periodic);
+            ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
+                                                    CubicSplineInterpolator::BoundaryConditions_Periodic,
+                                                    CubicSplineInterpolator::BoundaryConditions_Periodic);
     }
     else
     {
         mSplineInterpolator->removeKnot(mSplineInterpolator->size() - 1);
         mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Clamp,
                                                   SplineInterpolator::ExtrapolationMode_Clamp);
-        ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
-                                                  CubicSplineInterpolator::EndPointConditions_Natural,
-                                                  CubicSplineInterpolator::EndPointConditions_Natural);
+        ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
+                                                  CubicSplineInterpolator::BoundaryConditions_Natural,
+                                                  CubicSplineInterpolator::BoundaryConditions_Natural);
     }
     if (mPaintDelegate)
         mPaintDelegate->update(CurvesPaintDelegate::PeriodicChanged, this, rectWithoutMargins());
@@ -601,9 +625,10 @@ void Curves::setInputEnabled(bool v)
 void Curves::setKnots(const SplineInterpolatorKnots &k)
 {
     mSplineInterpolator->setKnots(k);
-    if (mKnotIndex != -1)
-        mKnotStates[mKnotIndex] &= ~QStyle::State_Selected;
+    mKnotStates = QVector<QStyle::State>(k.size(), QStyle::State_None);
     mKnotIndex = -1;
+    if (mIsPeriodic)
+        mSplineInterpolator->addKnot(AT_maximum(1.001, k[0].x() + 1.), k[0].y());
     if (mPaintDelegate)
         mPaintDelegate->update(CurvesPaintDelegate::KnotsChanged, this, rectWithoutMargins());
     update();
@@ -647,11 +672,11 @@ void Curves::setInterpolationMode(Curves::InterpolationMode m)
     else
     {
         mSplineInterpolator = new CubicSplineInterpolator();
-        ((CubicSplineInterpolator *)mSplineInterpolator)->setEndPointConditions(
-                    mIsPeriodic ? CubicSplineInterpolator::EndPointConditions_Periodic :
-                                  CubicSplineInterpolator::EndPointConditions_Natural,
-                    mIsPeriodic ? CubicSplineInterpolator::EndPointConditions_Periodic :
-                                  CubicSplineInterpolator::EndPointConditions_Natural);
+        ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
+                    mIsPeriodic ? CubicSplineInterpolator::BoundaryConditions_Periodic :
+                                  CubicSplineInterpolator::BoundaryConditions_Natural,
+                    mIsPeriodic ? CubicSplineInterpolator::BoundaryConditions_Periodic :
+                                  CubicSplineInterpolator::BoundaryConditions_Natural);
     }
 
     mSplineInterpolator->setKnots(tmpSplineInterpolator->knots());

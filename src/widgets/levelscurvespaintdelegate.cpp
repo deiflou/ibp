@@ -57,9 +57,25 @@ void LevelsCurvesPaintDelegate::update(UpdateEvent e, const Curves *w, const QRe
     }
 }
 
+void LevelsCurvesPaintDelegate::paint(QPainter &p, const Curves *w, const QRect &r, QStyle::State widgetState,
+                                      const QPolygonF &graph, const QVector<QPointF> &knotPos,
+                                      const QVector<QStyle::State> &knotStates, const QSize &knotSize)
+{
+    paintBackground(p, w, r, widgetState);
+
+    QPainterPath path;
+    path.addRect(r.left() - 10, r.bottom() - kTotalBarSize + 1, r.width() + 20, kTotalBarSize);
+    p.setClipPath(p.clipPath().subtracted(path));
+
+    paintGraph(graph, p, w, r, widgetState);
+    paintKnots(knotPos, knotStates, knotSize, p, w, r, widgetState);
+}
+
 void LevelsCurvesPaintDelegate::paintBackground(QPainter &p, const Curves *w,
                                                 const QRect & r, QStyle::State widgetState)
 {
+    Q_UNUSED(widgetState)
+
     QRect gr = graphRect(r);
     QRect pr = r.adjusted(0, 0, 0, -kTotalBarSize);
     double off = w->offset();
@@ -105,22 +121,6 @@ void LevelsCurvesPaintDelegate::paintBackground(QPainter &p, const Curves *w,
     p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.drawImage(br, mBar1);
     p.drawImage(br.adjusted(0, kBarSize, 0, 0), mBar2);
-
-    // focus rect
-    if (widgetState & QStyle::State_HasFocus)
-    {
-        p.setPen(QPen(w->palette().color(QPalette::Highlight), 4));
-        p.setBrush(Qt::NoBrush);
-        p.drawRect(r);
-    }
-
-    // paint if disabled
-    if (!(widgetState & QStyle::State_Enabled))
-    {
-        QColor disabledColor = w->palette().color(QPalette::Button);
-        disabledColor.setAlpha(200);
-        p.fillRect(r, disabledColor);
-    }
 }
 
 void LevelsCurvesPaintDelegate::paintGraph(const QPolygonF &g,
@@ -129,16 +129,21 @@ void LevelsCurvesPaintDelegate::paintGraph(const QPolygonF &g,
 {
     Q_UNUSED(w)
 
+    QRect pr = r.adjusted(0, 0, 0, -kTotalBarSize);
     QPolygonF poly = g;
-    QRect gr = graphRect(r);
-    for (int i = 0; i < poly.size(); i++)
-        poly[i].setY(poly[i].y() * gr.height() + gr.top());
+    poly.append(QPointF(pr.right() + 10, poly.last().y()));
+    poly.append(QPointF(pr.right() + 10, pr.bottom() + 10));
+    poly.append(QPointF(pr.left() - 10, pr.bottom() + 10));
+    poly.append(QPointF(pr.left() - 10, poly.first().y()));
 
-    int opacity = (widgetState & QStyle::State_Enabled) ? (widgetState & QStyle::State_MouseOver ||
-                                                           widgetState & QStyle::State_HasFocus) ? 64 : 32 : 8;
-    p.setBrush(Qt::NoBrush);
+    int opacity = (widgetState & QStyle::State_MouseOver || widgetState & QStyle::State_HasFocus) ? 64 : 32;
+    QColor fillColor = w->palette().color(QPalette::Midlight);
+
+    fillColor.setAlpha(opacity);
+    p.setBrush(fillColor);
     p.setPen(QPen(QColor(0, 0, 0, opacity), 2));
-    p.drawPolyline(poly.translated(1, 1));
+    p.drawPolygon(poly.translated(1, 1));
+    p.setBrush(Qt::NoBrush);
     p.setPen(QPen(QColor(255, 255, 255, opacity), 2));
     p.drawPolyline(poly);
 }
@@ -158,39 +163,31 @@ void LevelsCurvesPaintDelegate::paintKnots(const QVector<QPointF> & pts,
 
     for (int i = 0; i < pts.size(); i++)
     {
-        if (widgetState & QStyle::State_Enabled)
+        if (widgetState & QStyle::State_MouseOver || widgetState & QStyle::State_HasFocus)
         {
-            if (widgetState & QStyle::State_MouseOver || widgetState & QStyle::State_HasFocus)
+            if (sts[i] & QStyle::State_MouseOver)
             {
-                if (sts[i] & QStyle::State_MouseOver)
+                if (sts[i] & QStyle::State_Sunken)
                 {
-                    if (sts[i] & QStyle::State_Sunken)
-                    {
-                        opacity = 200;
-                        fillOpacity = (sts[i] & QStyle::State_Selected) ? 255 : 0;
-                    }
-                    else
-                    {
-                        opacity = 128;
-                        fillOpacity = (sts[i] & QStyle::State_Selected) ? 200 : 0;
-                    }
+                    opacity = 200;
+                    fillOpacity = (sts[i] & QStyle::State_Selected) ? 255 : 0;
                 }
                 else
                 {
-                    opacity = 64;
-                    fillOpacity = (sts[i] & QStyle::State_Selected) ? 128 : 0;
+                    opacity = 128;
+                    fillOpacity = (sts[i] & QStyle::State_Selected) ? 200 : 0;
                 }
             }
             else
             {
-                opacity = 32;
-                fillOpacity = (sts[i] & QStyle::State_Selected) ? 64 : 0;
+                opacity = 64;
+                fillOpacity = (sts[i] & QStyle::State_Selected) ? 128 : 0;
             }
         }
         else
         {
-            opacity = 16;
-            fillOpacity = (sts[i] & QStyle::State_Selected) ? 16 : 0;
+            opacity = 32;
+            fillOpacity = (sts[i] & QStyle::State_Selected) ? 64 : 0;
         }
 
         fillColor.setAlpha(fillOpacity);

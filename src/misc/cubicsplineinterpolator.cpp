@@ -29,11 +29,11 @@ namespace misc {
 
 CubicSplineInterpolator::CubicSplineInterpolator() :
     BaseSplineInterpolator(),
-    mFloorEndPointConditions(EndPointConditions_Natural),
-    mCeilEndPointConditions(EndPointConditions_Natural),
-    mFloorEndPointConditionsValue(0.),
-    mCeilEndPointConditionsValue(0.),
-    mDirty(true)
+    mFloorBoundaryConditions(BoundaryConditions_Natural),
+    mCeilBoundaryConditions(BoundaryConditions_Natural),
+    mFloorBoundaryConditionsValue(0.),
+    mCeilBoundaryConditionsValue(0.),
+    mIsDirty(true)
 {
 }
 
@@ -41,7 +41,7 @@ double CubicSplineInterpolator::f(double x)
 {
     if (mKnots.size() < 1) return 0.0;
 
-    if (mDirty) calculateCoeficients();
+    if (mIsDirty) calculateCoefficients();
 
     if (x < mKnots.first().x())
     {
@@ -97,13 +97,13 @@ int CubicSplineInterpolator::getPiece(double x) const
     return mKnots.size() - 2;
 }
 
-void CubicSplineInterpolator::calculateCoeficients()
+void CubicSplineInterpolator::calculateCoefficients()
 {
     if (mKnots.size() < 1) return;
 
     register int kSize = mKnots.size();
-    bool isPeriodic = mFloorEndPointConditions == EndPointConditions_Periodic &&
-                      mCeilEndPointConditions == EndPointConditions_Periodic;
+    bool isPeriodic = mFloorBoundaryConditions == BoundaryConditions_Periodic &&
+                      mCeilBoundaryConditions == BoundaryConditions_Periodic;
 
     mCoefficients.clear();
     mCoefficients.resize(kSize - 1);
@@ -112,7 +112,7 @@ void CubicSplineInterpolator::calculateCoeficients()
     {
         // ------------------------------------------
         // constant, the final value is extrapolated
-        // from the unique point
+        // from the unique knot
         // ------------------------------------------
         mCoefficients[0].a = mCoefficients[0].b = mCoefficients[0].c = 0.;
         mCoefficients[0].d = mKnots[0].y();
@@ -139,7 +139,7 @@ void CubicSplineInterpolator::calculateCoeficients()
 
         // ------------------------------------------
         // if is periodic, we need to solve a
-        // ksize x ksize system; otherwise,
+        // (ksize - 1) x (ksize - 1) system; otherwise,
         // the system is (ksize - 2) x (ksize - 2)
         // ------------------------------------------
         if (isPeriodic)
@@ -238,16 +238,16 @@ void CubicSplineInterpolator::calculateCoeficients()
             dx1 = mKnots[kSize - 1].x() - mKnots[kSize - 2].x();
             dy0 = mKnots[1].y() - mKnots[0].y();
             dy1 = mKnots[kSize - 1].y() - mKnots[kSize - 2].y();
-            if (mFloorEndPointConditions == EndPointConditions_Fixed1stDerivatives)
+            if (mFloorBoundaryConditions == BoundaryConditions_Fixed1stDerivatives)
             {
-                bVector(0) -= 3. * (dy0 / dx0 - mFloorEndPointConditionsValue);
+                bVector(0) -= 3. * (dy0 / dx0 - mFloorBoundaryConditionsValue);
                 tripletList.at(0) = Eigen::Triplet<double>(0, 0, tripletList.at(0).value() - dx0 / 2.);
             }
-            else if (mFloorEndPointConditions == EndPointConditions_Fixed2ndDerivatives)
-                bVector(0) -= dx0 * mFloorEndPointConditionsValue;
-            else if (mFloorEndPointConditions == EndPointConditions_Copy)
+            else if (mFloorBoundaryConditions == BoundaryConditions_Fixed2ndDerivatives)
+                bVector(0) -= dx0 * mFloorBoundaryConditionsValue;
+            else if (mFloorBoundaryConditions == BoundaryConditions_Copy)
                 tripletList.at(0) = Eigen::Triplet<double>(0, 0, tripletList.at(0).value() + dx0);
-            else if (mFloorEndPointConditions == EndPointConditions_Extrapolate && kSize > 3)
+            else if (mFloorBoundaryConditions == BoundaryConditions_Extrapolate && kSize > 3)
             {
                 dx2 = dx0 * dx0 / (mKnots[2].x() - mKnots[1].x());
                 tripletList.at(0) = Eigen::Triplet<double>(0, 0, tripletList.at(0).value() + dx0 + dx2);
@@ -257,18 +257,18 @@ void CubicSplineInterpolator::calculateCoeficients()
             else
                 xVector(0) = 0.;
 
-            if (mCeilEndPointConditions == EndPointConditions_Fixed1stDerivatives)
+            if (mCeilBoundaryConditions == BoundaryConditions_Fixed1stDerivatives)
             {
-                bVector(kSize - 3) -= 3. * (mCeilEndPointConditionsValue - dy1 / dx1);
+                bVector(kSize - 3) -= 3. * (mCeilBoundaryConditionsValue - dy1 / dx1);
                 tripletList.at(tripletList.size() - 1) = Eigen::Triplet<double>(kSize - 3, kSize - 3,
                                                          tripletList.at(tripletList.size() - 1).value() - dx1 / 2.);
             }
-            else if (mCeilEndPointConditions == EndPointConditions_Fixed2ndDerivatives)
-                bVector(kSize - 3) -= dx1 * mCeilEndPointConditionsValue;
-            else if (mCeilEndPointConditions == EndPointConditions_Copy)
+            else if (mCeilBoundaryConditions == BoundaryConditions_Fixed2ndDerivatives)
+                bVector(kSize - 3) -= dx1 * mCeilBoundaryConditionsValue;
+            else if (mCeilBoundaryConditions == BoundaryConditions_Copy)
                 tripletList.at(tripletList.size() - 1) = Eigen::Triplet<double>(kSize - 3, kSize - 3,
                                                          tripletList.at(tripletList.size() - 1).value() + dx1);
-            else if (mCeilEndPointConditions == EndPointConditions_Extrapolate && kSize > 3)
+            else if (mCeilBoundaryConditions == BoundaryConditions_Extrapolate && kSize > 3)
             {
                 dx2 = dx1 * dx1 / (mKnots[kSize - 2].x() - mKnots[kSize - 3].x());
                 tripletList.at(tripletList.size() - 1) = Eigen::Triplet<double>(kSize - 3, kSize - 3,
@@ -296,23 +296,23 @@ void CubicSplineInterpolator::calculateCoeficients()
             // the computed second derivatives at the
             // interiot knots
             // ------------------------------------------
-            if (mFloorEndPointConditions == EndPointConditions_Fixed1stDerivatives)
-                xVector(0) = (3. / dx0) * (dy0 / dx0 - mFloorEndPointConditionsValue) - (xVector(1) / 2.);
-            else if (mFloorEndPointConditions == EndPointConditions_Fixed2ndDerivatives)
-                xVector(0) = mFloorEndPointConditionsValue;
-            else if (mFloorEndPointConditions == EndPointConditions_Copy)
+            if (mFloorBoundaryConditions == BoundaryConditions_Fixed1stDerivatives)
+                xVector(0) = (3. / dx0) * (dy0 / dx0 - mFloorBoundaryConditionsValue) - (xVector(1) / 2.);
+            else if (mFloorBoundaryConditions == BoundaryConditions_Fixed2ndDerivatives)
+                xVector(0) = mFloorBoundaryConditionsValue;
+            else if (mFloorBoundaryConditions == BoundaryConditions_Copy)
                 xVector(0) = xVector(1);
-            else if (mFloorEndPointConditions == EndPointConditions_Extrapolate && kSize > 3)
+            else if (mFloorBoundaryConditions == BoundaryConditions_Extrapolate && kSize > 3)
                 xVector(0) = xVector(1) - dx0 * (xVector(2) - xVector(1)) / (mKnots[2].x() - mKnots[1].x());
 
-            if (mCeilEndPointConditions == EndPointConditions_Fixed1stDerivatives)
-                xVector(kSize - 1) = (3. / dx1) * (mCeilEndPointConditionsValue - dy1 / dx1) -
+            if (mCeilBoundaryConditions == BoundaryConditions_Fixed1stDerivatives)
+                xVector(kSize - 1) = (3. / dx1) * (mCeilBoundaryConditionsValue - dy1 / dx1) -
                         (xVector(kSize - 2) / 2.);
-            else if (mCeilEndPointConditions == EndPointConditions_Fixed2ndDerivatives)
-                xVector(kSize - 1) = mCeilEndPointConditionsValue;
-            else if (mCeilEndPointConditions == EndPointConditions_Copy)
+            else if (mCeilBoundaryConditions == BoundaryConditions_Fixed2ndDerivatives)
+                xVector(kSize - 1) = mCeilBoundaryConditionsValue;
+            else if (mCeilBoundaryConditions == BoundaryConditions_Copy)
                 xVector(kSize - 1) = xVector(kSize - 2);
-            else if (mCeilEndPointConditions == EndPointConditions_Extrapolate && kSize > 3)
+            else if (mCeilBoundaryConditions == BoundaryConditions_Extrapolate && kSize > 3)
                 xVector(kSize - 1) = xVector(kSize - 2) + dx1 * (xVector(kSize - 2) - xVector(kSize - 3)) /
                                      (mKnots[kSize - 2].x() - mKnots[kSize - 3].x());
         }
@@ -334,100 +334,100 @@ void CubicSplineInterpolator::calculateCoeficients()
         }
     }
 
-    mDirty = false;
+    mIsDirty = false;
 }
 
 bool CubicSplineInterpolator::setKnots(const SplineInterpolatorKnots &k)
 {
     bool b = BaseSplineInterpolator::setKnots(k);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::setKnot(int i, const SplineInterpolatorKnot &k)
 {
     bool b = BaseSplineInterpolator::setKnot(i, k);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::setKnot(int i, double nx, double ny)
 {
     bool b = BaseSplineInterpolator::setKnot(i, nx, ny);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::setKnot(double x, const SplineInterpolatorKnot &k)
 {
     bool b = BaseSplineInterpolator::setKnot(x, k);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::setKnot(double x, double nx, double ny)
 {
     bool b = BaseSplineInterpolator::setKnot(x, nx, ny);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool replace, int * index)
 {
     bool b = BaseSplineInterpolator::addKnot(k, replace, index);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::addKnot(double nx, double ny, bool replace, int * index)
 {
     bool b = BaseSplineInterpolator::addKnot(nx, ny, replace, index);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::removeKnot(double x)
 {
     bool b = BaseSplineInterpolator::removeKnot(x);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
 bool CubicSplineInterpolator::removeKnot(int i)
 {
     bool b = BaseSplineInterpolator::removeKnot(i);
-    if (b) mDirty = true;
+    if (b) mIsDirty = true;
     return b;
 }
 
-CubicSplineInterpolator::EndPointConditions CubicSplineInterpolator::floorEndPointConditions() const
+CubicSplineInterpolator::BoundaryConditions CubicSplineInterpolator::floorBoundaryConditions() const
 {
-    return mFloorEndPointConditions;
+    return mFloorBoundaryConditions;
 }
 
-CubicSplineInterpolator::EndPointConditions CubicSplineInterpolator::ceilEndPointConditions() const
+CubicSplineInterpolator::BoundaryConditions CubicSplineInterpolator::ceilBoundaryConditions() const
 {
-    return mCeilEndPointConditions;
+    return mCeilBoundaryConditions;
 }
 
-double CubicSplineInterpolator::floorEndPointConditionsValue() const
+double CubicSplineInterpolator::floorBoundaryConditionsValue() const
 {
-    return mFloorEndPointConditionsValue;
+    return mFloorBoundaryConditionsValue;
 }
 
-double CubicSplineInterpolator::ceilEndPointConditionsValue() const
+double CubicSplineInterpolator::ceilBoundaryConditionsValue() const
 {
-    return mCeilEndPointConditionsValue;
+    return mCeilBoundaryConditionsValue;
 }
 
-void CubicSplineInterpolator::setEndPointConditions(EndPointConditions f, EndPointConditions c,
+void CubicSplineInterpolator::setBoundaryConditions(BoundaryConditions f, BoundaryConditions c,
                                                      double fv, double cv)
 {
-    mFloorEndPointConditions = f;
-    mCeilEndPointConditions = c;
-    mFloorEndPointConditionsValue = fv;
-    mCeilEndPointConditionsValue = cv;
-    mDirty = true;
+    mFloorBoundaryConditions = f;
+    mCeilBoundaryConditions = c;
+    mFloorBoundaryConditionsValue = fv;
+    mCeilBoundaryConditionsValue = cv;
+    mIsDirty = true;
 }
 
 }}

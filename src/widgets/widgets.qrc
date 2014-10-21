@@ -6,6 +6,13 @@
         <file alias="expandCollapseArrowDown">resources/icons/expandCollapseArrowDown.png</file>
         <file alias="expandCollapseArrowRight">resources/icons/expandCollapseArrowRight.png</file>
         <file alias="lock">resources/icons/lock.png</file>
+        <file alias="interpolationFlat">resources/icons/interpolationFlat.png</file>
+        <file alias="interpolationLinear">resources/icons/interpolationLinear.png</file>
+        <file alias="interpolationSmooth">resources/icons/interpolationSmooth.png</file>
+        <file alias="magnifyingGlassMinus">resources/icons/magnifyingGlassMinus.png</file>
+        <file alias="magnifyingGlassPlus">resources/icons/magnifyingGlassPlus.png</file>
+        <file alias="magnifyingGlassOne">resources/icons/magnifyingGlassOne.png</file>
+        <file alias="invert">resources/icons/invert.png</file>
     </qresource>
     <qresource prefix="/anitools/other">
         <file alias="cmykProfile">resources/other/ISOcoated_v2_eci.icc</file>

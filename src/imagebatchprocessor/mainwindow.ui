@@ -216,7 +216,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>Save image.</string>
+                  <string>Save image</string>
                  </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
@@ -261,6 +261,9 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="toolTip">
+                  <string>Add image filter</string>
+                 </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
                    <normaloff>:/imagebatchprocessor/icons/addImageFilter</normaloff>
@@ -288,6 +291,9 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="toolTip">
+                  <string>Load image filter list</string>
+                 </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
                    <normaloff>:/imagebatchprocessor/icons/loadImageFilters</normaloff>
@@ -313,7 +319,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>Save image filter list.</string>
+                  <string>Save image filter list</string>
                  </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
@@ -365,7 +371,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>Lay out preview vertically.</string>
+                  <string>Lay out preview vertically</string>
                  </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
@@ -403,7 +409,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>Lay out preview horizontally.</string>
+                  <string>Lay out preview horizontally</string>
                  </property>
                  <property name="icon">
                   <iconset resource="imagebatchprocessor.qrc">
@@ -517,7 +523,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Switch to edit view.</string>
+                 <string>Switch to edit view</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -558,7 +564,7 @@ QToolButton#mToolbarEditButtonSaveImage, QToolButton#mToolbarEditButtonSaveFilte
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Switch to batch processing view.</string>
+                 <string>Switch to batch processing view</string>
                 </property>
                 <property name="text">
                  <string/>

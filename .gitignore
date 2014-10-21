@@ -1,0 +1,8 @@
+bin
+
+build
+
+lib
+
+*.pro.user
+projects/qtcreator/3rdparty.pri

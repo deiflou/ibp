@@ -64,7 +64,8 @@ SOURCES += \
     ../../src/widgets/curves.cpp \
     ../../src/widgets/style.cpp \
     ../../src/widgets/filedialog.cpp \
-    ../../src/widgets/levelscurvespaintdelegate.cpp
+    ../../src/widgets/levelscurvespaintdelegate.cpp \
+    ../../src/widgets/lumakeyingcurvespaintdelegate.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -88,7 +89,8 @@ HEADERS += \
     ../../src/widgets/curves.h \
     ../../src/widgets/style.h \
     ../../src/widgets/filedialog.h \
-    ../../src/widgets/levelscurvespaintdelegate.h
+    ../../src/widgets/levelscurvespaintdelegate.h \
+    ../../src/widgets/lumakeyingcurvespaintdelegate.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc
