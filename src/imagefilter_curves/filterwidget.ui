@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>267</width>
+    <width>453</width>
     <height>418</height>
    </rect>
   </property>
@@ -14,9 +14,12 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">#mButtonInterpolationModeFlat, #mButtonInterpolationModeLinear, #mButtonInterpolationModeSmooth
+{
+	padding: 1px;
+}</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1">
    <property name="spacing">
     <number>5</number>
    </property>
@@ -178,101 +181,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Interpolation Mode:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <property name="leftMargin">
-      <number>10</number>
-     </property>
-     <item>
-      <widget class="QToolButton" name="mButtonInterpolationModeFlat">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Flat</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="autoExclusive">
-        <bool>true</bool>
-       </property>
-       <property name="class" stdset="0">
-        <string>cFlatOptionButton</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_2</string>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="mButtonInterpolationModeLinear">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Linear</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="autoExclusive">
-        <bool>true</bool>
-       </property>
-       <property name="class" stdset="0">
-        <string>cFlatOptionButton</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_2</string>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="mButtonInterpolationModeSmooth">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Smooth</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-       <property name="autoExclusive">
-        <bool>true</bool>
-       </property>
-       <property name="class" stdset="0">
-        <string>cFlatOptionButton</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_2</string>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>Curve:</string>
@@ -329,50 +237,160 @@
         </layout>
        </item>
        <item>
-        <widget class="QWidget" name="mWidgetContainerSpins" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <property name="leftMargin">
-           <number>10</number>
-          </property>
-          <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <item>
+            <widget class="QToolButton" name="mButtonInterpolationModeFlat">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Use flat interpolation</string>
+             </property>
+             <property name="text">
+              <string>Flat</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>:/anitools/icons/interpolationFlat</normaloff>:/anitools/icons/interpolationFlat</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>true</bool>
+             </property>
+             <property name="class" stdset="0">
+              <string>cFlatOptionButton</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">buttonGroup_2</string>
+             </attribute>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="mButtonInterpolationModeLinear">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Use linear interpolation</string>
+             </property>
+             <property name="text">
+              <string>Linear</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>:/anitools/icons/interpolationLinear</normaloff>:/anitools/icons/interpolationLinear</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>true</bool>
+             </property>
+             <property name="class" stdset="0">
+              <string>cFlatOptionButton</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">buttonGroup_2</string>
+             </attribute>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="mButtonInterpolationModeSmooth">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Use smooth interpolation</string>
+             </property>
+             <property name="text">
+              <string>Smooth</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>:/anitools/icons/interpolationSmooth</normaloff>:/anitools/icons/interpolationSmooth</iconset>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>true</bool>
+             </property>
+             <property name="class" stdset="0">
+              <string>cFlatOptionButton</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">buttonGroup_2</string>
+             </attribute>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>5</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QWidget" name="mWidgetContainerSpins" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <property name="spacing">
-             <number>5</number>
+             <number>1</number>
             </property>
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Input Value</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Output Value</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <property name="spacing">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
              <widget class="QDoubleSpinBox" name="mSpinInputValue">
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Input value</string>
               </property>
               <property name="decimals">
                <number>0</number>
@@ -383,25 +401,15 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_6">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <widget class="QDoubleSpinBox" name="mSpinOutputValue">
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Output value</string>
               </property>
               <property name="decimals">
                <number>0</number>
@@ -412,9 +420,9 @@
              </widget>
             </item>
            </layout>
-          </item>
-         </layout>
-        </widget>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
@@ -459,7 +467,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include <math.h>
-#include <QDebug>
 
 #include "filterwidget.h"
 #include "ui_filterwidget.h"
@@ -35,7 +34,8 @@ FilterWidget::FilterWidget(QWidget *parent) :
     ui->setupUi(this);
     mLumaKeyingCurvesPaintDelegate = new LumaKeyingCurvesPaintDelegate(this);
     ui->mWidgetCurves->setPaintDelegate(mLumaKeyingCurvesPaintDelegate);
-    ui->mWidgetContainerSpins->hide();
+    ui->mSpinLumaValue->setEnabled(false);
+    ui->mSpinOpacityValue->setEnabled(false);
     mZoomFactors << 1. << 1.2 << 1.4 << 1.6 << 1.8 << 2.;
 }
 
@@ -87,6 +87,22 @@ void FilterWidget::setInverted(bool i)
     emit invertedChanged(i);
 }
 
+void FilterWidget::setOutputMode(Filter::OutputMode om)
+{
+    if ((om == Filter::KeyedImage && ui->mButtonOutputModeKeyedImage->isChecked()) ||
+        (om == Filter::Matte && ui->mButtonOutputModeMatte->isChecked()))
+        return;
+
+    mEmitSignals = false;
+    if (om == Filter::KeyedImage)
+        ui->mButtonOutputModeKeyedImage->setChecked(true);
+    else
+        ui->mButtonOutputModeMatte->setChecked(true);
+    mEmitSignals = true;
+
+    emit outputModeChanged(om);
+}
+
 void FilterWidget::on_mButtonInterpolationModeFlat_toggled(bool v)
 {
     if (!v)
@@ -121,13 +137,17 @@ void FilterWidget::on_mButtonInterpolationModeSmooth_toggled(bool v)
 void FilterWidget::on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots & k)
 {
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
-        ui->mWidgetContainerSpins->hide();
+    {
+        ui->mSpinLumaValue->setEnabled(false);
+        ui->mSpinOpacityValue->setEnabled(false);
+    }
     else
     {
         SplineInterpolatorKnot kn = k.at(ui->mWidgetCurves->selectedKnotIndex());
         ui->mSpinLumaValue->setValue(round(kn.x() * 255.0));
         ui->mSpinOpacityValue->setValue(round(kn.y() * 255.0));
-        ui->mWidgetContainerSpins->show();
+        ui->mSpinLumaValue->setEnabled(true);
+        ui->mSpinOpacityValue->setEnabled(true);
     }
 
     if (mEmitSignals)
@@ -139,13 +159,17 @@ void FilterWidget::on_mWidgetCurves_selectedKnotChanged(int i)
     Q_UNUSED(i)
 
     if (i == -1)
-        ui->mWidgetContainerSpins->hide();
+    {
+        ui->mSpinLumaValue->setEnabled(false);
+        ui->mSpinOpacityValue->setEnabled(false);
+    }
     else
     {
         SplineInterpolatorKnot kn = ui->mWidgetCurves->selectedKnot();
         ui->mSpinLumaValue->setValue(round(kn.x() * 255.0));
         ui->mSpinOpacityValue->setValue(round(kn.y() * 255.0));
-        ui->mWidgetContainerSpins->show();
+        ui->mSpinLumaValue->setEnabled(true);
+        ui->mSpinOpacityValue->setEnabled(true);
     }
 }
 
@@ -205,4 +229,22 @@ void FilterWidget::on_mButtonZoom100_clicked()
 {
     mZoomFactorIndex = 0;
     ui->mWidgetCurves->fit();
+}
+
+void FilterWidget::on_mButtonOutputModeKeyedImage_toggled(bool c)
+{
+    if (!c)
+        return;
+
+    if (mEmitSignals)
+        emit outputModeChanged(Filter::KeyedImage);
+}
+
+void FilterWidget::on_mButtonOutputModeMatte_toggled(bool c)
+{
+    if (!c)
+        return;
+
+    if (mEmitSignals)
+        emit outputModeChanged(Filter::Matte);
 }

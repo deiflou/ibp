@@ -37,6 +37,25 @@ CubicSplineInterpolator::CubicSplineInterpolator() :
 {
 }
 
+SplineInterpolator * CubicSplineInterpolator::clone() const
+{
+    CubicSplineInterpolator * si = new CubicSplineInterpolator();
+    if (!si)
+        return 0;
+    si->mKnots = mKnots;
+    si->mFloorExtrapolationMode = mFloorExtrapolationMode;
+    si->mCeilExtrapolationMode = mCeilExtrapolationMode;
+    si->mFloorExtrapolationValue = mFloorExtrapolationValue;
+    si->mCeilExtrapolationValue = mCeilExtrapolationValue;
+    si->mFloorBoundaryConditions = mFloorBoundaryConditions;
+    si->mCeilBoundaryConditions = mCeilBoundaryConditions;
+    si->mFloorBoundaryConditionsValue = mFloorBoundaryConditionsValue;
+    si->mCeilBoundaryConditionsValue = mCeilBoundaryConditionsValue;
+    si->mCoefficients = mCoefficients;
+    si->mIsDirty = mIsDirty;
+    return si;
+}
+
 double CubicSplineInterpolator::f(double x)
 {
     if (mKnots.size() < 1) return 0.0;

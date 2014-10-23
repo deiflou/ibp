@@ -22,8 +22,6 @@ TEMPLATE = lib
 TARGET = anitools.widgets
 
 win32 {
-    QT += winextras
-    DEFINES += WIN_AERO
     CONFIG(debug, debug|release) {
         DESTDIR = ../../lib/win32/widgets/debug
         DLLDESTDIR = ../../bin/win32/debug
@@ -65,7 +63,8 @@ SOURCES += \
     ../../src/widgets/style.cpp \
     ../../src/widgets/filedialog.cpp \
     ../../src/widgets/levelscurvespaintdelegate.cpp \
-    ../../src/widgets/lumakeyingcurvespaintdelegate.cpp
+    ../../src/widgets/lumakeyingcurvespaintdelegate.cpp \
+    ../../src/widgets/hslkeyingcurvespaintdelegate.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -90,7 +89,8 @@ HEADERS += \
     ../../src/widgets/style.h \
     ../../src/widgets/filedialog.h \
     ../../src/widgets/levelscurvespaintdelegate.h \
-    ../../src/widgets/lumakeyingcurvespaintdelegate.h
+    ../../src/widgets/lumakeyingcurvespaintdelegate.h \
+    ../../src/widgets/hslkeyingcurvespaintdelegate.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc

@@ -33,7 +33,7 @@ FilterWidget::FilterWidget(QWidget *parent) :
     ui->setupUi(this);
     mCurvesPaintDelegate = new LevelsCurvesPaintDelegate(this);
     ui->mWidgetCurves->setPaintDelegate(mCurvesPaintDelegate);
-    ui->mWidgetContainerSpins->hide();
+    ui->mWidgetContainerSpins->setEnabled(false);
 }
 
 FilterWidget::~FilterWidget()
@@ -171,13 +171,13 @@ void FilterWidget::on_mButtonInterpolationModeSmooth_toggled(bool v)
 void FilterWidget::on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots & k)
 {
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
-        ui->mWidgetContainerSpins->hide();
+        ui->mWidgetContainerSpins->setEnabled(false);
     else
     {
         SplineInterpolatorKnot kn = k.at(ui->mWidgetCurves->selectedKnotIndex());
         ui->mSpinInputValue->setValue(round(kn.x() * 255.0));
         ui->mSpinOutputValue->setValue(round(kn.y() * 255.0));
-        ui->mWidgetContainerSpins->show();
+        ui->mWidgetContainerSpins->setEnabled(true);
     }
 
     if (mEmitSignals)
@@ -189,13 +189,13 @@ void FilterWidget::on_mWidgetCurves_selectedKnotChanged(int i)
     Q_UNUSED(i)
 
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
-        ui->mWidgetContainerSpins->hide();
+        ui->mWidgetContainerSpins->setEnabled(false);
     else
     {
         SplineInterpolatorKnot k = ui->mWidgetCurves->selectedKnot();
         ui->mSpinInputValue->setValue(round(k.x() * 255.0));
         ui->mSpinOutputValue->setValue(round(k.y() * 255.0));
-        ui->mWidgetContainerSpins->show();
+        ui->mWidgetContainerSpins->setEnabled(true);
     }
 }
 

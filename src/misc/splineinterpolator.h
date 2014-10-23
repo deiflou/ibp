@@ -47,6 +47,7 @@ public:
     };
 
     virtual ~SplineInterpolator() {}
+    virtual SplineInterpolator * clone() const = 0;
 
     virtual const SplineInterpolatorKnots & knots() const = 0;
     virtual const SplineInterpolatorKnot & knot(int i) const = 0;

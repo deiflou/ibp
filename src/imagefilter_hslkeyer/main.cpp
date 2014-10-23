@@ -19,25 +19,35 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
-#define ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
+#include <QHash>
 
-#include "basesplineinterpolator.h"
+#include "filter.h"
+#include "../imgproc/imagefilter.h"
 
-namespace anitools {
-namespace misc {
+using namespace anitools::imgproc;
 
-class LinearSplineInterpolator : public BaseSplineInterpolator
+#ifdef Q_OS_WIN32
+#define ANITOOLS_EXPORT __declspec(dllexport)
+#else
+#define ANITOOLS_EXPORT
+#endif
+
+extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
-public:
-    LinearSplineInterpolator();
-    SplineInterpolator * clone() const;
+    QHash<QString, QString> info;
 
-    double f(double x);
+    info.insert("id", "anitools.imagefilter.hslkeyer");
+    info.insert("version", "0.1.0");
+    info.insert("name", QObject::tr("HSL Keyer"));
+    info.insert("description", QObject::tr("Apply a matte to the image based on its HSL components"));
+    info.insert("tags", QObject::tr("Keying"));
+    info.insert("author", QObject::tr("Deif Lou"));
+    info.insert("copyright", QObject::tr(""));
+    info.insert("url", QObject::tr(""));
+    return info;
+}
 
-private:
-    int getPiece(double x);
-};
-
-}}
-#endif // ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
+extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
+{
+    return new Filter();
+}

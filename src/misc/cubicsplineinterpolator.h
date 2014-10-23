@@ -76,6 +76,7 @@ public:
     };
 
     CubicSplineInterpolator();
+    SplineInterpolator * clone() const;
 
     bool setKnots(const SplineInterpolatorKnots &k);
     bool setKnot(int i, const SplineInterpolatorKnot &k);

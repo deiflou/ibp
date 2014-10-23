@@ -188,6 +188,7 @@ void ColorPicker::setColor(const QColor &color)
     QString sn = color.name(mFlags & HideAlpha ? QColor::HexRgb : QColor::HexArgb);
     ui->mLineEditHex->setText(sn.right(sn.length() - 1).toUpper());
     mCanUpdate = true;
+    emit colorChanged(ui->mSliderRed->color());
 }
 
 ColorPicker::ColorPickerFlags ColorPicker::flags() const

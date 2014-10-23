@@ -44,7 +44,9 @@ Filter::Filter() :
 
 Filter::~Filter()
 {
-
+    for (int i = 0; i < 5; i++)
+        if (mSplineInterpolator[i])
+            delete mSplineInterpolator[i];
 }
 
 ImageFilter * Filter::clone()
@@ -53,14 +55,9 @@ ImageFilter * Filter::clone()
 
     for (int i = 0; i < 5; i++)
     {
-        if (mInterpolationMode[i] == Flat)
-            f->mSplineInterpolator[i] = new NearestNeighborSplineInterpolator();
-        else if (mInterpolationMode[i] == Linear)
-            f->mSplineInterpolator[i] = new LinearSplineInterpolator();
-        else
-            f->mSplineInterpolator[i] = new CubicSplineInterpolator();
-
-        f->mSplineInterpolator[i]->setKnots(mSplineInterpolator[i]->knots());
+        if (f->mSplineInterpolator[i])
+            delete f->mSplineInterpolator[i];
+        f->mSplineInterpolator[i] = mSplineInterpolator[i]->clone();
 
         f->mInterpolationMode[i] = mInterpolationMode[i];
 

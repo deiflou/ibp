@@ -19,22 +19,25 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H
-#define ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H
+#ifndef ANITOOLS_WIDGETS_HSLKEYINGCURVESPAINTDELEGATE_H
+#define ANITOOLS_WIDGETS_HSLKEYINGCURVESPAINTDELEGATE_H
 
 #include <QImage>
 #include "curves.h"
+#include "../imgproc/types.h"
+
+using namespace anitools::imgproc;
 
 namespace anitools {
 namespace widgets {
 
-class LumaKeyingCurvesPaintDelegate : public CurvesPaintDelegate
+class HSLKeyingCurvesPaintDelegate : public CurvesPaintDelegate
 {
     Q_OBJECT
 
 public:
-    explicit LumaKeyingCurvesPaintDelegate(QObject *parent = 0);
-    ~LumaKeyingCurvesPaintDelegate();
+    explicit HSLKeyingCurvesPaintDelegate(QObject *parent = 0);
+    ~HSLKeyingCurvesPaintDelegate();
 
     void update(UpdateEvent e, const Curves * w, const QRect & r);
     void paint(QPainter & p, const Curves * w, const QRect & r,
@@ -43,11 +46,17 @@ public:
                const QSize & knotSize);
     QRect graphRect(const QRect & r) const;
 
+    HSL color() const;
+    ColorChannel channel() const;
     bool isInverted() const;
+    void setColor(const HSL & color);
+    void setChannel(ColorChannel channel);
     void setInverted(bool v);
 
 private:
     QImage mCheckerboardImage, mGradientImage;
+    HSL mColor;
+    ColorChannel mChannel;
     bool mIsInverted;
 
     void paintBackground(QPainter &p, const Curves * w, const QRect & r, QStyle::State widgetState);
@@ -56,8 +65,10 @@ private:
     void paintKnots(const QVector<QPointF> & pts, const QVector<QStyle::State> & sts,
                     const QSize & s, QPainter & p, const Curves * w, const QRect & r,
                     QStyle::State widgetState);
+
+    void makeGradientImage();
 };
 
 }}
 
-#endif // ANITOOLS_WIDGETS_LUMAKEYINGCURVESPAINTDELEGATE_H
+#endif // ANITOOLS_WIDGETS_HSLKEYINGCURVESPAINTDELEGATE_H

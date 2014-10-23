@@ -30,6 +30,7 @@
 #include <QWidget>
 
 #include "../imgproc/imagefilter.h"
+#include "../imgproc/types.h"
 #include "../misc/splineinterpolator.h"
 
 using namespace anitools::imgproc;
@@ -63,26 +64,37 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    SplineInterpolator * mSplineInterpolator;
-    InterpolationMode mInterpolationMode;
-    bool mIsInverted;
+    SplineInterpolator * mSplineInterpolatorHue, * mSplineInterpolatorSaturation, * mSplineInterpolatorLightness;
+    InterpolationMode mInterpolationModeHue, mInterpolationModeSaturation, mInterpolationModeLightness;
+    bool mIsInvertedHue, mIsInvertedSaturation, mIsInvertedLightness;
     OutputMode mOutputMode;
-    unsigned char mLut[256];
+    unsigned char mLutHue[256], mLutSaturation[256], mLutLightness[256];
 
-    void makeLUT();
+    void makeLUT(ColorChannel c);
 
 signals:
-    void knotsChanged(const SplineInterpolatorKnots & k);
-    void interpolationModeChanged(Filter::InterpolationMode im);
-    void invertedChanged(bool i);
+    void hueKnotsChanged(const SplineInterpolatorKnots & k);
+    void hueInterpolationModeChanged(Filter::InterpolationMode im);
+    void hueInvertedChanged(bool i);
+    void saturationKnotsChanged(const SplineInterpolatorKnots & k);
+    void saturationInterpolationModeChanged(Filter::InterpolationMode im);
+    void saturationInvertedChanged(bool i);
+    void lightnessKnotsChanged(const SplineInterpolatorKnots & k);
+    void lightnessInterpolationModeChanged(Filter::InterpolationMode im);
+    void lightnessInvertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
 
 public slots:
-    void setKnots(const SplineInterpolatorKnots & k);
-    void setInterpolationMode(Filter::InterpolationMode im);
-    void setInverted(bool i);
+    void setHueKnots(const SplineInterpolatorKnots & k);
+    void setHueInterpolationMode(Filter::InterpolationMode im);
+    void setHueInverted(bool i);
+    void setSaturationKnots(const SplineInterpolatorKnots & k);
+    void setSaturationInterpolationMode(Filter::InterpolationMode im);
+    void setSaturationInverted(bool i);
+    void setLightnessKnots(const SplineInterpolatorKnots & k);
+    void setLightnessInterpolationMode(Filter::InterpolationMode im);
+    void setLightnessInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
-
 };
 
 #endif // FILTER_H

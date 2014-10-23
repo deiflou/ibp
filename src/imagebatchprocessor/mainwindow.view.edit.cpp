@@ -85,6 +85,28 @@ void MainWindow::viewEditLoad()
     viewEditLoadImageFilterList(ConfigurationManager::folder() + "/imagebatchprocessor.ifl");
     mViewEditImageFilterListIsDirty = false;
 
+    // Load the list of expand statuses of the widget list
+    ui->mViewEditWidgetList->setAnimate(false);
+    QStringList expandStatusList = ConfigurationManager::value("viewedit/imagefilterlist/expandstatus",
+                                                               "").toString().split(" ");
+    if (expandStatusList.size() == mViewEditImageFilterList.count())
+    {
+        int i, v;
+        QList<bool> expandStatus;
+        bool ok;
+        for (i = 0; i < expandStatusList.size(); i++)
+        {
+            v = expandStatusList[i].toInt(&ok);
+            if (!ok || v < 0 || v > 1)
+                break;
+            expandStatus.append(v == 0 ? false : true);
+        }
+        if (expandStatus.size() == mViewEditImageFilterList.count())
+            for (i = 0; i < expandStatus.size(); i++)
+                ui->mViewEditWidgetList->setWidgetExpanded(i, expandStatus[i]);
+    }
+    ui->mViewEditWidgetList->setAnimate(true);
+
     // Load last image
     viewEditLoadInputImage(ConfigurationManager::value("viewedit/inputimagefilename", "").toString());
 
@@ -132,7 +154,6 @@ void MainWindow::viewEditUnload()
 
     // Save configuration
     ConfigurationManager::setValue("viewedit/inputimagefilename", mViewEditInputImageFilename);
-    ConfigurationManager::setValue("viewedit/imagefilterlist/width", ui->mViewEditSplitterMain->sizes().at(1));
 
     ConfigurationManager::setValue("viewedit/preview/splitterorientation",
                                    ui->mViewEditSplitterPreview->orientation());
@@ -152,6 +173,11 @@ void MainWindow::viewEditUnload()
                                        ui->mViewEditImagePreviewOutput->horizontalScrollBar()->value(),
                                        ui->mViewEditImagePreviewOutput->verticalScrollBar()->value()));
 
+    ConfigurationManager::setValue("viewedit/imagefilterlist/width", ui->mViewEditSplitterMain->sizes().at(1));
+    QStringList expandStatusList;
+    for (int i = 0; i < ui->mViewEditWidgetList->count(); i++)
+        expandStatusList.append(ui->mViewEditWidgetList->widgetExpanded(i) ? "1" : "0");
+    ConfigurationManager::setValue("viewedit/imagefilterlist/expandstatus", expandStatusList.join(" "));
 }
 
 void MainWindow::viewEditEventFilter(QObject *o, QEvent *e)

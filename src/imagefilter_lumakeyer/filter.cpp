@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include <QRegularExpression>
-#include <QDebug>
 #include <math.h>
 
 #include "filter.h"
@@ -33,9 +32,11 @@
 #include "../misc/util.h"
 
 Filter::Filter() :
-    mIsInverted(false)
+    mSplineInterpolator(0),
+    mInterpolationMode(Smooth),
+    mIsInverted(false),
+    mOutputMode(KeyedImage)
 {
-    mInterpolationMode = Smooth;
     mSplineInterpolator = new CubicSplineInterpolator();
     mSplineInterpolator->addKnot(0.0, 0.0);
     mSplineInterpolator->addKnot(1.0, 1.0);
@@ -44,22 +45,20 @@ Filter::Filter() :
 
 Filter::~Filter()
 {
-
+    if (mSplineInterpolator)
+        delete mSplineInterpolator;
 }
 
 ImageFilter * Filter::clone()
 {
     Filter * f = new Filter();
 
-    if (mInterpolationMode == Flat)
-        f->mSplineInterpolator = new NearestNeighborSplineInterpolator();
-    else if (mInterpolationMode == Linear)
-        f->mSplineInterpolator = new LinearSplineInterpolator();
-    else
-        f->mSplineInterpolator = new CubicSplineInterpolator();
-    f->mSplineInterpolator->setKnots(mSplineInterpolator->knots());
+    if (f->mSplineInterpolator)
+        delete f->mSplineInterpolator;
+    f->mSplineInterpolator = mSplineInterpolator->clone();
     f->mInterpolationMode = mInterpolationMode;
     f->mIsInverted = mIsInverted;
+    f->mOutputMode = mOutputMode;
     f->makeLUT();
 
     return f;
@@ -85,15 +84,25 @@ QImage Filter::process(const QImage & inputImage)
     register unsigned int gG = .7152 * 0x10000;
     register unsigned int gB = .0722 * 0x10000;
 
-    while (totalPixels--)
-    {
-        bits2->r = bits->r;
-        bits2->g = bits->g;
-        bits2->b = bits->b;
-        bits2->a = lut01[bits->a][mLut[(bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16)]];
-        bits++;
-        bits2++;
-    }
+    if (mOutputMode == KeyedImage)
+        while (totalPixels--)
+        {
+            bits2->r = bits->r;
+            bits2->g = bits->g;
+            bits2->b = bits->b;
+            bits2->a = lut01[bits->a][mLut[(bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16)]];
+            bits++;
+            bits2++;
+        }
+    else
+        while (totalPixels--)
+        {
+            bits2->r = bits2->g = bits2->b =
+                    lut01[bits->a][mLut[(bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16)]];
+            bits2->a = 255;
+            bits++;
+            bits2++;
+        }
 
     return i;
 }
@@ -108,6 +117,8 @@ bool Filter::loadParameters(QSettings &s)
     double x, y;
     SplineInterpolatorKnots knots;
     bool isInverted;
+    QString outputModeStr;
+    OutputMode outputMode;
     bool ok;
 
     interpolationModeStr = s.value("interpolationmode", "smooth").toString();
@@ -140,9 +151,18 @@ bool Filter::loadParameters(QSettings &s)
 
     isInverted = s.value("isinverted", false).toBool();
 
+    outputModeStr = s.value("outputmode", "keyedimage").toString();
+    if (outputModeStr == "keyedimage")
+        outputMode = KeyedImage;
+    else if (outputModeStr == "matte")
+        outputMode = Matte;
+    else
+        return false;
+
     setInterpolationMode(interpolationMode);
     setKnots(knots);
     setInverted(isInverted);
+    setOutputMode(outputMode);
 
     return true;
 }
@@ -162,7 +182,10 @@ bool Filter::saveParameters(QSettings &s)
             knotsStr += ", ";
     }
     s.setValue("knots", knotsStr);
+
     s.setValue("isinverted", mIsInverted);
+
+    s.setValue("outputmode", mOutputMode == KeyedImage ? "keyedimage" : "matte");
 
     return true;
 }
@@ -173,6 +196,7 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setInterpolationMode(mInterpolationMode);
     fw->setKnots(mSplineInterpolator->knots());
     fw->setInverted(mIsInverted);
+    fw->setOutputMode(mOutputMode);
 
     connect(this, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setInterpolationMode(Filter::InterpolationMode)));
@@ -180,6 +204,8 @@ QWidget *Filter::widget(QWidget *parent)
             fw, SLOT(setKnots(SplineInterpolatorKnots)));
     connect(this, SIGNAL(invertedChanged(bool)),
             fw, SLOT(setInverted(bool)));
+    connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)),
+            fw, SLOT(setOutputMode(Filter::OutputMode)));
 
     connect(fw, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setInterpolationMode(Filter::InterpolationMode)));
@@ -187,6 +213,8 @@ QWidget *Filter::widget(QWidget *parent)
             this, SLOT(setKnots(SplineInterpolatorKnots)));
     connect(fw, SIGNAL(invertedChanged(bool)),
             this, SLOT(setInverted(bool)));
+    connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)),
+            this, SLOT(setOutputMode(Filter::OutputMode)));
 
     return fw;
 }
@@ -196,6 +224,7 @@ void Filter::setKnots(const SplineInterpolatorKnots &k)
     if (mSplineInterpolator->knots() == k)
         return;
     mSplineInterpolator->setKnots(k);
+    makeLUT();
     emit knotsChanged(k);
     emit parametersChanged();
 }
@@ -239,12 +268,24 @@ void Filter::setInverted(bool i)
     emit parametersChanged();
 }
 
+void Filter::setOutputMode(Filter::OutputMode om)
+{
+    if (mOutputMode == om)
+        return;
+
+    mOutputMode = om;
+
+    emit outputModeChanged(om);
+    emit parametersChanged();
+}
+
+
 void Filter::makeLUT()
 {
     if (mIsInverted)
-        for (int i = 0; i <= 256; i++)
+        for (int i = 0; i < 256; i++)
             mLut[i] = AT_clamp(0, round(mSplineInterpolator->f(i / 255.) * 255.), 255);
     else
-        for (int i = 0; i <= 256; i++)
+        for (int i = 0; i < 256; i++)
             mLut[i] = 255 - AT_clamp(0, round(mSplineInterpolator->f(i / 255.) * 255.), 255);
 }

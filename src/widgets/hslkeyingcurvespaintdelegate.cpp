@@ -23,34 +23,38 @@
 #include <QStyle>
 #include <math.h>
 
-#include "lumakeyingcurvespaintdelegate.h"
-#include "../imgproc/types.h"
-
-using namespace anitools::imgproc;
+#include "hslkeyingcurvespaintdelegate.h"
+#include "../imgproc/colorconversion.h"
 
 namespace anitools {
 namespace widgets {
 
-LumaKeyingCurvesPaintDelegate::LumaKeyingCurvesPaintDelegate(QObject *parent) :
+HSLKeyingCurvesPaintDelegate::HSLKeyingCurvesPaintDelegate(QObject *parent) :
     mCheckerboardImage(2, 2, QImage::Format_RGB888),
     mGradientImage(256, 1, QImage::Format_ARGB32),
+    mChannel(ColorChannel_Hue),
     mIsInverted(false)
 {
     setParent(parent);
+
+    HSL c;
+    c.h = 0;
+    c.s = 255;
+    c.l = 128;
+
     BGRA * bits = (BGRA *)mGradientImage.bits();
     for (int x = 0; x < 256; x++, bits++)
-    {
-        bits->r = bits->g = bits->b = x;
         bits->a = 255;
-    }
+
+    setColor(c);
 }
 
-LumaKeyingCurvesPaintDelegate::~LumaKeyingCurvesPaintDelegate()
+HSLKeyingCurvesPaintDelegate::~HSLKeyingCurvesPaintDelegate()
 {
 
 }
 
-void LumaKeyingCurvesPaintDelegate::update(UpdateEvent e, const Curves *w, const QRect & r)
+void HSLKeyingCurvesPaintDelegate::update(UpdateEvent e, const Curves *w, const QRect & r)
 {
     Q_UNUSED(r)
 
@@ -66,17 +70,17 @@ void LumaKeyingCurvesPaintDelegate::update(UpdateEvent e, const Curves *w, const
     }
 }
 
-void LumaKeyingCurvesPaintDelegate::paint(QPainter &p, const Curves *w, const QRect &r, QStyle::State widgetState,
-                                          const QPolygonF &graph, const QVector<QPointF> &knotPos,
-                                          const QVector<QStyle::State> &knotStates, const QSize &knotSize)
+void HSLKeyingCurvesPaintDelegate::paint(QPainter &p, const Curves *w, const QRect &r, QStyle::State widgetState,
+                                         const QPolygonF &graph, const QVector<QPointF> &knotPos,
+                                         const QVector<QStyle::State> &knotStates, const QSize &knotSize)
 {
     paintBackground(p, w, r, widgetState);
     paintGraph(graph, p, w, r, widgetState);
     paintKnots(knotPos, knotStates, knotSize, p, w, r, widgetState);
 }
 
-void LumaKeyingCurvesPaintDelegate::paintBackground(QPainter &p, const Curves *w,
-                                                    const QRect & r, QStyle::State widgetState)
+void HSLKeyingCurvesPaintDelegate::paintBackground(QPainter &p, const Curves *w,
+                                                   const QRect & r, QStyle::State widgetState)
 {
     Q_UNUSED(widgetState)
 
@@ -107,9 +111,9 @@ void LumaKeyingCurvesPaintDelegate::paintBackground(QPainter &p, const Curves *w
     }
 }
 
-void LumaKeyingCurvesPaintDelegate::paintGraph(const QPolygonF &g,
-                                               QPainter &p, const Curves *w,
-                                               const QRect & r, QStyle::State widgetState)
+void HSLKeyingCurvesPaintDelegate::paintGraph(const QPolygonF &g,
+                                              QPainter &p, const Curves *w,
+                                              const QRect & r, QStyle::State widgetState)
 {
     Q_UNUSED(w)
     Q_UNUSED(r)
@@ -122,11 +126,11 @@ void LumaKeyingCurvesPaintDelegate::paintGraph(const QPolygonF &g,
     p.drawPolyline(g);
 }
 
-void LumaKeyingCurvesPaintDelegate::paintKnots(const QVector<QPointF> & pts,
-                                               const QVector<QStyle::State> & sts,
-                                               const QSize & s,
-                                               QPainter & p, const Curves * w,
-                                               const QRect & r, QStyle::State widgetState)
+void HSLKeyingCurvesPaintDelegate::paintKnots(const QVector<QPointF> & pts,
+                                              const QVector<QStyle::State> & sts,
+                                              const QSize & s,
+                                              QPainter & p, const Curves * w,
+                                              const QRect & r, QStyle::State widgetState)
 {
     Q_UNUSED(r)
 
@@ -175,16 +179,45 @@ void LumaKeyingCurvesPaintDelegate::paintKnots(const QVector<QPointF> & pts,
     }
 }
 
-QRect LumaKeyingCurvesPaintDelegate::graphRect(const QRect &r) const
+QRect HSLKeyingCurvesPaintDelegate::graphRect(const QRect &r) const
 {
     return r.adjusted(0, 5, 0, -5);
 }
-bool LumaKeyingCurvesPaintDelegate::isInverted() const
+
+HSL HSLKeyingCurvesPaintDelegate::color() const
+{
+    return mColor;
+}
+
+ColorChannel HSLKeyingCurvesPaintDelegate::channel() const
+{
+    return mChannel;
+}
+
+bool HSLKeyingCurvesPaintDelegate::isInverted() const
 {
     return mIsInverted;
 }
 
-void LumaKeyingCurvesPaintDelegate::setInverted(bool v)
+void HSLKeyingCurvesPaintDelegate::setColor(const HSL &color)
+{
+    if (mColor.h == color.h && mColor.s == color.s && mColor.l == color.l)
+        return;
+    mColor = color;
+    makeGradientImage();
+    emit updateRequired();
+}
+
+void HSLKeyingCurvesPaintDelegate::setChannel(ColorChannel channel)
+{
+    if (mChannel == channel)
+        return;
+    mChannel = channel;
+    makeGradientImage();
+    emit updateRequired();
+}
+
+void HSLKeyingCurvesPaintDelegate::setInverted(bool v)
 {
     if (mIsInverted == v)
         return;
@@ -196,6 +229,34 @@ void LumaKeyingCurvesPaintDelegate::setInverted(bool v)
         bits->a = 255 - bits->a;
 
     emit updateRequired();
+}
+
+void HSLKeyingCurvesPaintDelegate::makeGradientImage()
+{
+    HSL hsl[256];
+    HSL * bitshsl = hsl;
+    if (mChannel == ColorChannel_Hue)
+        for (int x = 0; x < 256; x++, bitshsl++)
+        {
+            bitshsl->h = x;
+            bitshsl->s = mColor.s;
+            bitshsl->l = mColor.l;
+        }
+    else if (mChannel == ColorChannel_Saturation)
+        for (int x = 0; x < 256; x++, bitshsl++)
+        {
+            bitshsl->s = x;
+            bitshsl->h = mColor.h;
+            bitshsl->l = mColor.l;
+        }
+    else
+        for (int x = 0; x < 256; x++, bitshsl++)
+        {
+            bitshsl->l = x;
+            bitshsl->h = mColor.h;
+            bitshsl->s = mColor.s;
+        }
+    convertHSLToBGR((const unsigned char *)hsl, mGradientImage.bits(), 256);
 }
 
 }}

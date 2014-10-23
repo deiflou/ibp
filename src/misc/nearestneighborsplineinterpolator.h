@@ -31,6 +31,7 @@ class NearestNeighborSplineInterpolator : public BaseSplineInterpolator
 {
 public:
     NearestNeighborSplineInterpolator();
+    SplineInterpolator * clone() const;
 
     double f(double x);
 

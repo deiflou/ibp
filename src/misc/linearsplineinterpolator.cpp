@@ -31,6 +31,19 @@ LinearSplineInterpolator::LinearSplineInterpolator() :
 {
 }
 
+SplineInterpolator * LinearSplineInterpolator::clone() const
+{
+    LinearSplineInterpolator * si = new LinearSplineInterpolator();
+    if (!si)
+        return 0;
+    si->mKnots = mKnots;
+    si->mFloorExtrapolationMode = mFloorExtrapolationMode;
+    si->mCeilExtrapolationMode = mCeilExtrapolationMode;
+    si->mFloorExtrapolationValue = mFloorExtrapolationValue;
+    si->mCeilExtrapolationValue = mCeilExtrapolationValue;
+    return si;
+}
+
 double LinearSplineInterpolator::f(double x)
 {
     if (mKnots.size() < 1) return 0.0;

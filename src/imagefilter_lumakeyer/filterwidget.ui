@@ -6,20 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>267</width>
-    <height>418</height>
+    <width>456</width>
+    <height>277</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QToolButton
+   <string notr="true">#mButtonZoomIn, #mButtonZoomOut, #mButtonZoom100,
+#mButtonInterpolationModeFlat, #mButtonInterpolationModeLinear, #mButtonInterpolationModeSmooth,
+#mButtonInverted
 {
-	padding: 4px;
+	padding: 1px;
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1">
    <property name="spacing">
     <number>5</number>
    </property>
@@ -43,247 +45,94 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <property name="spacing">
-      <number>0</number>
+      <number>5</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QHBoxLayout" name="mLayoutCurves" stretch="1">
        <property name="spacing">
         <number>5</number>
        </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
        <item>
-        <layout class="QHBoxLayout" name="mLayoutCurves">
-         <property name="spacing">
-          <number>0</number>
+        <widget class="anitools::widgets::Curves" name="mWidgetCurves" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
          </property>
-         <property name="leftMargin">
-          <number>10</number>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
          </property>
-         <item>
-          <widget class="anitools::widgets::Curves" name="mWidgetCurves" native="true">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>80</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        </widget>
        </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0,1,0,1,0">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0,1,0">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <property name="spacing">
-          <number>5</number>
-         </property>
-         <property name="leftMargin">
-          <number>10</number>
+          <number>1</number>
          </property>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <property name="spacing">
-            <number>1</number>
-           </property>
-           <item>
-            <widget class="QToolButton" name="mButtonZoomIn">
-             <property name="toolTip">
-              <string>Zoom in</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/magnifyingGlassPlus</normaloff>:/anitools/icons/magnifyingGlassPlus</iconset>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="mButtonZoomOut">
-             <property name="toolTip">
-              <string>Zoom out</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/magnifyingGlassMinus</normaloff>:/anitools/icons/magnifyingGlassMinus</iconset>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="mButtonZoom100">
-             <property name="toolTip">
-              <string>Zoom 100%</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/magnifyingGlassOne</normaloff>:/anitools/icons/magnifyingGlassOne</iconset>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <property name="spacing">
-            <number>1</number>
-           </property>
-           <item>
-            <widget class="QToolButton" name="mButtonInterpolationModeFlat">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Use flat interpolation</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/interpolationFlat</normaloff>:/anitools/icons/interpolationFlat</iconset>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="autoExclusive">
-              <bool>true</bool>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-             <attribute name="buttonGroup">
-              <string notr="true">buttonGroup_2</string>
-             </attribute>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="mButtonInterpolationModeLinear">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Use linear interpolation</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/interpolationLinear</normaloff>:/anitools/icons/interpolationLinear</iconset>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="autoExclusive">
-              <bool>true</bool>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-             <attribute name="buttonGroup">
-              <string notr="true">buttonGroup_2</string>
-             </attribute>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="mButtonInterpolationModeSmooth">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Use smooth interpolation</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>:/anitools/icons/interpolationSmooth</normaloff>:/anitools/icons/interpolationSmooth</iconset>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-             <property name="autoExclusive">
-              <bool>true</bool>
-             </property>
-             <property name="class" stdset="0">
-              <string>cFlatOptionButton</string>
-             </property>
-             <attribute name="buttonGroup">
-              <string notr="true">buttonGroup_2</string>
-             </attribute>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="mButtonInverted">
+          <widget class="QToolButton" name="mButtonZoomIn">
            <property name="toolTip">
-            <string>Invert</string>
+            <string>Zoom in</string>
            </property>
            <property name="text">
             <string/>
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>:/anitools/icons/invert</normaloff>:/anitools/icons/invert</iconset>
+             <normaloff>:/anitools/icons/magnifyingGlassPlus</normaloff>:/anitools/icons/magnifyingGlassPlus</iconset>
            </property>
-           <property name="checkable">
-            <bool>true</bool>
+           <property name="class" stdset="0">
+            <string>cFlatOptionButton</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="mButtonZoomOut">
+           <property name="toolTip">
+            <string>Zoom out</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/anitools/icons/magnifyingGlassMinus</normaloff>:/anitools/icons/magnifyingGlassMinus</iconset>
+           </property>
+           <property name="class" stdset="0">
+            <string>cFlatOptionButton</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="mButtonZoom100">
+           <property name="toolTip">
+            <string>Zoom 100%</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/anitools/icons/magnifyingGlassOne</normaloff>:/anitools/icons/magnifyingGlassOne</iconset>
            </property>
            <property name="class" stdset="0">
             <string>cFlatOptionButton</string>
@@ -293,94 +142,286 @@
         </layout>
        </item>
        <item>
-        <widget class="QWidget" name="mWidgetContainerSpins" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <property name="leftMargin">
-           <number>10</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <property name="spacing">
-             <number>5</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Luma Value</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Opacity Value</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QDoubleSpinBox" name="mSpinLumaValue">
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <double>255.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_6">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="mSpinOpacityValue">
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <double>255.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>5</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QToolButton" name="mButtonInterpolationModeFlat">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Use flat interpolation</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/anitools/icons/interpolationFlat</normaloff>:/anitools/icons/interpolationFlat</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>cFlatOptionButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup_2</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="mButtonInterpolationModeLinear">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Use linear interpolation</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/anitools/icons/interpolationLinear</normaloff>:/anitools/icons/interpolationLinear</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>cFlatOptionButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup_2</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="mButtonInterpolationModeSmooth">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Use smooth interpolation</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/anitools/icons/interpolationSmooth</normaloff>:/anitools/icons/interpolationSmooth</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+           <property name="class" stdset="0">
+            <string>cFlatOptionButton</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroup_2</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>5</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="mButtonInverted">
+         <property name="toolTip">
+          <string>Invert</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>:/anitools/icons/invert</normaloff>:/anitools/icons/invert</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="class" stdset="0">
+          <string>cFlatOptionButton</string>
+         </property>
         </widget>
        </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>5</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="mSpinLumaValue">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Luma value</string>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <double>255.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="mSpinOpacityValue">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Opacity value</string>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <double>255.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Output Mode:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <property name="leftMargin">
+      <number>10</number>
+     </property>
+     <item>
+      <widget class="QToolButton" name="mButtonOutputModeKeyedImage">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Keyed Image</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="autoExclusive">
+        <bool>true</bool>
+       </property>
+       <property name="class" stdset="0">
+        <string>cFlatOptionButton</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="mButtonOutputModeMatte">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Matte</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoExclusive">
+        <bool>true</bool>
+       </property>
+       <property name="class" stdset="0">
+        <string>cFlatOptionButton</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
      </item>
     </layout>
    </item>
@@ -411,5 +452,6 @@
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

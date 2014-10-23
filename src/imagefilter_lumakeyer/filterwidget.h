@@ -53,11 +53,13 @@ signals:
     void knotsChanged(const SplineInterpolatorKnots & k);
     void interpolationModeChanged(Filter::InterpolationMode im);
     void invertedChanged(bool i);
+    void outputModeChanged(Filter::OutputMode om);
 
 public slots:
     void setKnots(const SplineInterpolatorKnots & k);
     void setInterpolationMode(Filter::InterpolationMode im);
     void setInverted(bool i);
+    void setOutputMode(Filter::OutputMode om);
 
 private slots:
     void on_mButtonInterpolationModeFlat_toggled(bool v);
@@ -71,6 +73,8 @@ private slots:
     void on_mButtonZoomIn_clicked();
     void on_mButtonZoomOut_clicked();
     void on_mButtonZoom100_clicked();
+    void on_mButtonOutputModeKeyedImage_toggled(bool c);
+    void on_mButtonOutputModeMatte_toggled(bool c);
 };
 
 #endif // FILTERWIDGET_H
