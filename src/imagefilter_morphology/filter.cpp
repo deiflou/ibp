@@ -25,6 +25,8 @@
 #include "filterwidget.h"
 
 Filter::Filter() :
+    mModifyRGB(true),
+    mModifyAlpha(true),
     mMorphologyOp(Dilation),
     mKernelShape(Ellipse),
     mVRadius(0),
@@ -41,6 +43,8 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
+    f->mModifyRGB = mModifyRGB;
+    f->mModifyAlpha = mModifyAlpha;
     f->mMorphologyOp = mMorphologyOp;
     f->mKernelShape = mKernelShape;
     f->mVRadius = mVRadius;
@@ -63,14 +67,17 @@ QImage Filter::process(const QImage &inputImage)
     if (mHRadius == 0 || mVRadius == 0)
         return inputImage;
 
+    if (!mModifyRGB && !mModifyAlpha)
+        return inputImage;
+
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
     int hsize = mHRadius * 2;
     hsize += hsize % 2 == 0 ? 1 : 0;
     int vsize = mVRadius * 2;
     vsize += vsize % 2 == 0 ? 1 : 0;
     cv::Mat kernel;
-    cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
-    cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
+    cv::Mat mSrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
+    cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
 
     switch (mKernelShape)
     {
@@ -100,21 +107,62 @@ QImage Filter::process(const QImage &inputImage)
         break;
     }
 
-    switch (mMorphologyOp)
+    // split the image channels
+    cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
+    int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
+    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
+
+    // apply gaussian blur
+    cv::Mat mRGBMorph;
+    cv::Mat mAlphaMorph;
+    if (mModifyRGB)
     {
-    case Dilation:
-        cv::dilate(msrc, mdst, kernel);
-        break;
-    case Erosion:
-        cv::erode(msrc, mdst, kernel);
-        break;
-    case Closing:
-        cv::morphologyEx(msrc, mdst, cv::MORPH_CLOSE, kernel);
-        break;
-    case Opening:
-        cv::morphologyEx(msrc, mdst, cv::MORPH_OPEN, kernel);
-        break;
+        mRGBMorph = cv::Mat(inputImage.height(), inputImage.width(), CV_8UC3);
+        switch (mMorphologyOp)
+        {
+        case Dilation:
+            cv::dilate(mRGB, mRGBMorph, kernel);
+            break;
+        case Erosion:
+            cv::erode(mRGB, mRGBMorph, kernel);
+            break;
+        case Closing:
+            cv::morphologyEx(mRGB, mRGBMorph, cv::MORPH_CLOSE, kernel);
+            break;
+        case Opening:
+            cv::morphologyEx(mRGB, mRGBMorph, cv::MORPH_OPEN, kernel);
+            break;
+        }
     }
+    else
+        mRGBMorph = mRGB;
+    if (mModifyAlpha)
+    {
+        mAlphaMorph = cv::Mat(inputImage.height(), inputImage.width(), CV_8UC1);
+        switch (mMorphologyOp)
+        {
+        case Dilation:
+            cv::dilate(mAlpha, mAlphaMorph, kernel);
+            break;
+        case Erosion:
+            cv::erode(mAlpha, mAlphaMorph, kernel);
+            break;
+        case Closing:
+            cv::morphologyEx(mAlpha, mAlphaMorph, cv::MORPH_CLOSE, kernel);
+            break;
+        case Opening:
+            cv::morphologyEx(mAlpha, mAlphaMorph, cv::MORPH_OPEN, kernel);
+            break;
+        }
+    }
+    else
+        mAlphaMorph = mAlpha;
+
+    // merge image channels
+    cv::Mat mOutMerge[] = { mRGBMorph, mAlphaMorph };
+    cv::mixChannels(mOutMerge, 2, &mDst, 1, fromTo, 4);
 
     return i;
 }
@@ -276,12 +324,16 @@ cv::Mat Filter::getRingStructuringElement(cv::Size size)
 
 bool Filter::loadParameters(QSettings &s)
 {
+    bool modifyRGB, modifyAlpha;
     QString mopstr;
     MorphologyOp mop;
     QString shapestr;
     KernelShape shape;
     int hradius, vradius;
     bool lock, ok;
+
+    modifyRGB = s.value("modifyrgb", true).toBool();
+    modifyAlpha = s.value("modifyalpha", true).toBool();
 
     mopstr = s.value("morphologicalop", "dilation").toString();
     if (mopstr == "dilation")
@@ -324,6 +376,8 @@ bool Filter::loadParameters(QSettings &s)
     if (lock && hradius != vradius)
         vradius = hradius;
 
+    setModifyRGB(modifyRGB);
+    setModifyAlpha(modifyAlpha);
     setMorphologyOp(mop);
     setKernelShape(shape);
     setLockRadius(lock);
@@ -362,6 +416,8 @@ bool Filter::saveParameters(QSettings &s)
     else if (mKernelShape == Ring)
         shapestr = "ring";
 
+    s.setValue("modifyrgb", mModifyRGB);
+    s.setValue("modifyalpha", mModifyAlpha);
     s.setValue("morphologicalop", mopstr);
     s.setValue("kernelshape", shapestr);
     s.setValue("hradius", mHRadius);
@@ -374,22 +430,46 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
+    fw->setModifyRGB(mModifyRGB);
+    fw->setModifyAlpha(mModifyAlpha);
     fw->setMorphologyOp(mMorphologyOp);
     fw->setKernelShape(mKernelShape);
     fw->setLockRadius(mLockRadius);
     fw->setHRadius(mHRadius);
     fw->setVRadius(mVRadius);
+    connect(this, SIGNAL(modifyRGBChanged(bool)), fw, SLOT(setModifyRGB(bool)));
+    connect(this, SIGNAL(modifyAlphaChanged(bool)), fw, SLOT(setModifyAlpha(bool)));
     connect(this, SIGNAL(morphologyOpChanged(Filter::MorphologyOp)), fw, SLOT(setMorphologyOp(Filter::MorphologyOp)));
     connect(this, SIGNAL(kernelShapeChanged(Filter::KernelShape)), fw, SLOT(setKernelShape(Filter::KernelShape)));
     connect(this, SIGNAL(hRadiusChanged(int)), fw, SLOT(setHRadius(int)));
     connect(this, SIGNAL(vRadiusChanged(int)), fw, SLOT(setVRadius(int)));
     connect(this, SIGNAL(lockRadiusChanged(bool)), fw, SLOT(setLockRadius(bool)));
+    connect(fw, SIGNAL(modifyRGBChanged(bool)), this, SLOT(setModifyRGB(bool)));
+    connect(fw, SIGNAL(modifyAlphaChanged(bool)), this, SLOT(setModifyAlpha(bool)));
     connect(fw, SIGNAL(morphologyOpChanged(Filter::MorphologyOp)), this, SLOT(setMorphologyOp(Filter::MorphologyOp)));
     connect(fw, SIGNAL(kernelShapeChanged(Filter::KernelShape)), this, SLOT(setKernelShape(Filter::KernelShape)));
     connect(fw, SIGNAL(hRadiusChanged(int)), this, SLOT(setHRadius(int)));
     connect(fw, SIGNAL(vRadiusChanged(int)), this, SLOT(setVRadius(int)));
     connect(fw, SIGNAL(lockRadiusChanged(bool)), this, SLOT(setLockRadius(bool)));
     return fw;
+}
+
+void Filter::setModifyRGB(bool v)
+{
+    if (v == mModifyRGB)
+        return;
+    mModifyRGB = v;
+    emit modifyRGBChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setModifyAlpha(bool v)
+{
+    if (v == mModifyAlpha)
+        return;
+    mModifyAlpha = v;
+    emit modifyAlphaChanged(v);
+    emit parametersChanged();
 }
 
 void Filter::setMorphologyOp(Filter::MorphologyOp mop)

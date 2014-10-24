@@ -49,12 +49,17 @@ public:
 
 private:
     double mRadius;
+    bool mBlurRGB, mBlurAlpha;
 
 signals:
     void radiusChanged(double s);
+    void blurRGBChanged(bool v);
+    void blurAlphaChanged(bool v);
 
 public slots:
     void setRadius(double s);
+    void setBlurRGB(bool v);
+    void setBlurAlpha(bool v);
 };
 
 #endif // FILTER_H

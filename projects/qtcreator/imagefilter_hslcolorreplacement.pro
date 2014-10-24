@@ -18,7 +18,7 @@
 QT += widgets
 TEMPLATE = lib
 
-TARGET = anitools.imagefilter.lumakeyer
+TARGET = anitools.imagefilter.hslcolorreplacement
 
 include(3rdparty.pri)
 
@@ -40,12 +40,12 @@ LIBS += -lopencv_core300 -lopencv_imgproc300
 
 INCLUDEPATH += ../../src/widgets/
 
-SOURCES += ../../src/imagefilter_lumakeyer/filter.cpp \
-           ../../src/imagefilter_lumakeyer/main.cpp \
-           ../../src/imagefilter_lumakeyer/filterwidget.cpp
+SOURCES += ../../src/imagefilter_hslcolorreplacement/filter.cpp \
+           ../../src/imagefilter_hslcolorreplacement/main.cpp \
+           ../../src/imagefilter_hslcolorreplacement/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_lumakeyer/filter.h \
-           ../../src/imagefilter_lumakeyer/filterwidget.h
+HEADERS += ../../src/imagefilter_hslcolorreplacement/filter.h \
+           ../../src/imagefilter_hslcolorreplacement/filterwidget.h
 
-FORMS += ../../src/imagefilter_lumakeyer/filterwidget.ui
+FORMS += ../../src/imagefilter_hslcolorreplacement/filterwidget.ui
 

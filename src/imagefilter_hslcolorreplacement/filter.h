@@ -50,8 +50,8 @@ public:
 
     enum OutputMode
     {
-        KeyedImage,
-        Matte
+        CorrectedImage,
+        Mask
     };
 
     Filter();
@@ -69,6 +69,8 @@ private:
     bool mIsInvertedHue, mIsInvertedSaturation, mIsInvertedLightness;
     OutputMode mOutputMode;
     double mPreblurRadius;
+    bool mColorize;
+    int mRelHue, mRelSaturation, mRelLightness, mAbsHue, mAbsSaturation;
     unsigned char mLutHue[256], mLutSaturation[256], mLutLightness[256];
 
     void makeLUT(ColorChannel c);
@@ -85,6 +87,12 @@ signals:
     void lightnessInvertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
     void preblurRadiusChanged(double pbr);
+    void colorizeChanged(bool v);
+    void relHueChanged(int v);
+    void relSaturationChanged(int v);
+    void relLightnessChanged(int v);
+    void absHueChanged(int v);
+    void absSaturationChanged(int v);
 
 public slots:
     void setHueKnots(const SplineInterpolatorKnots & k);
@@ -98,6 +106,12 @@ public slots:
     void setLightnessInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
     void setPreblurRadius(double pbr);
+    void setColorize(bool v);
+    void setRelHue(int v);
+    void setRelSaturation(int v);
+    void setRelLightness(int v);
+    void setAbsHue(int v);
+    void setAbsSaturation(int v);
 };
 
 #endif // FILTER_H

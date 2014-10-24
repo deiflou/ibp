@@ -28,6 +28,7 @@
 #include "../imgproc/types.h"
 #include "../imgproc/lut.h"
 #include "../imgproc/colorconversion.h"
+#include "../imgproc/pixelblending.h"
 #include "../misc/nearestneighborsplineinterpolator.h"
 #include "../misc/linearsplineinterpolator.h"
 #include "../misc/cubicsplineinterpolator.h"
@@ -43,8 +44,14 @@ Filter::Filter() :
     mIsInvertedHue(false),
     mIsInvertedSaturation(false),
     mIsInvertedLightness(false),
-    mOutputMode(KeyedImage),
-    mPreblurRadius(0.)
+    mOutputMode(CorrectedImage),
+    mPreblurRadius(0.),
+    mColorize(false),
+    mRelHue(0),
+    mRelSaturation(0),
+    mRelLightness(0),
+    mAbsHue(30),
+    mAbsSaturation(25)
 {
     mSplineInterpolatorHue = new CubicSplineInterpolator();
     mSplineInterpolatorHue->addKnot(.0, 0.);
@@ -99,6 +106,12 @@ ImageFilter * Filter::clone()
 
     f->mOutputMode = mOutputMode;
     f->mPreblurRadius = mPreblurRadius;
+    f->mColorize = mColorize;
+    f->mRelHue = mRelHue;
+    f->mRelSaturation = mRelSaturation;
+    f->mRelLightness = mRelLightness;
+    f->mAbsHue = mAbsHue;
+    f->mAbsSaturation = mAbsSaturation;
 
     return f;
 }
@@ -114,42 +127,36 @@ QImage Filter::process(const QImage & inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-    register int totalPixels = i.width() * i.height();
-    HSL * hslImage = (HSL *)malloc(totalPixels * sizeof(HSL));
+    QImage outputImage = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    register int totalPixels = outputImage.width() * outputImage.height();
     register BGRA * bits = (BGRA*)inputImage.bits();
-    register BGRA * bits2 = (BGRA*)i.bits();
-    register HSL * bitsHSL = hslImage;
+    register BGRA * bits2 = (BGRA*)outputImage.bits();
+    register HSL * bitsHSL;
+    register int i;
+    HSL * hslImage = (HSL *)malloc(totalPixels * sizeof(HSL));
 
+    // -------------------------------------------
+    // create mask
+    // -------------------------------------------
+    // pre blur
     if (qFuzzyIsNull(mPreblurRadius))
         convertBGRToHSL(inputImage.bits(), (unsigned char *)hslImage, totalPixels);
     else
     {
-        QImage iBlurred = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
         cv::Mat mInput(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
-        cv::Mat mBlurred(iBlurred.height(), iBlurred.width(), CV_8UC4, iBlurred.bits());
+        cv::Mat mBlurred(inputImage.height(), inputImage.width(), CV_8UC4, (void *)outputImage.bits());
         double sigma = (mPreblurRadius + .5) / 2.45;
         cv::GaussianBlur(mInput, mBlurred, cv::Size(0, 0), sigma);
-        convertBGRToHSL(iBlurred.bits(), (unsigned char *)hslImage, totalPixels);
+        convertBGRToHSL(outputImage.bits(), (unsigned char *)hslImage, totalPixels);
     }
-
-    if (mOutputMode == KeyedImage)
-        while (totalPixels--)
-        {
-            bits2->r = bits->r;
-            bits2->g = bits->g;
-            bits2->b = bits->b;
-            bits2->a = lut01[bits->a][255 -
-                       lut01[mLutHue[bitsHSL->h]][lut01[mLutSaturation[bitsHSL->s]][mLutLightness[bitsHSL->l]]]];;
-            bits++;
-            bits2++;
-            bitsHSL++;
-        }
-    else
+    // output mask and return
+    bitsHSL = hslImage;
+    if (mOutputMode == Mask)
+    {
         while (totalPixels--)
         {
             bits2->r = bits2->g = bits2->b =
-                    lut01[bits->a][255 -
+                    lut01[bits->a][
                     lut01[mLutHue[bitsHSL->h]][
                     lut01[mLutSaturation[bitsHSL->s]][
                     mLutLightness[bitsHSL->l]]]];
@@ -158,10 +165,125 @@ QImage Filter::process(const QImage & inputImage)
             bits2++;
             bitsHSL++;
         }
+        free(hslImage);
+        return outputImage;
+    }
+    // make mask
+    for (i = 0; i < totalPixels; i++)
+    {
+        bits2->a = lut01[mLutHue[bitsHSL->h]][lut01[mLutSaturation[bitsHSL->s]][mLutLightness[bitsHSL->l]]];
+        bits2++;
+        bitsHSL++;
+    }
+
+    // -------------------------------------------
+    // correct image
+    // -------------------------------------------
+    register int h2, s2, l2;
+    bits2 = (BGRA *)outputImage.bits();
+    if (mRelLightness != 0)
+    {
+        l2 = mRelLightness * 255 / 100;
+
+        if (mRelLightness < 0)
+        {
+            l2 += 255;
+            for (i = 0; i < totalPixels; i++)
+            {
+                bits2->r = lut01[bits->r][l2];
+                bits2->g = lut01[bits->g][l2];
+                bits2->b = lut01[bits->b][l2];
+
+                bits++;
+                bits2++;
+            }
+        }
+        else
+        {
+            for (i = 0; i < totalPixels; i++)
+            {
+                bits2->r = bits->r + lut01[255 - bits->r][l2];
+                bits2->g = bits->g + lut01[255 - bits->g][l2];
+                bits2->b = bits->b + lut01[255 - bits->b][l2];
+
+                bits++;
+                bits2++;
+            }
+        }
+
+    }
+    else
+    {
+        for (i = 0; i < totalPixels; i++)
+        {
+            bits2->r = bits->r;
+            bits2->g = bits->g;
+            bits2->b = bits->b;
+
+            bits++;
+            bits2++;
+        }
+    }
+
+    if (mRelLightness == 0)
+    {
+        if (!qFuzzyIsNull(mPreblurRadius))
+            convertBGRToHSL(outputImage.bits(), (unsigned char *)hslImage, totalPixels);
+    }
+    else
+        convertBGRToHSL(outputImage.bits(), (unsigned char *)hslImage, totalPixels);
+    bitsHSL = hslImage;
+
+    if (!mColorize)
+    {
+        if (mRelHue != 0 || mRelSaturation != 0)
+        {
+            h2 = mRelHue * 127 / 180;
+            s2 = mRelSaturation * 255 / 100;
+            for (i = 0; i < totalPixels; i++)
+            {
+                bitsHSL->h = (bitsHSL->h + h2 + 256) % 256;
+                if (bitsHSL->s > 0)
+                    bitsHSL->s = s2 < 0 ?
+                              lut01[bitsHSL->s][s2 + 255] :
+                              s2 == 255 ? 255 : AT_minimum(lut02[bitsHSL->s][255 - s2], 255);
+
+                bitsHSL++;
+            }
+
+            convertHSLToBGR((unsigned char *)hslImage, (unsigned char *)outputImage.bits(), totalPixels);
+        }
+    }
+    else
+    {
+        h2 = mAbsHue * 255 / 360;
+        s2 = mAbsSaturation * 255 / 100;
+        for (i = 0; i < totalPixels; i++)
+        {
+            bitsHSL->h = h2;
+            bitsHSL->s = s2;
+
+            bitsHSL++;
+        }
+
+        convertHSLToBGR((unsigned char *)hslImage, (unsigned char *)outputImage.bits(), totalPixels);
+    }
 
     free(hslImage);
 
-    return i;
+    // -------------------------------------------
+    // copy alpha channel
+    // -------------------------------------------
+    bits = (BGRA *)inputImage.bits();
+    bits2 = (BGRA *)outputImage.bits();
+    for (i = 0; i < totalPixels; i++)
+    {
+        blendSourceAtopDestination(*bits2, *bits, *bits2);
+        bits++;
+        bits2++;
+    }
+
+    return outputImage;
 }
 
 bool Filter::loadParameters(QSettings &s)
@@ -177,6 +299,8 @@ bool Filter::loadParameters(QSettings &s)
     QString outputModeStr;
     OutputMode outputMode;
     double preblurRadius;
+    int relHue, relSaturation, relLightness, absHue, absSaturation;
+    bool colorize;
     bool ok;
 
     interpolationModeStr = s.value("hueinterpolationmode", "smooth").toString();
@@ -267,15 +391,32 @@ bool Filter::loadParameters(QSettings &s)
 
     outputModeStr = s.value("outputmode", "keyedimage").toString();
     if (outputModeStr == "keyedimage")
-        outputMode = KeyedImage;
+        outputMode = CorrectedImage;
     else if (outputModeStr == "matte")
-        outputMode = Matte;
+        outputMode = Mask;
     else
         return false;
 
     preblurRadius = s.value("preblurradius", 0.).toDouble(&ok);
     if (!ok || preblurRadius < 0. || preblurRadius > 100.)
         return false;
+
+    relHue = s.value("relhue", 0).toInt(&ok);
+    if (!ok)
+        return false;
+    relSaturation = s.value("relsaturation", 0).toInt(&ok);
+    if (!ok)
+        return false;
+    relLightness = s.value("rellightness", 0).toInt(&ok);
+    if (!ok)
+        return false;
+    absHue = s.value("abshue", 30).toInt(&ok);
+    if (!ok)
+        return false;
+    absSaturation = s.value("abssaturation", 25).toInt(&ok);
+    if (!ok)
+        return false;
+    colorize = s.value("colorize", false).toBool();
 
     setHueInterpolationMode(interpolationModeHue);
     setHueKnots(knotsHue);
@@ -288,6 +429,12 @@ bool Filter::loadParameters(QSettings &s)
     setLightnessInverted(isInvertedLightness);
     setOutputMode(outputMode);
     setPreblurRadius(preblurRadius);
+    setRelHue(relHue);
+    setRelSaturation(relSaturation);
+    setRelLightness(relLightness);
+    setAbsHue(absHue);
+    setAbsSaturation(absSaturation);
+    setColorize(colorize);
 
     return true;
 }
@@ -336,9 +483,16 @@ bool Filter::saveParameters(QSettings &s)
     s.setValue("saturationisinverted", mIsInvertedSaturation);
     s.setValue("lightnessisinverted", mIsInvertedLightness);
 
-    s.setValue("outputmode", mOutputMode == KeyedImage ? "keyedimage" : "matte");
+    s.setValue("outputmode", mOutputMode == CorrectedImage ? "keyedimage" : "matte");
 
     s.setValue("preblurradius", mPreblurRadius);
+
+    s.setValue("relhue", mRelHue);
+    s.setValue("relsaturation", mRelSaturation);
+    s.setValue("rellightness", mRelLightness);
+    s.setValue("abshue", mAbsHue);
+    s.setValue("abssaturation", mAbsSaturation);
+    s.setValue("colorize", mColorize);
 
     return true;
 }
@@ -357,6 +511,12 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setLightnessInverted(mIsInvertedLightness);
     fw->setOutputMode(mOutputMode);
     fw->setPreblurRadius(mPreblurRadius);
+    fw->setRelHue(mRelHue);
+    fw->setRelSaturation(mRelSaturation);
+    fw->setRelLightness(mRelLightness);
+    fw->setAbsHue(mAbsHue);
+    fw->setAbsSaturation(mAbsSaturation);
+    fw->setColorize(mColorize);
 
     connect(this, SIGNAL(hueInterpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setHueInterpolationMode(Filter::InterpolationMode)));
@@ -380,6 +540,12 @@ QWidget *Filter::widget(QWidget *parent)
             fw, SLOT(setOutputMode(Filter::OutputMode)));
     connect(this, SIGNAL(preblurRadiusChanged(double)),
             fw, SLOT(setPreblurRadius(double)));
+    connect(this, SIGNAL(relHueChanged(int)), fw, SLOT(setRelHue(int)));
+    connect(this, SIGNAL(relSaturationChanged(int)), fw, SLOT(setRelSaturation(int)));
+    connect(this, SIGNAL(relLightnessChanged(int)), fw, SLOT(setRelLightness(int)));
+    connect(this, SIGNAL(absHueChanged(int)), fw, SLOT(setAbsHue(int)));
+    connect(this, SIGNAL(absSaturationChanged(int)), fw, SLOT(setAbsSaturation(int)));
+    connect(this, SIGNAL(colorizeChanged(bool)), fw, SLOT(setColorize(bool)));
 
     connect(fw, SIGNAL(hueInterpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setHueInterpolationMode(Filter::InterpolationMode)));
@@ -403,6 +569,12 @@ QWidget *Filter::widget(QWidget *parent)
             this, SLOT(setOutputMode(Filter::OutputMode)));
     connect(fw, SIGNAL(preblurRadiusChanged(double)),
             this, SLOT(setPreblurRadius(double)));
+    connect(fw, SIGNAL(relHueChanged(int)), this, SLOT(setRelHue(int)));
+    connect(fw, SIGNAL(relSaturationChanged(int)), this, SLOT(setRelSaturation(int)));
+    connect(fw, SIGNAL(relLightnessChanged(int)), this, SLOT(setRelLightness(int)));
+    connect(fw, SIGNAL(absHueChanged(int)), this, SLOT(setAbsHue(int)));
+    connect(fw, SIGNAL(absSaturationChanged(int)), this, SLOT(setAbsSaturation(int)));
+    connect(fw, SIGNAL(colorizeChanged(bool)), this, SLOT(setColorize(bool)));
 
     return fw;
 }
@@ -593,3 +765,58 @@ void Filter::makeLUT(ColorChannel c)
         for (int i = 0; i < 256; i++)
             lut[i] = AT_clamp(0, round(splineInterpolator->f(i / 255.) * 255.), 255);
 }
+
+void Filter::setRelHue(int v)
+{
+    if (v == mRelHue)
+        return;
+    mRelHue = v;
+    emit relHueChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setRelSaturation(int v)
+{
+    if (v == mRelSaturation)
+        return;
+    mRelSaturation = v;
+    emit relSaturationChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setRelLightness(int v)
+{
+    if (v == mRelLightness)
+        return;
+    mRelLightness = v;
+    emit relLightnessChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setAbsHue(int v)
+{
+    if (v == mAbsHue)
+        return;
+    mAbsHue = v;
+    emit absHueChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setAbsSaturation(int v)
+{
+    if (v == mAbsSaturation)
+        return;
+    mAbsSaturation = v;
+    emit absSaturationChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setColorize(bool v)
+{
+    if (v == mColorize)
+        return;
+    mColorize = v;
+    emit colorizeChanged(v);
+    emit parametersChanged();
+}
+

@@ -103,7 +103,7 @@ private:
     static const int kRightMargin = 2;
     static const int kBottomMargin = 3;
     static const QSize kKnotSize;
-    static const int kMinimumSizeForInput = 50;
+    static const int kMinimumSizeForInput = 40;
     static const double kKeypressIncrement = 1.0 / 256.0;
     static const double kMinimumDistanceBetweenKnots = 1.0 / 256.0 * 3.0;
     static const int kMaximumNumberOfKnots = 19;

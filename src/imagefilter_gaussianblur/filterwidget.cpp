@@ -47,6 +47,26 @@ void FilterWidget::setRadius(double s)
     emit radiusChanged(s);
 }
 
+void FilterWidget::setBlurRGB(bool v)
+{
+    if (ui->mButtonAffectedChannelsRGB->isChecked() == v)
+        return;
+    mEmitSignals = false;
+    ui->mButtonAffectedChannelsRGB->setChecked(v);
+    mEmitSignals = true;
+    emit blurRGBChanged(v);
+}
+
+void FilterWidget::setBlurAlpha(bool v)
+{
+    if (ui->mButtonAffectedChannelsAlpha->isChecked() == v)
+        return;
+    mEmitSignals = false;
+    ui->mButtonAffectedChannelsAlpha->setChecked(v);
+    mEmitSignals = true;
+    emit blurAlphaChanged(v);
+}
+
 void FilterWidget::on_mSliderRadius_valueChanged(int value)
 {
     ui->mSpinRadius->setValue(value / 100.0);
@@ -59,4 +79,16 @@ void FilterWidget::on_mSpinRadius_valueChanged(double arg1)
     ui->mSliderRadius->setValue((int)round(arg1 * 100.0));
     if (mEmitSignals)
         emit radiusChanged(arg1);
+}
+
+void FilterWidget::on_mButtonAffectedChannelsRGB_toggled(bool c)
+{
+    if (mEmitSignals)
+        emit blurRGBChanged(c);
+}
+
+void FilterWidget::on_mButtonAffectedChannelsAlpha_toggled(bool c)
+{
+    if (mEmitSignals)
+        emit blurAlphaChanged(c);
 }

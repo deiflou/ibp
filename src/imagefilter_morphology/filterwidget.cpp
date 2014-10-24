@@ -54,6 +54,26 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
+void FilterWidget::setModifyRGB(bool v)
+{
+    if (ui->mButtonAffectedChannelsRGB->isChecked() == v)
+        return;
+    mEmitSignals = false;
+    ui->mButtonAffectedChannelsRGB->setChecked(v);
+    mEmitSignals = true;
+    emit modifyRGBChanged(v);
+}
+
+void FilterWidget::setModifyAlpha(bool v)
+{
+    if (ui->mButtonAffectedChannelsAlpha->isChecked() == v)
+        return;
+    mEmitSignals = false;
+    ui->mButtonAffectedChannelsAlpha->setChecked(v);
+    mEmitSignals = true;
+    emit modifyAlphaChanged(v);
+}
+
 void FilterWidget::setMorphologyOp(Filter::MorphologyOp mop)
 {
     if (mop == (Filter::MorphologyOp)ui->mComboMorphologyOp->currentIndex())
@@ -96,6 +116,18 @@ void FilterWidget::setLockRadius(bool l)
     ui->mButtonLockRadius->setChecked(l);
     mEmitSignals = true;
     emit lockRadiusChanged(l);
+}
+
+void FilterWidget::on_mButtonAffectedChannelsRGB_toggled(bool c)
+{
+    if (mEmitSignals)
+        emit modifyRGBChanged(c);
+}
+
+void FilterWidget::on_mButtonAffectedChannelsAlpha_toggled(bool c)
+{
+    if (mEmitSignals)
+        emit modifyAlphaChanged(c);
 }
 
 void FilterWidget::on_mComboMorphologyOp_currentIndexChanged(int index)

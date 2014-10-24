@@ -19,44 +19,35 @@
 **
 ****************************************************************************/
 
-#ifndef FILTERWIDGET_H
-#define FILTERWIDGET_H
-
-#include <QWidget>
+#include <QHash>
 
 #include "filter.h"
+#include "../imgproc/imagefilter.h"
 
-namespace Ui {
-class FilterWidget;
+using namespace anitools::imgproc;
+
+#ifdef Q_OS_WIN32
+#define ANITOOLS_EXPORT __declspec(dllexport)
+#else
+#define ANITOOLS_EXPORT
+#endif
+
+extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
+{
+    QHash<QString, QString> info;
+
+    info.insert("id", "anitools.imagefilter.hslcolorreplacement");
+    info.insert("version", "0.1.0");
+    info.insert("name", QObject::tr("HSL Color Replacement"));
+    info.insert("description", QObject::tr("Replace colors of the image based on its HSL components"));
+    info.insert("tags", QObject::tr("Color"));
+    info.insert("author", QObject::tr("Deif Lou"));
+    info.insert("copyright", QObject::tr(""));
+    info.insert("url", QObject::tr(""));
+    return info;
 }
 
-class FilterWidget : public QWidget
+extern "C" ANITOOLS_EXPORT ImageFilter * getImageFilterInstance()
 {
-    Q_OBJECT
-
-public:
-    explicit FilterWidget(QWidget *parent = 0);
-    ~FilterWidget();
-
-private:
-    Ui::FilterWidget *ui;
-    bool mEmitSignals;
-
-signals:
-    void radiusChanged(double s);
-    void blurRGBChanged(bool v);
-    void blurAlphaChanged(bool v);
-
-public slots:
-    void setRadius(double s);
-    void setBlurRGB(bool v);
-    void setBlurAlpha(bool v);
-
-private slots:
-    void on_mSliderRadius_valueChanged(int value);
-    void on_mSpinRadius_valueChanged(double arg1);
-    void on_mButtonAffectedChannelsRGB_toggled(bool c);
-    void on_mButtonAffectedChannelsAlpha_toggled(bool c);
-};
-
-#endif // FILTERWIDGET_H
+    return new Filter();
+}

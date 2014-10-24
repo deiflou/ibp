@@ -67,6 +67,7 @@ private:
     InterpolationMode mInterpolationMode;
     bool mIsInverted;
     OutputMode mOutputMode;
+    double mPreblurRadius;
     unsigned char mLut[256];
 
     void makeLUT();
@@ -76,12 +77,14 @@ signals:
     void interpolationModeChanged(Filter::InterpolationMode im);
     void invertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
+    void preblurRadiusChanged(double pbr);
 
 public slots:
     void setKnots(const SplineInterpolatorKnots & k);
     void setInterpolationMode(Filter::InterpolationMode im);
     void setInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
+    void setPreblurRadius(double pbr);
 
 };
 

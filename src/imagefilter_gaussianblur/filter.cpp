@@ -25,7 +25,9 @@
 #include "filterwidget.h"
 
 Filter::Filter() :
-    mRadius(0.0)
+    mRadius(0.0),
+    mBlurRGB(true),
+    mBlurAlpha(true)
 {
 }
 
@@ -38,6 +40,8 @@ ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
     f->mRadius = mRadius;
+    f->mBlurRGB = mBlurRGB;
+    f->mBlurAlpha = mBlurAlpha;
     return f;
 }
 
@@ -55,13 +59,44 @@ QImage Filter::process(const QImage &inputImage)
     if (qFuzzyIsNull(mRadius))
         return inputImage;
 
+    if (!mBlurRGB && !mBlurAlpha)
+        return inputImage;
+
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
 
-    cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
-    cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
+    cv::Mat mSrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
+    cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
 
     double sigma = (mRadius + .5) / 2.45;
-    cv::GaussianBlur(msrc, mdst, cv::Size(0, 0), sigma);
+
+    // split the image channels
+    cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
+    int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
+    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
+
+    // apply gaussian blur
+    cv::Mat mRGBBlurred;
+    cv::Mat mAlphaBlurred;
+    if (mBlurRGB)
+    {
+        mRGBBlurred = cv::Mat(inputImage.height(), inputImage.width(), CV_8UC3);
+        cv::GaussianBlur(mRGB, mRGBBlurred, cv::Size(0, 0), sigma);
+    }
+    else
+        mRGBBlurred = mRGB;
+    if (mBlurAlpha)
+    {
+        mAlphaBlurred = cv::Mat(inputImage.height(), inputImage.width(), CV_8UC1);
+        cv::GaussianBlur(mAlpha, mAlphaBlurred, cv::Size(0, 0), sigma);
+    }
+    else
+        mAlphaBlurred = mAlpha;
+
+    // merge image channels
+    cv::Mat mOutMerge[] = { mRGBBlurred, mAlphaBlurred };
+    cv::mixChannels(mOutMerge, 2, &mDst, 1, fromTo, 4);
 
     return i;
 }
@@ -69,17 +104,24 @@ QImage Filter::process(const QImage &inputImage)
 bool Filter::loadParameters(QSettings &s)
 {
     double radius;
+    bool blurRGB, blurAlpha;
     bool ok;
     radius = s.value("radius", 0.0).toDouble(&ok);
     if (!ok)
         return false;
+    blurRGB = s.value("blurrgb", true).toBool();
+    blurAlpha = s.value("bluralpha", true).toBool();
     setRadius(radius);
+    setBlurRGB(blurRGB);
+    setBlurAlpha(blurAlpha);
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("radius", mRadius);
+    s.setValue("blurrgb", mBlurRGB);
+    s.setValue("bluralpha", mBlurAlpha);
     return true;
 }
 
@@ -87,8 +129,17 @@ QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
     fw->setRadius(mRadius);
+    fw->setBlurRGB(mBlurRGB);
+    fw->setBlurAlpha(mBlurAlpha);
+
     connect(this, SIGNAL(radiusChanged(double)), fw, SLOT(setRadius(double)));
+    connect(this, SIGNAL(blurRGBChanged(bool)), fw, SLOT(setBlurRGB(bool)));
+    connect(this, SIGNAL(blurAlphaChanged(bool)), fw, SLOT(setBlurAlpha(bool)));
+
     connect(fw, SIGNAL(radiusChanged(double)), this, SLOT(setRadius(double)));
+    connect(fw, SIGNAL(blurRGBChanged(bool)), this, SLOT(setBlurRGB(bool)));
+    connect(fw, SIGNAL(blurAlphaChanged(bool)), this, SLOT(setBlurAlpha(bool)));
+
     return fw;
 }
 
@@ -98,5 +149,23 @@ void Filter::setRadius(double s)
         return;
     mRadius = s;
     emit radiusChanged(s);
+    emit parametersChanged();
+}
+
+void Filter::setBlurRGB(bool v)
+{
+    if (v == mBlurRGB)
+        return;
+    mBlurRGB = v;
+    emit blurRGBChanged(v);
+    emit parametersChanged();
+}
+
+void Filter::setBlurAlpha(bool v)
+{
+    if (v == mBlurAlpha)
+        return;
+    mBlurAlpha = v;
+    emit blurAlphaChanged(v);
     emit parametersChanged();
 }

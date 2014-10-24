@@ -43,6 +43,8 @@ private:
     bool mEmitSignals;
 
 signals:
+    void modifyRGBChanged(bool v);
+    void modifyAlphaChanged(bool v);
     void morphologyOpChanged(Filter::MorphologyOp mop);
     void kernelShapeChanged(Filter::KernelShape shape);
     void hRadiusChanged(int r);
@@ -50,6 +52,8 @@ signals:
     void lockRadiusChanged(bool l);
 
 public slots:
+    void setModifyRGB(bool v);
+    void setModifyAlpha(bool v);
     void setMorphologyOp(Filter::MorphologyOp mop);
     void setKernelShape(Filter::KernelShape shape);
     void setHRadius(int r);
@@ -57,6 +61,8 @@ public slots:
     void setLockRadius(bool l);
 
 private slots:
+    void on_mButtonAffectedChannelsRGB_toggled(bool c);
+    void on_mButtonAffectedChannelsAlpha_toggled(bool c);
     void on_mComboMorphologyOp_currentIndexChanged(int index);
     void on_mComboKernelShape_currentIndexChanged(int index);
     void on_mSliderHRadius_valueChanged(int value);

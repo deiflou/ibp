@@ -36,6 +36,8 @@ win32 {
     }
 }
 
+LIBS += -lopencv_core300 -lopencv_imgproc300
+
 INCLUDEPATH += ../../src/widgets/
 
 SOURCES += ../../src/imagefilter_hslkeyer/filter.cpp \

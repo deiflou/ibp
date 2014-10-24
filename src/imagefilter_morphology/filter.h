@@ -67,6 +67,7 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
+    bool mModifyRGB, mModifyAlpha;
     MorphologyOp mMorphologyOp;
     KernelShape mKernelShape;
     int mVRadius, mHRadius;
@@ -78,6 +79,8 @@ private:
     cv::Mat getRingStructuringElement(cv::Size size);
 
 signals:
+    void modifyRGBChanged(bool v);
+    void modifyAlphaChanged(bool v);
     void morphologyOpChanged(Filter::MorphologyOp mop);
     void kernelShapeChanged(Filter::KernelShape shape);
     void vRadiusChanged(int r);
@@ -85,6 +88,8 @@ signals:
     void lockRadiusChanged(bool l);
 
 public slots:
+    void setModifyRGB(bool v);
+    void setModifyAlpha(bool v);
     void setMorphologyOp(Filter::MorphologyOp mop);
     void setKernelShape(Filter::KernelShape shape);
     void setVRadius(int r);

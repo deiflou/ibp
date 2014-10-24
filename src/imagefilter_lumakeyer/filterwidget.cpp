@@ -103,6 +103,16 @@ void FilterWidget::setOutputMode(Filter::OutputMode om)
     emit outputModeChanged(om);
 }
 
+void FilterWidget::setPreblurRadius(double pbr)
+{
+    if (ui->mSpinPreblurRadius->value() == pbr)
+        return;
+    mEmitSignals = false;
+    ui->mSpinPreblurRadius->setValue(pbr);
+    mEmitSignals = true;
+    emit preblurRadiusChanged(pbr);
+}
+
 void FilterWidget::on_mButtonInterpolationModeFlat_toggled(bool v)
 {
     if (!v)
@@ -247,4 +257,18 @@ void FilterWidget::on_mButtonOutputModeMatte_toggled(bool c)
 
     if (mEmitSignals)
         emit outputModeChanged(Filter::Matte);
+}
+
+void FilterWidget::on_mSliderPreblurRadius_valueChanged(int value)
+{
+    ui->mSpinPreblurRadius->setValue(value / 100.0);
+    if (mEmitSignals)
+        emit preblurRadiusChanged(value / 100.0);
+}
+
+void FilterWidget::on_mSpinPreblurRadius_valueChanged(double arg1)
+{
+    ui->mSliderPreblurRadius->setValue((int)round(arg1 * 100.0));
+    if (mEmitSignals)
+        emit preblurRadiusChanged(arg1);
 }

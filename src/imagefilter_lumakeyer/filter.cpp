@@ -21,6 +21,7 @@
 
 #include <QRegularExpression>
 #include <math.h>
+#include <opencv2/imgproc.hpp>
 
 #include "filter.h"
 #include "filterwidget.h"
@@ -35,7 +36,8 @@ Filter::Filter() :
     mSplineInterpolator(0),
     mInterpolationMode(Smooth),
     mIsInverted(false),
-    mOutputMode(KeyedImage)
+    mOutputMode(KeyedImage),
+    mPreblurRadius(0.)
 {
     mSplineInterpolator = new CubicSplineInterpolator();
     mSplineInterpolator->addKnot(0.0, 0.0);
@@ -59,6 +61,7 @@ ImageFilter * Filter::clone()
     f->mInterpolationMode = mInterpolationMode;
     f->mIsInverted = mIsInverted;
     f->mOutputMode = mOutputMode;
+    f->mPreblurRadius = mPreblurRadius;
     f->makeLUT();
 
     return f;
@@ -76,13 +79,26 @@ QImage Filter::process(const QImage & inputImage)
         return inputImage;
 
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-
+    QImage iBlurred;
     register BGRA * bits = (BGRA*)inputImage.bits();
     register BGRA * bits2 = (BGRA*)i.bits();
+    register BGRA * bits3;
     register int totalPixels = i.width() * i.height();
     register unsigned int gR = .2126 * 0x10000;
     register unsigned int gG = .7152 * 0x10000;
     register unsigned int gB = .0722 * 0x10000;
+
+    if (qFuzzyIsNull(mPreblurRadius))
+        bits3 = bits;
+    else
+    {
+        iBlurred = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+        cv::Mat mInput(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
+        cv::Mat mBlurred(iBlurred.height(), iBlurred.width(), CV_8UC4, iBlurred.bits());
+        double sigma = (mPreblurRadius + .5) / 2.45;
+        cv::GaussianBlur(mInput, mBlurred, cv::Size(0, 0), sigma);
+        bits3 = (BGRA *)iBlurred.bits();
+    }
 
     if (mOutputMode == KeyedImage)
         while (totalPixels--)
@@ -90,18 +106,20 @@ QImage Filter::process(const QImage & inputImage)
             bits2->r = bits->r;
             bits2->g = bits->g;
             bits2->b = bits->b;
-            bits2->a = lut01[bits->a][mLut[(bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16)]];
+            bits2->a = lut01[bits->a][mLut[(bits3->r * gR >> 16) + (bits3->g * gG >> 16) + (bits3->b * gB >> 16)]];
             bits++;
             bits2++;
+            bits3++;
         }
     else
         while (totalPixels--)
         {
             bits2->r = bits2->g = bits2->b =
-                    lut01[bits->a][mLut[(bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16)]];
+                    lut01[bits->a][mLut[(bits3->r * gR >> 16) + (bits3->g * gG >> 16) + (bits3->b * gB >> 16)]];
             bits2->a = 255;
             bits++;
             bits2++;
+            bits3++;
         }
 
     return i;
@@ -119,6 +137,7 @@ bool Filter::loadParameters(QSettings &s)
     bool isInverted;
     QString outputModeStr;
     OutputMode outputMode;
+    double preblurRadius;
     bool ok;
 
     interpolationModeStr = s.value("interpolationmode", "smooth").toString();
@@ -159,10 +178,15 @@ bool Filter::loadParameters(QSettings &s)
     else
         return false;
 
+    preblurRadius = s.value("preblurradius", 0.).toDouble(&ok);
+    if (!ok || preblurRadius < 0. || preblurRadius > 100.)
+        return false;
+
     setInterpolationMode(interpolationMode);
     setKnots(knots);
     setInverted(isInverted);
     setOutputMode(outputMode);
+    setPreblurRadius(preblurRadius);
 
     return true;
 }
@@ -187,6 +211,8 @@ bool Filter::saveParameters(QSettings &s)
 
     s.setValue("outputmode", mOutputMode == KeyedImage ? "keyedimage" : "matte");
 
+    s.setValue("preblurradius", mPreblurRadius);
+
     return true;
 }
 
@@ -197,6 +223,7 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setKnots(mSplineInterpolator->knots());
     fw->setInverted(mIsInverted);
     fw->setOutputMode(mOutputMode);
+    fw->setPreblurRadius(mPreblurRadius);
 
     connect(this, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setInterpolationMode(Filter::InterpolationMode)));
@@ -206,6 +233,8 @@ QWidget *Filter::widget(QWidget *parent)
             fw, SLOT(setInverted(bool)));
     connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)),
             fw, SLOT(setOutputMode(Filter::OutputMode)));
+    connect(this, SIGNAL(preblurRadiusChanged(double)),
+            fw, SLOT(setPreblurRadius(double)));
 
     connect(fw, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setInterpolationMode(Filter::InterpolationMode)));
@@ -215,6 +244,8 @@ QWidget *Filter::widget(QWidget *parent)
             this, SLOT(setInverted(bool)));
     connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)),
             this, SLOT(setOutputMode(Filter::OutputMode)));
+    connect(fw, SIGNAL(preblurRadiusChanged(double)),
+            this, SLOT(setPreblurRadius(double)));
 
     return fw;
 }
@@ -279,6 +310,16 @@ void Filter::setOutputMode(Filter::OutputMode om)
     emit parametersChanged();
 }
 
+void Filter::setPreblurRadius(double pbr)
+{
+    if (qFuzzyCompare(pbr, mPreblurRadius))
+        return;
+
+    mPreblurRadius = pbr;
+
+    emit preblurRadiusChanged(pbr);
+    emit parametersChanged();
+}
 
 void Filter::makeLUT()
 {

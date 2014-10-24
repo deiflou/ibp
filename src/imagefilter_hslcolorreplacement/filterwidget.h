@@ -63,6 +63,12 @@ signals:
     void lightnessInvertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
     void preblurRadiusChanged(double pbr);
+    void colorizeChanged(bool v);
+    void relHueChanged(int v);
+    void relSaturationChanged(int v);
+    void relLightnessChanged(int v);
+    void absHueChanged(int v);
+    void absSaturationChanged(int v);
 
 public slots:
     void setHueKnots(const SplineInterpolatorKnots & k);
@@ -76,6 +82,12 @@ public slots:
     void setLightnessInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
     void setPreblurRadius(double pbr);
+    void setColorize(bool v);
+    void setRelHue(int v);
+    void setRelSaturation(int v);
+    void setRelLightness(int v);
+    void setAbsHue(int v);
+    void setAbsSaturation(int v);
 
 private slots:
     void on_mButtonHueInterpolationModeFlat_toggled(bool v);
@@ -119,6 +131,18 @@ private slots:
 
     void on_mSliderPreblurRadius_valueChanged(int value);
     void on_mSpinPreblurRadius_valueChanged(double arg1);
+
+    void on_mSliderRelHue_valueChanged(int v);
+    void on_mSpinRelHue_valueChanged(int v);
+    void on_mSliderRelSaturation_valueChanged(int v);
+    void on_mSpinRelSaturation_valueChanged(int v);
+    void on_mSliderAbsHue_valueChanged(int v);
+    void on_mSpinAbsHue_valueChanged(int v);
+    void on_mSliderAbsSaturation_valueChanged(int v);
+    void on_mSpinAbsSaturation_valueChanged(int v);
+    void on_mSliderRelLightness_valueChanged(int v);
+    void on_mSpinRelLightness_valueChanged(int v);
+    void on_mButtonColorize_toggled(bool v);
 };
 
 #endif // FILTERWIDGET_H
