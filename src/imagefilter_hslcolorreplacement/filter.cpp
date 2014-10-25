@@ -272,7 +272,7 @@ QImage Filter::process(const QImage & inputImage)
     free(hslImage);
 
     // -------------------------------------------
-    // copy alpha channel
+    // mix images
     // -------------------------------------------
     bits = (BGRA *)inputImage.bits();
     bits2 = (BGRA *)outputImage.bits();

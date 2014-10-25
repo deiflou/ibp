@@ -13,14 +13,18 @@ The goal is to make a series of simple applications that will help in the develo
 - To apply a list of effects to a list of images (useful if you want to transform/filter/modify a folder with hundreds of frames). The goal here is to provide the application with a set of filters that will help to achieve animation specific effects (non-uniform illumination correction, keying and so on).
 This tool is under development. Here are some snapshots:
 
-  [![](/doc/images/readme01-thumb.jpg)](/doc/images/readme01.jpg)
+  [![](./doc/images/readme01-thumb.jpg)](./doc/images/readme01.jpg)
  
   The previous image shows the use of a generic color correction filter list.
 
-  [![](/doc/images/readme02-thumb.jpg)](/doc/images/readme02.jpg) [![](/doc/images/readme03-thumb.jpg)](/doc/images/readme03.jpg)
+  [![](./doc/images/readme02-thumb.jpg)](./doc/images/readme02.jpg) [![](./doc/images/readme03-thumb.jpg)](./doc/images/readme03.jpg)
  
   The previous images show a generic illumination correction filter list. The first image shows levels correction with no intensity inhomogeneity (IIH) correction. The second image applies a IIH correction filter before adjusting the levels.
 
+  [![](./doc/images/readme04-thumb.jpg)](./doc/images/readme04.jpg)
+
+  The previous image shows the use of a HSL keyer to remove unwanted color from the image.
+  
 - To make a capturing application, with options for digital camera, webcam, and others. The application must have a simple yet versatile timeline interface (multilayer, sound layers, xsheet functionality, etc.). It must also have some other helper tools like arc planning and exporting capabilities.
 
   This is not being developed yet.

@@ -64,7 +64,8 @@ SOURCES += \
     ../../src/widgets/filedialog.cpp \
     ../../src/widgets/levelscurvespaintdelegate.cpp \
     ../../src/widgets/lumakeyingcurvespaintdelegate.cpp \
-    ../../src/widgets/hslkeyingcurvespaintdelegate.cpp
+    ../../src/widgets/hslkeyingcurvespaintdelegate.cpp \
+    ../../src/widgets/hslcolorreplacementcurvespaintdelegate.cpp
 
 HEADERS += \
     ../../src/widgets/colorbutton.h \
@@ -90,7 +91,8 @@ HEADERS += \
     ../../src/widgets/filedialog.h \
     ../../src/widgets/levelscurvespaintdelegate.h \
     ../../src/widgets/lumakeyingcurvespaintdelegate.h \
-    ../../src/widgets/hslkeyingcurvespaintdelegate.h
+    ../../src/widgets/hslkeyingcurvespaintdelegate.h \
+    ../../src/widgets/hslcolorreplacementcurvespaintdelegate.h
 
 RESOURCES += \
     ../../src/widgets/widgets.qrc

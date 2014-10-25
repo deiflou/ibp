@@ -37,20 +37,20 @@ FilterWidget::FilterWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mHueCurvesPaintDelegate = new HSLKeyingCurvesPaintDelegate(this);
+    mHueCurvesPaintDelegate = new HSLColorReplacementCurvesPaintDelegate(this);
     mHueCurvesPaintDelegate->setChannel(ColorChannel_Hue);
     ui->mWidgetHueCurve->setPaintDelegate(mHueCurvesPaintDelegate);
     ui->mWidgetHueCurve->setPeriodic(true);
     ui->mSpinHueInValue->setEnabled(false);
     ui->mSpinHueOutValue->setEnabled(false);
 
-    mSaturationCurvesPaintDelegate = new HSLKeyingCurvesPaintDelegate(this);
+    mSaturationCurvesPaintDelegate = new HSLColorReplacementCurvesPaintDelegate(this);
     mSaturationCurvesPaintDelegate->setChannel(ColorChannel_Saturation);
     ui->mWidgetSaturationCurve->setPaintDelegate(mSaturationCurvesPaintDelegate);
     ui->mSpinSaturationInValue->setEnabled(false);
     ui->mSpinSaturationOutValue->setEnabled(false);
 
-    mLightnessCurvesPaintDelegate = new HSLKeyingCurvesPaintDelegate(this);
+    mLightnessCurvesPaintDelegate = new HSLColorReplacementCurvesPaintDelegate(this);
     mLightnessCurvesPaintDelegate->setChannel(ColorChannel_Lightness);
     ui->mWidgetLightnessCurve->setPaintDelegate(mLightnessCurvesPaintDelegate);
     ui->mSpinLightnessInValue->setEnabled(false);
@@ -724,6 +724,9 @@ void FilterWidget::on_mSliderRelHue_valueChanged(int v)
 void FilterWidget::on_mSpinRelHue_valueChanged(int v)
 {
     ui->mSliderRelHue->setValue(v);
+    mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
+    mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
+    mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
     if (mEmitSignals)
         emit relHueChanged(v);
 }
@@ -738,6 +741,9 @@ void FilterWidget::on_mSliderRelSaturation_valueChanged(int v)
 void FilterWidget::on_mSpinRelSaturation_valueChanged(int v)
 {
     ui->mSliderRelSaturation->setValue(v);
+    mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
+    mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
+    mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
     if (mEmitSignals)
         emit relSaturationChanged(v);
 }
@@ -752,6 +758,9 @@ void FilterWidget::on_mSliderRelLightness_valueChanged(int v)
 void FilterWidget::on_mSpinRelLightness_valueChanged(int v)
 {
     ui->mSliderRelLightness->setValue(v);
+    mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, v);
+    mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, v);
+    mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, v);
     if (mEmitSignals)
         emit relLightnessChanged(v);
 }
@@ -766,6 +775,9 @@ void FilterWidget::on_mSliderAbsHue_valueChanged(int v)
 void FilterWidget::on_mSpinAbsHue_valueChanged(int v)
 {
     ui->mSliderAbsHue->setValue(v);
+    mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
+    mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
+    mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, v);
     if (mEmitSignals)
         emit absHueChanged(v);
 }
@@ -780,6 +792,9 @@ void FilterWidget::on_mSliderAbsSaturation_valueChanged(int v)
 void FilterWidget::on_mSpinAbsSaturation_valueChanged(int v)
 {
     ui->mSliderAbsSaturation->setValue(v);
+    mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
+    mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
+    mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, v);
     if (mEmitSignals)
         emit absSaturationChanged(v);
 }
@@ -795,6 +810,34 @@ void FilterWidget::on_mButtonColorize_toggled(bool v)
     ui->mSpinAbsHue->setVisible(v);
     ui->mSliderAbsSaturation->setVisible(v);
     ui->mSpinAbsSaturation->setVisible(v);
+
+    mHueCurvesPaintDelegate->setColorize(v);
+    mSaturationCurvesPaintDelegate->setColorize(v);
+    mLightnessCurvesPaintDelegate->setColorize(v);
+    if (v)
+    {
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinAbsHue->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinAbsHue->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinAbsHue->value());
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinAbsSaturation->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinAbsSaturation->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinAbsSaturation->value());
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+    }
+    else
+    {
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinRelHue->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinRelHue->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Hue, ui->mSpinRelHue->value());
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinRelSaturation->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinRelSaturation->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Saturation, ui->mSpinRelSaturation->value());
+        mHueCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+        mSaturationCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+        mLightnessCurvesPaintDelegate->setCorrectedValue(ColorChannel_Lightness, ui->mSpinRelLightness->value());
+    }
 
     if (mEmitSignals)
         emit colorizeChanged(v);

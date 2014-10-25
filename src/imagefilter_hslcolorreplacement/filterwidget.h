@@ -25,7 +25,7 @@
 #include <QWidget>
 
 #include "filter.h"
-#include "../widgets/hslkeyingcurvespaintdelegate.h"
+#include "../widgets/hslcolorreplacementcurvespaintdelegate.h"
 
 using namespace anitools::widgets;
 
@@ -44,9 +44,9 @@ public:
 private:
     Ui::FilterWidget *ui;
     bool mEmitSignals;
-    HSLKeyingCurvesPaintDelegate * mHueCurvesPaintDelegate;
-    HSLKeyingCurvesPaintDelegate * mSaturationCurvesPaintDelegate;
-    HSLKeyingCurvesPaintDelegate * mLightnessCurvesPaintDelegate;
+    HSLColorReplacementCurvesPaintDelegate * mHueCurvesPaintDelegate;
+    HSLColorReplacementCurvesPaintDelegate * mSaturationCurvesPaintDelegate;
+    HSLColorReplacementCurvesPaintDelegate * mLightnessCurvesPaintDelegate;
 
     QVector<double> mZoomFactors;
     int mHueZoomFactorIndex, mSaturationZoomFactorIndex, mLightnessZoomFactorIndex;
