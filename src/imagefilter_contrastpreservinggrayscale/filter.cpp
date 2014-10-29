@@ -19,26 +19,21 @@
 **
 ****************************************************************************/
 
-#include <opencv2/imgproc.hpp>
+#include <opencv2/photo.hpp>
 
 #include "filter.h"
-#include "filterwidget.h"
 
-Filter::Filter() :
-    mRadius(0)
+Filter::Filter()
 {
 }
 
 Filter::~Filter()
 {
-
 }
 
 ImageFilter *Filter::clone()
 {
-    Filter * f = new Filter();
-    f->mRadius = mRadius;
-    return f;
+    return new Filter();
 }
 
 extern "C" QHash<QString, QString> getAnitoolsPluginInfo();
@@ -52,51 +47,43 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    if (mRadius == 0)
-        return inputImage;
-
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    cv::Mat mSrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
+    cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
+    cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
+    cv::Mat mGray(inputImage.height(), inputImage.width(), CV_8UC1);
+    cv::Mat mTmp(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
+    cv::Mat mOutMerge[] = { mGray, mGray, mGray, mAlpha };
+    int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
 
-    cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
-    cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
+    // split the image channels
+    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
 
-    int size = (mRadius << 1) + 1;
-    cv::blur(msrc, mdst, cv::Size(size, size));
+    // denoise
+    cv::decolor(mRGB, mGray, mTmp);
+
+    // merge image channels
+    cv::mixChannels(mOutMerge, 4, &mDst, 1, fromTo, 4);
 
     return i;
 }
 
 bool Filter::loadParameters(QSettings &s)
 {
-    int radius;
-    bool ok;
-    radius = s.value("radius", 0).toInt(&ok);
-    if (!ok || radius < 0 || radius > 100)
-        return false;
-    setRadius(radius);
+    Q_UNUSED(s)
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("radius", mRadius);
+    Q_UNUSED(s)
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
-    FilterWidget * fw = new FilterWidget(parent);
-    fw->setRadius(mRadius);
-    connect(this, SIGNAL(radiusChanged(int)), fw, SLOT(setRadius(int)));
-    connect(fw, SIGNAL(radiusChanged(int)), this, SLOT(setRadius(int)));
-    return fw;
-}
-
-void Filter::setRadius(int s)
-{
-    if (s == mRadius)
-        return;
-    mRadius = s;
-    emit radiusChanged(s);
-    emit parametersChanged();
+    Q_UNUSED(parent)
+    return 0;
 }

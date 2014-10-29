@@ -19,13 +19,13 @@
 **
 ****************************************************************************/
 
-#include <opencv2/imgproc.hpp>
+#include <opencv2/xphoto.hpp>
 
 #include "filter.h"
 #include "filterwidget.h"
 
 Filter::Filter() :
-    mRadius(0)
+    mStrength(0.)
 {
 }
 
@@ -37,7 +37,7 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
-    f->mRadius = mRadius;
+    f->mStrength = mStrength;
     return f;
 }
 
@@ -52,51 +52,63 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    if (mRadius == 0)
+    if (qFuzzyCompare(mStrength, 0.))
         return inputImage;
 
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
+    cv::Mat mSrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
+    cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
+    cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
+    cv::Mat mRGBDenoised(inputImage.height(), inputImage.width(), CV_8UC3);
+    double sigma = mStrength;
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
+    cv::Mat mOutMerge[] = { mRGBDenoised, mAlpha };
+    int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
 
-    cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
-    cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
+    // split the image channels
+    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
 
-    int size = (mRadius << 1) + 1;
-    cv::blur(msrc, mdst, cv::Size(size, size));
+    // denoise
+    cv::xphoto::dctDenoising(mRGB, mRGBDenoised, sigma);
+
+    // merge image channels
+    cv::mixChannels(mOutMerge, 2, &mDst, 1, fromTo, 4);
 
     return i;
 }
 
 bool Filter::loadParameters(QSettings &s)
 {
-    int radius;
+    double strength;
     bool ok;
-    radius = s.value("radius", 0).toInt(&ok);
-    if (!ok || radius < 0 || radius > 100)
+    strength = s.value("strength", 0.).toDouble(&ok);
+    if (!ok || strength < 0. || strength > 100.)
         return false;
-    setRadius(radius);
+    setStrength(strength);
     return true;
 }
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("radius", mRadius);
+    s.setValue("strength", mStrength);
     return true;
 }
 
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setRadius(mRadius);
-    connect(this, SIGNAL(radiusChanged(int)), fw, SLOT(setRadius(int)));
-    connect(fw, SIGNAL(radiusChanged(int)), this, SLOT(setRadius(int)));
+    fw->setStrength(mStrength);
+    connect(this, SIGNAL(strengthChanged(double)), fw, SLOT(setStrength(double)));
+    connect(fw, SIGNAL(strengthChanged(double)), this, SLOT(setStrength(double)));
     return fw;
 }
 
-void Filter::setRadius(int s)
+void Filter::setStrength(double s)
 {
-    if (s == mRadius)
+    if (s == mStrength)
         return;
-    mRadius = s;
-    emit radiusChanged(s);
+    mStrength = s;
+    emit strengthChanged(s);
     emit parametersChanged();
 }

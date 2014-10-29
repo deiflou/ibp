@@ -19,7 +19,6 @@
 **
 ****************************************************************************/
 
-#include <QDebug>
 #include <QTime>
 #include <math.h>
 
@@ -160,7 +159,7 @@ bool Filter::loadParameters(QSettings &s)
     amount = s.value("amount", 0.0).toDouble(&ok);
     if (!ok || amount < 0. || amount > 400.)
         return false;
-qDebug() << amount;
+
     distributionStr = s.value("distribution", "uniform").toString();
     if (distributionStr == "uniform")
         distribution = Uniform;
