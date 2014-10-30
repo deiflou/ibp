@@ -60,15 +60,10 @@ QImage Filter::process(const QImage &inputImage)
     cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
     cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
     cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mRGBDenoised(inputImage.height(), inputImage.width(), CV_8UC3);
+    cv::Mat mRGBDenoised;
     double sigma, h, hColor;
     int templateWindowSize, searchWindowSize;
-    cv::Mat mOutSplit[] = { mRGB, mAlpha };
-    cv::Mat mOutMerge[] = { mRGBDenoised, mAlpha };
     int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
-
-    // split the image channels
-    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
 
     // calculate parameters
     sigma = mStrength;
@@ -77,11 +72,16 @@ QImage Filter::process(const QImage &inputImage)
     templateWindowSize = sigma <= 15. ? 3 : sigma <= 30. ? 5 : sigma <= 45. ? 7 : sigma <= 75. ? 9 : 11;
     searchWindowSize = sigma <= 37.5 ? 21 : 35;
 
+    // split the image channels
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
+    cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
+
     // denoise
     //cv::fastNlMeansDenoisingColored(mRGB, mRGBDenoised, h, hColor, templateWindowSize, searchWindowSize);
     cv::fastNlMeansDenoising(mRGB, mRGBDenoised, h, templateWindowSize, searchWindowSize);
 
     // merge image channels
+    cv::Mat mOutMerge[] = { mRGBDenoised, mAlpha };
     cv::mixChannels(mOutMerge, 2, &mDst, 1, fromTo, 4);
 
     return i;

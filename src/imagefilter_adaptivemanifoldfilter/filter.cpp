@@ -19,7 +19,7 @@
 **
 ****************************************************************************/
 
-#include <opencv2/imgproc.hpp>
+#include <opencv2/ximgproc.hpp>
 
 #include "filter.h"
 #include "filterwidget.h"
@@ -59,20 +59,20 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage i = QImage(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-    double sigmaS = (mRadius + .5) / 2.45;
-    double sigmaR = (100 - mEdgePreservation) * 255. / 100. * 2;
+    double sigmaS = (mRadius + .5) / 2.45 + 1.;
+    double sigmaR = (100 - mEdgePreservation) / 100.;
 
     cv::Mat msrc(inputImage.height(), inputImage.width(), CV_8UC4, (void *)inputImage.bits());
     cv::Mat msrcbgr(msrc.rows, msrc.cols, CV_8UC3);
     cv::Mat msrcalpha(msrc.rows, msrc.cols, CV_8UC1);
     cv::Mat mdst(i.height(), i.width(), CV_8UC4, i.bits());
-    cv::Mat mdstbgr(msrc.rows, msrc.cols, CV_8UC3);
+    cv::Mat mdstbgr;
 
     cv::Mat out[] = { msrcbgr, msrcalpha };
     int from_to[] = { 0,0, 1,1, 2,2, 3,3 };
     cv::mixChannels(&msrc, 1, out, 2, from_to, 4);
 
-    cv::bilateralFilter(msrcbgr, mdstbgr, 0, sigmaR, sigmaS);
+    cv::ximgproc::amFilter(msrcbgr, msrcbgr, mdstbgr, sigmaS, sigmaR, true);
 
     cv::Mat out2[] = { mdstbgr, msrcalpha };
     cv::mixChannels(out2, 2, &mdst, 1, from_to, 4);

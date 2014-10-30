@@ -36,9 +36,9 @@ extern "C" ANITOOLS_EXPORT QHash<QString, QString> getAnitoolsPluginInfo()
 {
     QHash<QString, QString> info;
 
-    info.insert("id", "anitools.imagefilter.edgepreservingblur");
+    info.insert("id", "anitools.imagefilter.bilateralfilter");
     info.insert("version", "0.1.0");
-    info.insert("name", QObject::tr("Edge-Preserving Blur (Bilateral Filter)"));
+    info.insert("name", QObject::tr("Bilateral Filter"));
     info.insert("description", QObject::tr("Blurs the image using a smooth gaussian "
                                            "distribution but preserving hard edges"));
     info.insert("tags", QObject::tr("Smooth, Noise"));

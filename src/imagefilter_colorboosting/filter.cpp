@@ -52,19 +52,18 @@ QImage Filter::process(const QImage &inputImage)
     cv::Mat mDst(i.height(), i.width(), CV_8UC4, i.bits());
     cv::Mat mRGB(inputImage.height(), inputImage.width(), CV_8UC3);
     cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mColorBoost(inputImage.height(), inputImage.width(), CV_8UC3);
-    cv::Mat mTmp(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mOutSplit[] = { mRGB, mAlpha };
-    cv::Mat mOutMerge[] = { mColorBoost, mAlpha };
+    cv::Mat mColorBoost, mTmp;
     int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
 
     // split the image channels
+    cv::Mat mOutSplit[] = { mRGB, mAlpha };
     cv::mixChannels(&mSrc, 1, mOutSplit, 2, fromTo, 4);
 
     // denoise
     cv::decolor(mRGB, mTmp, mColorBoost);
 
     // merge image channels
+    cv::Mat mOutMerge[] = { mColorBoost, mAlpha };
     cv::mixChannels(mOutMerge, 2, &mDst, 1, fromTo, 4);
 
     return i;

@@ -31,6 +31,9 @@
    </property>
    <item>
     <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item row="3" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="spacing">

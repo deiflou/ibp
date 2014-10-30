@@ -18,7 +18,7 @@
 QT += widgets
 TEMPLATE = lib
 
-TARGET = anitools.imagefilter.edgepreservingblur
+TARGET = anitools.imagefilter.guidedfilter
 
 include(3rdparty.pri)
 
@@ -33,14 +33,14 @@ win32 {
 
 }
 
-LIBS += -lopencv_core300 -lopencv_imgproc300
+LIBS += -lopencv_core300 -lopencv_ximgproc300
 
-SOURCES += ../../src/imagefilter_edgepreservingblur/filter.cpp \
-           ../../src/imagefilter_edgepreservingblur/main.cpp \
-           ../../src/imagefilter_edgepreservingblur/filterwidget.cpp
+SOURCES += ../../src/imagefilter_guidedfilter/filter.cpp \
+           ../../src/imagefilter_guidedfilter/main.cpp \
+           ../../src/imagefilter_guidedfilter/filterwidget.cpp
 
-HEADERS += ../../src/imagefilter_edgepreservingblur/filter.h \
-           ../../src/imagefilter_edgepreservingblur/filterwidget.h \
+HEADERS += ../../src/imagefilter_guidedfilter/filter.h \
+           ../../src/imagefilter_guidedfilter/filterwidget.h \
 
-FORMS += ../../src/imagefilter_edgepreservingblur/filterwidget.ui
+FORMS += ../../src/imagefilter_guidedfilter/filterwidget.ui
 

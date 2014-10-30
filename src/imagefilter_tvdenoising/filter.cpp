@@ -66,15 +66,12 @@ QImage Filter::process(const QImage &inputImage)
     cv::Mat mGreen(inputImage.height(), inputImage.width(), CV_8UC1);
     cv::Mat mBlue(inputImage.height(), inputImage.width(), CV_8UC1);
     cv::Mat mAlpha(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mRedDenoised(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mGreenDenoised(inputImage.height(), inputImage.width(), CV_8UC1);
-    cv::Mat mBlueDenoised(inputImage.height(), inputImage.width(), CV_8UC1);;
+    cv::Mat mRedDenoised, mGreenDenoised, mBlueDenoised;
     double lambda = pow(AT_maximum(100. - mStrength, .001) / 100., 3) * 10.;
-    cv::Mat mOutSplit[] = { mBlue, mGreen, mRed, mAlpha };
-    cv::Mat mOutMerge[] = { mBlueDenoised, mGreenDenoised, mRedDenoised, mAlpha };
     int fromTo[] = { 0, 0, 1, 1, 2, 2, 3, 3 };
 
     // split the image channels
+    cv::Mat mOutSplit[] = { mBlue, mGreen, mRed, mAlpha };
     cv::mixChannels(&mSrc, 1, mOutSplit, 4, fromTo, 4);
 
     // denoise
@@ -91,6 +88,7 @@ QImage Filter::process(const QImage &inputImage)
     cv::denoise_TVL1(observations, mRedDenoised, lambda, mIterations);
 
     // merge image channels
+    cv::Mat mOutMerge[] = { mBlueDenoised, mGreenDenoised, mRedDenoised, mAlpha };
     cv::mixChannels(mOutMerge, 4, &mDst, 1, fromTo, 4);
 
     return i;
