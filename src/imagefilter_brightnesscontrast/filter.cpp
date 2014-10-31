@@ -26,16 +26,18 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"
+#include "../misc/util.h"
 
 Filter::Filter() :
-    mWorkingChannel(RGB)
+    mWorkingChannel(RGB),
+    mUseSoftMode(true)
 {
     for (int i = 0; i < 5; i++)
     {
         mBrightnessContrast[i][Brightness] = 0;
         mBrightnessContrast[i][Contrast] = 0;
-        makeLUT((WorkingChannel)i);
     }
+    makeAllLUTs();
 }
 
 Filter::~Filter()
@@ -50,8 +52,9 @@ ImageFilter *Filter::clone()
     {
         f->mBrightnessContrast[i][Brightness] = mBrightnessContrast[i][Brightness];
         f->mBrightnessContrast[i][Contrast] = mBrightnessContrast[i][Contrast];
-        f->makeLUT((WorkingChannel)i);
     }
+    f->mUseSoftMode = mUseSoftMode;
+    f->makeAllLUTs();
     return f;
 }
 
@@ -92,6 +95,7 @@ bool Filter::loadParameters(QSettings &s)
     QString brightnessContrastStr[5];
     QStringList brightnessContrastList;
     int brightnessContrast[5][2];
+    bool useSoftMode;
     bool ok;
 
     workingChannelStr = s.value("workingchannel", 0).toString();
@@ -129,6 +133,8 @@ bool Filter::loadParameters(QSettings &s)
             return false;
     }
 
+    useSoftMode = s.value("usesoftmode", true).toBool();
+
     mWorkingChannel = workingChannel;
     for(int i = 0; i < 5; i++)
     {
@@ -136,9 +142,11 @@ bool Filter::loadParameters(QSettings &s)
         mBrightnessContrast[i][Contrast] = brightnessContrast[i][Contrast];
         makeLUT((WorkingChannel)i);
     }
+    mUseSoftMode = useSoftMode;
     emit workingChannelChanged(mWorkingChannel);
     emit brightnessChanged(mBrightnessContrast[mWorkingChannel][Brightness]);
     emit contrastChanged(mBrightnessContrast[mWorkingChannel][Contrast]);
+    emit useSoftModeChanged(mUseSoftMode);
     return true;
 }
 
@@ -160,6 +168,8 @@ bool Filter::saveParameters(QSettings &s)
         s.setValue(brightnessContrastNameStr[i], brightnessContrastStr);
     }
 
+    s.setValue("usesoftmode", mUseSoftMode);
+
     return true;
 }
 
@@ -169,6 +179,7 @@ QWidget *Filter::widget(QWidget *parent)
     fw->setWorkingChannel(mWorkingChannel);
     fw->setBrightness(mBrightnessContrast[mWorkingChannel][Brightness]);
     fw->setContrast(mBrightnessContrast[mWorkingChannel][Contrast]);
+    fw->setUseSoftMode(mUseSoftMode);
 
     connect(this, SIGNAL(workingChannelChanged(Filter::WorkingChannel)),
             fw, SLOT(setWorkingChannel(Filter::WorkingChannel)));
@@ -176,6 +187,8 @@ QWidget *Filter::widget(QWidget *parent)
             fw, SLOT(setBrightness(int)));
     connect(this, SIGNAL(contrastChanged(int)),
             fw, SLOT(setContrast(int)));
+    connect(this, SIGNAL(useSoftModeChanged(bool)),
+            fw, SLOT(setUseSoftMode(bool)));
 
     connect(fw, SIGNAL(workingChannelChanged(Filter::WorkingChannel)),
             this, SLOT(setWorkingChannel(Filter::WorkingChannel)));
@@ -183,6 +196,8 @@ QWidget *Filter::widget(QWidget *parent)
             this, SLOT(setBrightness(int)));
     connect(fw, SIGNAL(contrastChanged(int)),
             this, SLOT(setContrast(int)));
+    connect(fw, SIGNAL(useSoftModeChanged(bool)),
+            this, SLOT(setUseSoftMode(bool)));
 
     return fw;
 }
@@ -218,7 +233,105 @@ void Filter::setContrast(int v)
     emit parametersChanged();
 }
 
+void Filter::setUseSoftMode(bool v)
+{
+    if (v == mUseSoftMode)
+        return;
+    mUseSoftMode = v;
+    makeAllLUTs();
+    emit useSoftModeChanged(v);
+    emit parametersChanged();
+}
+
 void Filter::makeLUT(WorkingChannel c)
+{
+    if (mUseSoftMode)
+        makeSoftLUT(c);
+    else
+        makeHardLUT(c);
+}
+
+void Filter::makeSoftLUT(Filter::WorkingChannel c)
+{
+    const int brightness = mBrightnessContrast[c][Brightness];
+    const int contrast = mBrightnessContrast[c][Contrast];
+    const double bf = fabs(brightness) / 10.;
+    const double cf = fabs(contrast) / 10.;
+    const double eb = exp(-bf);
+    const double ec = exp(-cf);
+    const double auxb = 2. / (1. + eb);
+    const double auxc = 2. / (1. + ec);
+    register int x;
+    register double xf, yf;
+
+    unsigned char * lut = mLuts[c];
+
+    if (brightness > 0 && contrast == 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = (2. / (1. + pow(eb, xf)) - 1.) / (auxb - 1.);
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness < 0 && contrast == 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = -log((1. + xf - xf * auxb) / (1. - xf + xf * auxb)) / bf;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness == 0 && contrast > 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = ((2. / (1. + pow(ec, xf * 2. -1.)) - 1.) / (auxc - 1.)) / 2. + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness == 0 && contrast < 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = -log(2. / (auxc * (2 * xf - 1.) - 2. * xf + 2.) - 1.) / (2. * cf) + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness > 0 && contrast > 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = (2. / (1. + pow(eb, xf)) - 1.) / (auxb - 1.);
+            yf = ((2. / (1. + pow(ec, yf * 2. -1.)) - 1.) / (auxc - 1.)) / 2. + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness > 0 && contrast < 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = (2. / (1. + pow(eb, xf)) - 1.) / (auxb - 1.);
+            yf = -log(2. / (auxc * (2 * yf - 1.) - 2. * yf + 2.) - 1.) / (2. * cf) + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness < 0 && contrast > 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = -log((1. + xf - xf * auxb) / (1. - xf + xf * auxb)) / bf;
+            yf = ((2. / (1. + pow(ec, yf * 2. -1.)) - 1.) / (auxc - 1.)) / 2. + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else if (brightness < 0 && contrast < 0)
+        for (x = 0; x < 256; x++)
+        {
+            xf = x / 255.;
+            yf = -log((1. + xf - xf * auxb) / (1. - xf + xf * auxb)) / bf;
+            yf = -log(2. / (auxc * (2 * yf - 1.) - 2. * yf + 2.) - 1.) / (2. * cf) + .5;
+            lut[x] = AT_clamp(0, round(yf * 255.), 255);
+        }
+    else
+        for (x = 0; x < 256; x++)
+            lut[x] = x;
+}
+
+void Filter::makeHardLUT(Filter::WorkingChannel c)
 {
     double brightness = mBrightnessContrast[c][Brightness];
     double contrast = mBrightnessContrast[c][Contrast] * 127 / 100.0;
@@ -253,7 +366,16 @@ void Filter::makeLUT(WorkingChannel c)
             // Contrast
             value = round(m * value) - b;
         }
-        lut[i] = qBound(0, value, 255);
+        lut[i] = AT_clamp(0, value, 255);
     }
+}
+
+void Filter::makeAllLUTs()
+{
+    makeLUT(RGB);
+    makeLUT(Red);
+    makeLUT(Green);
+    makeLUT(Blue);
+    makeLUT(Alpha);
 }
 

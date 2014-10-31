@@ -81,6 +81,16 @@ void FilterWidget::setContrast(int v)
     emit contrastChanged(v);
 }
 
+void FilterWidget::setUseSoftMode(bool v)
+{
+    if (v == ui->mButtonOptionsUseSoftMode->isChecked())
+        return;
+    mEmitSignals = false;
+    ui->mButtonOptionsUseSoftMode->setChecked(v);
+    mEmitSignals = true;
+    emit useSoftModeChanged(v);
+}
+
 void FilterWidget::on_mButtonWorkingChannelRGB_toggled(bool c)
 {
     if (!c)
@@ -143,4 +153,10 @@ void FilterWidget::on_mSpinContrast_valueChanged(int v)
     ui->mSliderContrast->setValue(v);
     if (mEmitSignals)
         emit contrastChanged(v);
+}
+
+void FilterWidget::on_mButtonOptionsUseSoftMode_toggled(bool c)
+{
+    if (mEmitSignals)
+        emit useSoftModeChanged(c);
 }

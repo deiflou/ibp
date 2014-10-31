@@ -62,19 +62,25 @@ public:
 private:
     WorkingChannel mWorkingChannel;
     int mBrightnessContrast[5][2];
+    bool mUseSoftMode;
     unsigned char mLuts[5][256];
 
     void makeLUT(WorkingChannel c);
+    void makeSoftLUT(WorkingChannel c);
+    void makeHardLUT(WorkingChannel c);
+    void makeAllLUTs();
 
 signals:
     void workingChannelChanged(Filter::WorkingChannel s);
     void brightnessChanged(int v);
     void contrastChanged(int v);
+    void useSoftModeChanged(bool v);
 
 public slots:
     void setWorkingChannel(Filter::WorkingChannel s);
     void setBrightness(int v);
     void setContrast(int v);
+    void setUseSoftMode(bool v);
 };
 
 #endif // FILTER_H

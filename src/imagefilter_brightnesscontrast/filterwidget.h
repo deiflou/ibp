@@ -46,11 +46,13 @@ signals:
     void workingChannelChanged(Filter::WorkingChannel s);
     void brightnessChanged(int v);
     void contrastChanged(int v);
+    void useSoftModeChanged(bool v);
 
 public slots:
     void setWorkingChannel(Filter::WorkingChannel s);
     void setBrightness(int v);
     void setContrast(int v);
+    void setUseSoftMode(bool v);
 
 private slots:
     void on_mButtonWorkingChannelRGB_toggled(bool c);
@@ -63,6 +65,8 @@ private slots:
     void on_mSpinBrightness_valueChanged(int v);
     void on_mSliderContrast_valueChanged(int v);
     void on_mSpinContrast_valueChanged(int v);
+
+    void on_mButtonOptionsUseSoftMode_toggled(bool c);
 };
 
 #endif // FILTERWIDGET_H
