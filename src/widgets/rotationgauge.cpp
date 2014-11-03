@@ -49,12 +49,12 @@ RotationGauge::RotationGauge(QWidget* parent) :
 
 void RotationGauge::focusInEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusInEvent(e);
 }
 void RotationGauge::focusOutEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusOutEvent(e);
 }
 
@@ -78,7 +78,7 @@ void RotationGauge::setAngle(double v)
     double t = mAngle;
     mAngle = fmod(v, 360.0);
     if (mAngle < 0.0) mAngle += 360.0;
-    repaint();
+    update();
     if (t != mAngle)
         emit angleChanged(mAngle);
 }
@@ -87,7 +87,7 @@ void RotationGauge::setAltitude(double v)
 {
     double t = mAltitude;
     mAltitude = qBound(0.0, v, 90.0);
-    repaint();
+    update();
     if (t != mAltitude)
         emit altitudeChanged(mAltitude);
 }
@@ -95,7 +95,7 @@ void RotationGauge::setAltitude(double v)
 void RotationGauge::enableAltitude(bool v)
 {
     mAltitudeEnabled = v;
-    repaint();
+    update();
 }
 
 void RotationGauge::paintEvent(QPaintEvent *e)
@@ -180,7 +180,7 @@ void RotationGauge::mouseMoveEvent(QMouseEvent *e)
     mAngle = AT_RadToDeg(angle);
     mAltitude = AT_RadToDeg(altitude);
 
-    repaint();
+    update();
 
     emit angleChanged(mAngle);
     if (mAltitudeEnabled)

@@ -27,9 +27,9 @@
 #include "filterwidget.h"
 #include "../imgproc/types.h"
 #include "../imgproc/lut.h"
-#include "../misc/nearestneighborsplineinterpolator.h"
-#include "../misc/linearsplineinterpolator.h"
-#include "../misc/cubicsplineinterpolator.h"
+#include "../misc/nearestneighborsplineinterpolator1D.h"
+#include "../misc/linearsplineinterpolator1D.h"
+#include "../misc/cubicsplineinterpolator1D.h"
 #include "../misc/util.h"
 
 Filter::Filter() :
@@ -39,7 +39,7 @@ Filter::Filter() :
     mOutputMode(KeyedImage),
     mPreblurRadius(0.)
 {
-    mSplineInterpolator = new CubicSplineInterpolator();
+    mSplineInterpolator = new CubicSplineInterpolator1D();
     mSplineInterpolator->addKnot(0.0, 0.0);
     mSplineInterpolator->addKnot(1.0, 1.0);
     makeLUT();
@@ -133,7 +133,7 @@ bool Filter::loadParameters(QSettings &s)
     QStringList knotsList;
     QStringList knotList;
     double x, y;
-    SplineInterpolatorKnots knots;
+    Interpolator1DKnots knots;
     bool isInverted;
     QString outputModeStr;
     OutputMode outputMode;
@@ -165,7 +165,7 @@ bool Filter::loadParameters(QSettings &s)
         y = knotList.at(1).toDouble(&ok);
         if (!ok || y < 0. || y > 1.)
             return false;
-        knots.append(SplineInterpolatorKnot(x, y));
+        knots.append(Interpolator1DKnot(x, y));
     }
 
     isInverted = s.value("isinverted", false).toBool();
@@ -196,7 +196,7 @@ bool Filter::saveParameters(QSettings &s)
     s.setValue("interpolationmode", mInterpolationMode == Flat ? "flat" :
                                     mInterpolationMode == Linear ? "linear" : "smooth");
 
-    SplineInterpolatorKnots knots = mSplineInterpolator->knots();
+    Interpolator1DKnots knots = mSplineInterpolator->knots();
     QString knotsStr = "";
     for (int i = 0; i < knots.size(); i++)
     {
@@ -227,8 +227,8 @@ QWidget *Filter::widget(QWidget *parent)
 
     connect(this, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setInterpolationMode(Filter::InterpolationMode)));
-    connect(this, SIGNAL(knotsChanged(SplineInterpolatorKnots)),
-            fw, SLOT(setKnots(SplineInterpolatorKnots)));
+    connect(this, SIGNAL(knotsChanged(Interpolator1DKnots)),
+            fw, SLOT(setKnots(Interpolator1DKnots)));
     connect(this, SIGNAL(invertedChanged(bool)),
             fw, SLOT(setInverted(bool)));
     connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)),
@@ -238,8 +238,8 @@ QWidget *Filter::widget(QWidget *parent)
 
     connect(fw, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setInterpolationMode(Filter::InterpolationMode)));
-    connect(fw, SIGNAL(knotsChanged(SplineInterpolatorKnots)),
-            this, SLOT(setKnots(SplineInterpolatorKnots)));
+    connect(fw, SIGNAL(knotsChanged(Interpolator1DKnots)),
+            this, SLOT(setKnots(Interpolator1DKnots)));
     connect(fw, SIGNAL(invertedChanged(bool)),
             this, SLOT(setInverted(bool)));
     connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)),
@@ -250,7 +250,7 @@ QWidget *Filter::widget(QWidget *parent)
     return fw;
 }
 
-void Filter::setKnots(const SplineInterpolatorKnots &k)
+void Filter::setKnots(const Interpolator1DKnots &k)
 {
     if (mSplineInterpolator->knots() == k)
         return;
@@ -267,14 +267,14 @@ void Filter::setInterpolationMode(Filter::InterpolationMode im)
 
     mInterpolationMode = im;
 
-    SplineInterpolator * tmp = mSplineInterpolator;
+    Interpolator1D * tmp = mSplineInterpolator;
 
     if (im == Flat)
-        mSplineInterpolator = new NearestNeighborSplineInterpolator();
+        mSplineInterpolator = new NearestNeighborSplineInterpolator1D();
     else if (im == Linear)
-        mSplineInterpolator = new LinearSplineInterpolator();
+        mSplineInterpolator = new LinearSplineInterpolator1D();
     else
-        mSplineInterpolator = new CubicSplineInterpolator();
+        mSplineInterpolator = new CubicSplineInterpolator1D();
 
     mSplineInterpolator->setKnots(tmp->knots());
 

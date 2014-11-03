@@ -288,7 +288,7 @@ void ColorSlider::updateImageData()
 void ColorSlider::updateImageDataAndPaint()
 {
     updateImageData();
-    repaint();
+    update();
 }
 
 void ColorSlider::paintEvent(QPaintEvent *e)

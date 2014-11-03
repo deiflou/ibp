@@ -35,19 +35,19 @@ include(3rdparty.pri)
 
 SOURCES += \
     ../../src/misc/nativeeventfilter.cpp \
-    ../../src/misc/basesplineinterpolator.cpp \
-    ../../src/misc/cubicsplineinterpolator.cpp \
-    ../../src/misc/linearsplineinterpolator.cpp \
-    ../../src/misc/nearestneighborsplineinterpolator.cpp \
-    ../../src/misc/splineinterpolator.cpp \
-    ../../src/misc/configurationmanager.cpp
+    ../../src/misc/configurationmanager.cpp \
+    ../../src/misc/interpolator1D.cpp \
+    ../../src/misc/basesplineinterpolator1D.cpp \
+    ../../src/misc/cubicsplineinterpolator1D.cpp \
+    ../../src/misc/linearsplineinterpolator1D.cpp \
+    ../../src/misc/nearestneighborsplineinterpolator1D.cpp
 
 HEADERS += \
     ../../src/misc/util.h \
     ../../src/misc/nativeeventfilter.h \
-    ../../src/misc/basesplineinterpolator.h \
-    ../../src/misc/cubicsplineinterpolator.h \
-    ../../src/misc/linearsplineinterpolator.h \
-    ../../src/misc/nearestneighborsplineinterpolator.h \
-    ../../src/misc/splineinterpolator.h \
-    ../../src/misc/configurationmanager.h
+    ../../src/misc/configurationmanager.h \
+    ../../src/misc/interpolator1D.h \
+    ../../src/misc/basesplineinterpolator1D.h \
+    ../../src/misc/cubicsplineinterpolator1D.h \
+    ../../src/misc/linearsplineinterpolator1D.h \
+    ../../src/misc/nearestneighborsplineinterpolator1D.h

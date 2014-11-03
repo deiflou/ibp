@@ -19,14 +19,18 @@
 **
 ****************************************************************************/
 
-#include "splineinterpolator.h"
+
+#ifndef ANITOOLS_IMGPROC_INTENSITYMAPPING_H
+#define ANITOOLS_IMGPROC_INTENSITYMAPPING_H
 
 namespace anitools {
-namespace misc {
+namespace imgproc {
 
-bool SplineInterpolatorKnotsLessThan(const SplineInterpolatorKnot &s1, const SplineInterpolatorKnot &s2)
-{
-    return s1.x() < s2.x();
-}
+bool generateLevelsLUT(unsigned char * lut,
+                       double gammaCorrection = 1., double inputBlackPoint = 0., double inputWhitePoint = 1.,
+                       double outputBlackPoint = 0., double outputWhitePoint = 1.);
 
-}}
+} // namespace imgproc
+} // namespace anitools
+
+#endif // ANITOOLS_IMGPROC_INTENSITYMAPPING_H

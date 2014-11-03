@@ -19,8 +19,8 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_MISC_SPLINEINTERPOLATOR_H
-#define ANITOOLS_MISC_SPLINEINTERPOLATOR_H
+#ifndef ANITOOLS_MISC_INTERPOLATOR1D_H
+#define ANITOOLS_MISC_INTERPOLATOR1D_H
 
 #include <QPointF>
 #include <QVector>
@@ -28,12 +28,12 @@
 namespace anitools {
 namespace misc {
 
-typedef QPointF SplineInterpolatorKnot;
-typedef QVector<SplineInterpolatorKnot> SplineInterpolatorKnots;
+typedef QPointF Interpolator1DKnot;
+typedef QVector<Interpolator1DKnot> Interpolator1DKnots;
 
-extern bool SplineInterpolatorKnotsLessThan(const SplineInterpolatorKnot &s1, const SplineInterpolatorKnot &s2);
+extern bool Interpolator1DKnotsLessThan(const Interpolator1DKnot &s1, const Interpolator1DKnot &s2);
 
-class SplineInterpolator
+class Interpolator1D
 {
 
 public:
@@ -46,18 +46,18 @@ public:
         ExtrapolationMode_Mirror
     };
 
-    virtual ~SplineInterpolator() {}
-    virtual SplineInterpolator * clone() const = 0;
+    virtual ~Interpolator1D() {}
+    virtual Interpolator1D * clone() const = 0;
 
-    virtual const SplineInterpolatorKnots & knots() const = 0;
-    virtual const SplineInterpolatorKnot & knot(int i) const = 0;
+    virtual const Interpolator1DKnots & knots() const = 0;
+    virtual const Interpolator1DKnot & knot(int i) const = 0;
     virtual int size() const = 0;
-    virtual bool setKnots(const SplineInterpolatorKnots &k) = 0;
-    virtual bool setKnot(int i, const SplineInterpolatorKnot &k) = 0;
+    virtual bool setKnots(const Interpolator1DKnots &k) = 0;
+    virtual bool setKnot(int i, const Interpolator1DKnot &k) = 0;
     virtual bool setKnot(int i, double nx, double ny) = 0;
-    virtual bool setKnot(double x, const SplineInterpolatorKnot &k) = 0;
+    virtual bool setKnot(double x, const Interpolator1DKnot &k) = 0;
     virtual bool setKnot(double x, double nx, double ny) = 0;
-    virtual bool addKnot(const SplineInterpolatorKnot &k, bool replace = false, int * index = 0) = 0;
+    virtual bool addKnot(const Interpolator1DKnot &k, bool replace = false, int * index = 0) = 0;
     virtual bool addKnot(double nx, double ny, bool replace = false, int * index = 0) = 0;
     virtual bool removeKnot(double x) = 0;
     virtual bool removeKnot(int i) = 0;
@@ -72,4 +72,4 @@ public:
 };
 
 }}
-#endif // ANITOOLS_MISC_SPLINEINTERPOLATOR_H
+#endif // ANITOOLS_MISC_INTERPOLATOR1D_H

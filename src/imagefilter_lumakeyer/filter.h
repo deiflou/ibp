@@ -30,7 +30,7 @@
 #include <QWidget>
 
 #include "../imgproc/imagefilter.h"
-#include "../misc/splineinterpolator.h"
+#include "../misc/interpolator1D.h"
 
 using namespace anitools::imgproc;
 using namespace anitools::misc;
@@ -63,7 +63,7 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    SplineInterpolator * mSplineInterpolator;
+    Interpolator1D * mSplineInterpolator;
     InterpolationMode mInterpolationMode;
     bool mIsInverted;
     OutputMode mOutputMode;
@@ -73,14 +73,14 @@ private:
     void makeLUT();
 
 signals:
-    void knotsChanged(const SplineInterpolatorKnots & k);
+    void knotsChanged(const Interpolator1DKnots & k);
     void interpolationModeChanged(Filter::InterpolationMode im);
     void invertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
     void preblurRadiusChanged(double pbr);
 
 public slots:
-    void setKnots(const SplineInterpolatorKnots & k);
+    void setKnots(const Interpolator1DKnots & k);
     void setInterpolationMode(Filter::InterpolationMode im);
     void setInverted(bool i);
     void setOutputMode(Filter::OutputMode om);

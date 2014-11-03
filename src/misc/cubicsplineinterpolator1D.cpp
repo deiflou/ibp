@@ -20,15 +20,14 @@
 ****************************************************************************/
 
 #include <Eigen/Sparse>
-#include <vector>
 
-#include "cubicsplineinterpolator.h"
+#include "cubicsplineinterpolator1D.h"
 
 namespace anitools {
 namespace misc {
 
-CubicSplineInterpolator::CubicSplineInterpolator() :
-    BaseSplineInterpolator(),
+CubicSplineInterpolator1D::CubicSplineInterpolator1D() :
+    BaseSplineInterpolator1D(),
     mFloorBoundaryConditions(BoundaryConditions_Natural),
     mCeilBoundaryConditions(BoundaryConditions_Natural),
     mFloorBoundaryConditionsValue(0.),
@@ -37,9 +36,9 @@ CubicSplineInterpolator::CubicSplineInterpolator() :
 {
 }
 
-SplineInterpolator * CubicSplineInterpolator::clone() const
+Interpolator1D * CubicSplineInterpolator1D::clone() const
 {
-    CubicSplineInterpolator * si = new CubicSplineInterpolator();
+    CubicSplineInterpolator1D * si = new CubicSplineInterpolator1D();
     if (!si)
         return 0;
     si->mKnots = mKnots;
@@ -56,67 +55,65 @@ SplineInterpolator * CubicSplineInterpolator::clone() const
     return si;
 }
 
-double CubicSplineInterpolator::f(double x)
+double CubicSplineInterpolator1D::F(double x)
 {
-    if (mKnots.size() < 1) return 0.0;
-
-    if (mIsDirty) calculateCoefficients();
-
-    if (x < mKnots.first().x())
-    {
-        if (mFloorExtrapolationMode == ExtrapolationMode_Constant)
-            return mFloorExtrapolationValue;
-        else if (mFloorExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
-            return mCoefficients.first().c * (x - mKnots[0].x()) + mKnots[0].y();
-        else if (mFloorExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
-            x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.last().x();
-        else if (mFloorExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
-        {
-            const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
-            const double b = (x - mKnots.first().x()) / a;
-            x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
-        }
-        else
-            return mKnots.first().y();
-    }
-    else if (x > mKnots.last().x())
-    {
-        if (mCeilExtrapolationMode == ExtrapolationMode_Constant)
-            return mCeilExtrapolationValue;
-        else if (mCeilExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
-        {
-            const double lkp = mKnots.last().x() - mKnots[mKnots.size() - 2].x();
-            return ((3. * mCoefficients.last().a * lkp + 2. * mCoefficients.last().b) * lkp + mCoefficients.last().c) *
-                   (x - mKnots.last().x()) + mKnots.last().y();
-        }
-        else if (mCeilExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
-            x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.first().x();
-        else if (mCeilExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
-        {
-            const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
-            const double b = (x - mKnots.first().x()) / a;
-            x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
-        }
-        else
-            return mKnots.last().y();
-    }
-
-    int piece = getPiece(x);
-
-    double w = x - mKnots[piece].x();
+    if (mIsDirty)
+        calculateCoefficients();
+    const int piece = pieceForValue(x);
+    const double w = x - mKnots[piece].x();
     return ((mCoefficients[piece].a * w + mCoefficients[piece].b) * w +
             mCoefficients[piece].c) * w + mCoefficients[piece].d;
 }
 
-int CubicSplineInterpolator::getPiece(double x) const
+double CubicSplineInterpolator1D::floorExtrapolate(double x)
 {
-    for (int i = 1; i < mKnots.size(); i++)
-        if (x < mKnots[i].x())
-            return i - 1;
-    return mKnots.size() - 2;
+    if (mFloorExtrapolationMode == ExtrapolationMode_Constant)
+        return mFloorExtrapolationValue;
+    else if (mFloorExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
+    {
+        if (mIsDirty)
+            calculateCoefficients();
+        return mCoefficients.first().c * (x - mKnots[0].x()) + mKnots[0].y();
+    }
+    else if (mFloorExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
+        x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.last().x();
+    else if (mFloorExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
+    {
+        const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
+        const double b = (x - mKnots.first().x()) / a;
+        x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
+    }
+    else
+        return mKnots.first().y();
+    return F(x);
 }
 
-void CubicSplineInterpolator::calculateCoefficients()
+double CubicSplineInterpolator1D::ceilExtrapolate(double x)
+{
+    if (mCeilExtrapolationMode == ExtrapolationMode_Constant)
+        return mCeilExtrapolationValue;
+    else if (mCeilExtrapolationMode == ExtrapolationMode_FollowTangent && mKnots.size() > 1)
+    {
+        if (mIsDirty)
+            calculateCoefficients();
+        const double lkp = mKnots.last().x() - mKnots[mKnots.size() - 2].x();
+        return ((3. * mCoefficients.last().a * lkp + 2. * mCoefficients.last().b) * lkp + mCoefficients.last().c) *
+               (x - mKnots.last().x()) + mKnots.last().y();
+    }
+    else if (mCeilExtrapolationMode == ExtrapolationMode_Repeat && mKnots.size() > 1)
+        x = fmod(x - mKnots.first().x(), mKnots.last().x() - mKnots.first().x()) + mKnots.first().x();
+    else if (mCeilExtrapolationMode == ExtrapolationMode_Mirror && mKnots.size() > 1)
+    {
+        const double a = (mKnots.last().x() - mKnots.first().x()) * 2.;
+        const double b = (x - mKnots.first().x()) / a;
+        x = fabs(b - floor(b + .5)) * a + mKnots.first().x();
+    }
+    else
+        return mKnots.last().y();
+    return F(x);
+}
+
+void CubicSplineInterpolator1D::calculateCoefficients()
 {
     if (mKnots.size() < 1) return;
 
@@ -125,7 +122,7 @@ void CubicSplineInterpolator::calculateCoefficients()
                       mCeilBoundaryConditions == BoundaryConditions_Periodic;
 
     mCoefficients.clear();
-    mCoefficients.resize(kSize - 1);
+    mCoefficients.resize(kSize > 1 ? kSize - 1 : 1);
 
     if (kSize == 1)
     {
@@ -356,90 +353,90 @@ void CubicSplineInterpolator::calculateCoefficients()
     mIsDirty = false;
 }
 
-bool CubicSplineInterpolator::setKnots(const SplineInterpolatorKnots &k)
+bool CubicSplineInterpolator1D::setKnots(const Interpolator1DKnots &k)
 {
-    bool b = BaseSplineInterpolator::setKnots(k);
+    bool b = BaseSplineInterpolator1D::setKnots(k);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::setKnot(int i, const SplineInterpolatorKnot &k)
+bool CubicSplineInterpolator1D::setKnot(int i, const Interpolator1DKnot &k)
 {
-    bool b = BaseSplineInterpolator::setKnot(i, k);
+    bool b = BaseSplineInterpolator1D::setKnot(i, k);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::setKnot(int i, double nx, double ny)
+bool CubicSplineInterpolator1D::setKnot(int i, double nx, double ny)
 {
-    bool b = BaseSplineInterpolator::setKnot(i, nx, ny);
+    bool b = BaseSplineInterpolator1D::setKnot(i, nx, ny);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::setKnot(double x, const SplineInterpolatorKnot &k)
+bool CubicSplineInterpolator1D::setKnot(double x, const Interpolator1DKnot &k)
 {
-    bool b = BaseSplineInterpolator::setKnot(x, k);
+    bool b = BaseSplineInterpolator1D::setKnot(x, k);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::setKnot(double x, double nx, double ny)
+bool CubicSplineInterpolator1D::setKnot(double x, double nx, double ny)
 {
-    bool b = BaseSplineInterpolator::setKnot(x, nx, ny);
+    bool b = BaseSplineInterpolator1D::setKnot(x, nx, ny);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool replace, int * index)
+bool CubicSplineInterpolator1D::addKnot(const Interpolator1DKnot &k, bool replace, int * index)
 {
-    bool b = BaseSplineInterpolator::addKnot(k, replace, index);
+    bool b = BaseSplineInterpolator1D::addKnot(k, replace, index);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::addKnot(double nx, double ny, bool replace, int * index)
+bool CubicSplineInterpolator1D::addKnot(double nx, double ny, bool replace, int * index)
 {
-    bool b = BaseSplineInterpolator::addKnot(nx, ny, replace, index);
+    bool b = BaseSplineInterpolator1D::addKnot(nx, ny, replace, index);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::removeKnot(double x)
+bool CubicSplineInterpolator1D::removeKnot(double x)
 {
-    bool b = BaseSplineInterpolator::removeKnot(x);
+    bool b = BaseSplineInterpolator1D::removeKnot(x);
     if (b) mIsDirty = true;
     return b;
 }
 
-bool CubicSplineInterpolator::removeKnot(int i)
+bool CubicSplineInterpolator1D::removeKnot(int i)
 {
-    bool b = BaseSplineInterpolator::removeKnot(i);
+    bool b = BaseSplineInterpolator1D::removeKnot(i);
     if (b) mIsDirty = true;
     return b;
 }
 
-CubicSplineInterpolator::BoundaryConditions CubicSplineInterpolator::floorBoundaryConditions() const
+CubicSplineInterpolator1D::BoundaryConditions CubicSplineInterpolator1D::floorBoundaryConditions() const
 {
     return mFloorBoundaryConditions;
 }
 
-CubicSplineInterpolator::BoundaryConditions CubicSplineInterpolator::ceilBoundaryConditions() const
+CubicSplineInterpolator1D::BoundaryConditions CubicSplineInterpolator1D::ceilBoundaryConditions() const
 {
     return mCeilBoundaryConditions;
 }
 
-double CubicSplineInterpolator::floorBoundaryConditionsValue() const
+double CubicSplineInterpolator1D::floorBoundaryConditionsValue() const
 {
     return mFloorBoundaryConditionsValue;
 }
 
-double CubicSplineInterpolator::ceilBoundaryConditionsValue() const
+double CubicSplineInterpolator1D::ceilBoundaryConditionsValue() const
 {
     return mCeilBoundaryConditionsValue;
 }
 
-void CubicSplineInterpolator::setBoundaryConditions(BoundaryConditions f, BoundaryConditions c,
+void CubicSplineInterpolator1D::setBoundaryConditions(BoundaryConditions f, BoundaryConditions c,
                                                      double fv, double cv)
 {
     mFloorBoundaryConditions = f;

@@ -50,14 +50,14 @@ private:
     int mZoomFactorIndex;
 
 signals:
-    void knotsChanged(const SplineInterpolatorKnots & k);
+    void knotsChanged(const Interpolator1DKnots & k);
     void interpolationModeChanged(Filter::InterpolationMode im);
     void invertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
     void preblurRadiusChanged(double pbr);
 
 public slots:
-    void setKnots(const SplineInterpolatorKnots & k);
+    void setKnots(const Interpolator1DKnots & k);
     void setInterpolationMode(Filter::InterpolationMode im);
     void setInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
@@ -67,7 +67,7 @@ private slots:
     void on_mButtonInterpolationModeFlat_toggled(bool v);
     void on_mButtonInterpolationModeLinear_toggled(bool v);
     void on_mButtonInterpolationModeSmooth_toggled(bool v);
-    void on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots & k);
+    void on_mWidgetCurves_knotsChanged(const Interpolator1DKnots & k);
     void on_mWidgetCurves_selectedKnotChanged(int i);
     void on_mSpinLumaValue_valueChanged(double v);
     void on_mSpinOpacityValue_valueChanged(double v);

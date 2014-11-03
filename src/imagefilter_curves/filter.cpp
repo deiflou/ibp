@@ -25,9 +25,9 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"
-#include "../misc/nearestneighborsplineinterpolator.h"
-#include "../misc/linearsplineinterpolator.h"
-#include "../misc/cubicsplineinterpolator.h"
+#include "../misc/nearestneighborsplineinterpolator1D.h"
+#include "../misc/linearsplineinterpolator1D.h"
+#include "../misc/cubicsplineinterpolator1D.h"
 
 Filter::Filter() :
     mWorkingChannel(RGB)
@@ -35,7 +35,7 @@ Filter::Filter() :
     for (int i = 0; i < 5; i++)
     {
         mInterpolationMode[i] = Smooth;
-        mSplineInterpolator[i] = new CubicSplineInterpolator();
+        mSplineInterpolator[i] = new CubicSplineInterpolator1D();
         mSplineInterpolator[i]->addKnot(0.0, 0.0);
         mSplineInterpolator[i]->addKnot(1.0, 1.0);
         makeLUT((WorkingChannel)i);
@@ -108,7 +108,7 @@ bool Filter::loadParameters(QSettings &s)
     QStringList knotsList;
     QStringList knotList;
     double x, y;
-    SplineInterpolatorKnots knots[5];
+    Interpolator1DKnots knots[5];
 
     bool ok;
 
@@ -164,7 +164,7 @@ bool Filter::loadParameters(QSettings &s)
             y = knotList.at(1).toDouble(&ok);
             if (!ok || y < 0. || y > 1.)
                 return false;
-            knots[i].append(SplineInterpolatorKnot(x, y));
+            knots[i].append(Interpolator1DKnot(x, y));
         }
     }
 
@@ -174,11 +174,11 @@ bool Filter::loadParameters(QSettings &s)
         mInterpolationMode[i] = interpolationMode[i];
         delete mSplineInterpolator[i];
         if (mInterpolationMode[i] == Flat)
-            mSplineInterpolator[i] = new NearestNeighborSplineInterpolator();
+            mSplineInterpolator[i] = new NearestNeighborSplineInterpolator1D();
         else if (mInterpolationMode[i] == Linear)
-            mSplineInterpolator[i] = new LinearSplineInterpolator();
+            mSplineInterpolator[i] = new LinearSplineInterpolator1D();
         else
-            mSplineInterpolator[i] = new CubicSplineInterpolator();
+            mSplineInterpolator[i] = new CubicSplineInterpolator1D();
         mSplineInterpolator[i]->setKnots(knots[i]);
 
         makeLUT((WorkingChannel)i);
@@ -207,7 +207,7 @@ bool Filter::saveParameters(QSettings &s)
         s.setValue(interpolationModeNameStr[i], mInterpolationMode[i] == Flat ? "flat" :
                                                 mInterpolationMode[i] == Linear ? "linear" : "smooth");
 
-        SplineInterpolatorKnots knots = mSplineInterpolator[i]->knots();
+        Interpolator1DKnots knots = mSplineInterpolator[i]->knots();
         knotsStr = "";
         for (int j = 0; j < knots.size(); j++)
         {
@@ -233,15 +233,15 @@ QWidget *Filter::widget(QWidget *parent)
             fw, SLOT(setWorkingChannel(Filter::WorkingChannel)));
     connect(this, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setInterpolationMode(Filter::InterpolationMode)));
-    connect(this, SIGNAL(knotsChanged(SplineInterpolatorKnots)),
-            fw, SLOT(setKnots(SplineInterpolatorKnots)));
+    connect(this, SIGNAL(knotsChanged(Interpolator1DKnots)),
+            fw, SLOT(setKnots(Interpolator1DKnots)));
 
     connect(fw, SIGNAL(workingChannelChanged(Filter::WorkingChannel)),
             this, SLOT(setWorkingChannel(Filter::WorkingChannel)));
     connect(fw, SIGNAL(interpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setInterpolationMode(Filter::InterpolationMode)));
-    connect(fw, SIGNAL(knotsChanged(SplineInterpolatorKnots)),
-            this, SLOT(setKnots(SplineInterpolatorKnots)));
+    connect(fw, SIGNAL(knotsChanged(Interpolator1DKnots)),
+            this, SLOT(setKnots(Interpolator1DKnots)));
 
     return fw;
 }
@@ -257,7 +257,7 @@ void Filter::setWorkingChannel(Filter::WorkingChannel s)
     emit parametersChanged();
 }
 
-void Filter::setKnots(const SplineInterpolatorKnots &k)
+void Filter::setKnots(const Interpolator1DKnots &k)
 {
     if (mSplineInterpolator[mWorkingChannel]->knots() == k)
         return;
@@ -273,16 +273,16 @@ void Filter::setInterpolationMode(Filter::InterpolationMode im)
 
     mInterpolationMode[mWorkingChannel] = im;
 
-    SplineInterpolatorKnots k = mSplineInterpolator[mWorkingChannel]->knots();
+    Interpolator1DKnots k = mSplineInterpolator[mWorkingChannel]->knots();
 
     delete mSplineInterpolator[mWorkingChannel];
 
     if (im == 0)
-        mSplineInterpolator[mWorkingChannel] = new NearestNeighborSplineInterpolator();
+        mSplineInterpolator[mWorkingChannel] = new NearestNeighborSplineInterpolator1D();
     else if (im == 1)
-        mSplineInterpolator[mWorkingChannel] = new LinearSplineInterpolator();
+        mSplineInterpolator[mWorkingChannel] = new LinearSplineInterpolator1D();
     else
-        mSplineInterpolator[mWorkingChannel] = new CubicSplineInterpolator();
+        mSplineInterpolator[mWorkingChannel] = new CubicSplineInterpolator1D();
 
     mSplineInterpolator[mWorkingChannel]->setKnots(k);
 

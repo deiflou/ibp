@@ -19,25 +19,14 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR_H
-#define ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR_H
-
-#include "basesplineinterpolator.h"
+#include "interpolator1D.h"
 
 namespace anitools {
 namespace misc {
 
-class NearestNeighborSplineInterpolator : public BaseSplineInterpolator
+bool Interpolator1DKnotsLessThan(const Interpolator1DKnot &s1, const Interpolator1DKnot &s2)
 {
-public:
-    NearestNeighborSplineInterpolator();
-    SplineInterpolator * clone() const;
-
-    double f(double x);
-
-private:
-    int getPiece(double x);
-};
+    return s1.x() < s2.x();
+}
 
 }}
-#endif // ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR_H

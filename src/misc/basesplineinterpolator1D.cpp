@@ -19,13 +19,13 @@
 **
 ****************************************************************************/
 
-#include "basesplineinterpolator.h"
+#include "basesplineinterpolator1D.h"
 #include "math.h"
 
 namespace anitools {
 namespace misc {
 
-BaseSplineInterpolator::BaseSplineInterpolator() :
+BaseSplineInterpolator1D::BaseSplineInterpolator1D() :
     mFloorExtrapolationMode(ExtrapolationMode_Clamp),
     mCeilExtrapolationMode(ExtrapolationMode_Clamp),
     mFloorExtrapolationValue(0.),
@@ -33,40 +33,40 @@ BaseSplineInterpolator::BaseSplineInterpolator() :
 {
 }
 
-BaseSplineInterpolator::~BaseSplineInterpolator()
+BaseSplineInterpolator1D::~BaseSplineInterpolator1D()
 {
 }
 
-const SplineInterpolatorKnots & BaseSplineInterpolator::knots() const
+const Interpolator1DKnots & BaseSplineInterpolator1D::knots() const
 {
     return mKnots;
 }
-const SplineInterpolatorKnot & BaseSplineInterpolator::knot(int i) const
+const Interpolator1DKnot & BaseSplineInterpolator1D::knot(int i) const
 {
     return mKnots.at(i);
 }
 
-int BaseSplineInterpolator::size() const
+int BaseSplineInterpolator1D::size() const
 {
     return mKnots.size();
 }
 
-bool BaseSplineInterpolator::setKnots(const SplineInterpolatorKnots &k)
+bool BaseSplineInterpolator1D::setKnots(const Interpolator1DKnots &k)
 {
     // look for duplicated X
-    SplineInterpolatorKnots k2 = k;
-    qSort(k2.begin(), k2.end(), SplineInterpolatorKnotsLessThan);
+    Interpolator1DKnots k2 = k;
+    qSort(k2.begin(), k2.end(), Interpolator1DKnotsLessThan);
     for (int i = 0; i < k2.size() - 1; i++)
         if (k2[i].x() == k2[i + 1].x()) return false;
     mKnots = k2;
     return true;
 }
 
-bool BaseSplineInterpolator::setKnot(int i, const SplineInterpolatorKnot &k)
+bool BaseSplineInterpolator1D::setKnot(int i, const Interpolator1DKnot &k)
 {
     if (i < 0 || i >= mKnots.size()) return false;
 
-    SplineInterpolatorKnot k2 = mKnots[i];
+    Interpolator1DKnot k2 = mKnots[i];
     mKnots.remove(i);
 
     if (!addKnot(k))
@@ -78,12 +78,12 @@ bool BaseSplineInterpolator::setKnot(int i, const SplineInterpolatorKnot &k)
     return true;
 }
 
-bool BaseSplineInterpolator::setKnot(int i, double nx, double ny)
+bool BaseSplineInterpolator1D::setKnot(int i, double nx, double ny)
 {
-    return setKnot(i, SplineInterpolatorKnot(nx, ny));
+    return setKnot(i, Interpolator1DKnot(nx, ny));
 }
 
-bool BaseSplineInterpolator::setKnot(double x, const SplineInterpolatorKnot &k)
+bool BaseSplineInterpolator1D::setKnot(double x, const Interpolator1DKnot &k)
 {
     for (int i = 0; i < mKnots.size(); i++)
     {
@@ -95,12 +95,12 @@ bool BaseSplineInterpolator::setKnot(double x, const SplineInterpolatorKnot &k)
     return false;
 }
 
-bool BaseSplineInterpolator::setKnot(double x, double nx, double ny)
+bool BaseSplineInterpolator1D::setKnot(double x, double nx, double ny)
 {
-    return setKnot(x, SplineInterpolatorKnot(nx, ny));
+    return setKnot(x, Interpolator1DKnot(nx, ny));
 }
 
-bool BaseSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool replace, int * index)
+bool BaseSplineInterpolator1D::addKnot(const Interpolator1DKnot &k, bool replace, int * index)
 {
     for (int i = 0; i < mKnots.size(); i++)
     {
@@ -129,12 +129,12 @@ bool BaseSplineInterpolator::addKnot(const SplineInterpolatorKnot &k, bool repla
     return true;
 }
 
-bool BaseSplineInterpolator::addKnot(double nx, double ny, bool replace, int * index)
+bool BaseSplineInterpolator1D::addKnot(double nx, double ny, bool replace, int * index)
 {
-    return addKnot(SplineInterpolatorKnot(nx, ny), replace, index);
+    return addKnot(Interpolator1DKnot(nx, ny), replace, index);
 }
 
-bool BaseSplineInterpolator::removeKnot(double x)
+bool BaseSplineInterpolator1D::removeKnot(double x)
 {
     for (int i = 0; i < mKnots.size(); i++)
     {
@@ -146,35 +146,61 @@ bool BaseSplineInterpolator::removeKnot(double x)
     return false;
 }
 
-bool BaseSplineInterpolator::removeKnot(int i)
+bool BaseSplineInterpolator1D::removeKnot(int i)
 {
     if (i < 0 || i >= mKnots.size()) return false;
     mKnots.remove(i);
     return true;
 }
 
-SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::floorExtrapolationMode() const
+double BaseSplineInterpolator1D::f(double x)
+{
+    if (mKnots.size() < 1) return 0.0;
+
+    if (x < mKnots.first().x())
+        return floorExtrapolate(x);
+    else if (x > mKnots.last().x())
+        return ceilExtrapolate(x);
+
+    return F(x);
+}
+
+Interpolator1D::ExtrapolationMode BaseSplineInterpolator1D::floorExtrapolationMode() const
 {
     return mFloorExtrapolationMode;
 }
-SplineInterpolator::ExtrapolationMode BaseSplineInterpolator::ceilExtrapolationMode() const
+Interpolator1D::ExtrapolationMode BaseSplineInterpolator1D::ceilExtrapolationMode() const
 {
     return mCeilExtrapolationMode;
 }
-double BaseSplineInterpolator::floorExtrapolationValue() const
+double BaseSplineInterpolator1D::floorExtrapolationValue() const
 {
     return mFloorExtrapolationValue;
 }
-double BaseSplineInterpolator::ceilExtrapolationValue() const
+double BaseSplineInterpolator1D::ceilExtrapolationValue() const
 {
     return mCeilExtrapolationValue;
 }
-void BaseSplineInterpolator::setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c, double fv, double cv)
+void BaseSplineInterpolator1D::setExtrapolationMode(ExtrapolationMode f, ExtrapolationMode c, double fv, double cv)
 {
     mFloorExtrapolationMode = f;
     mCeilExtrapolationMode = c;
     mFloorExtrapolationValue = fv;
     mCeilExtrapolationValue = cv;
+}
+
+int BaseSplineInterpolator1D::pieceForValue(double x) const
+{
+    int min = 0, max = mKnots.size() - 1, mid;
+    while (max > min + 1)
+    {
+        mid = (min + max) >> 1;
+        if (mKnots[mid].x() < x)
+            min = mid;
+        else
+            max = mid;
+    }
+    return min;
 }
 
 }}

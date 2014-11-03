@@ -54,12 +54,12 @@ OutputLevelsSlider::OutputLevelsSlider(QWidget *parent) :
 
 void OutputLevelsSlider::focusInEvent(QFocusEvent * e)
 {
-    repaint();
+    update();
     QWidget::focusInEvent(e);
 }
 void OutputLevelsSlider::focusOutEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusOutEvent(e);
 }
 
@@ -70,12 +70,12 @@ void OutputLevelsSlider::keyPressEvent(QKeyEvent * e)
     case Qt::Key_Up:
         mHandleSelected++;
         if (mHandleSelected > 2) mHandleSelected = 2;
-        repaint();
+        update();
         break;
     case Qt::Key_Down:
         mHandleSelected--;
         if (mHandleSelected < 1) mHandleSelected = 1;
-        repaint();
+        update();
         break;
     case Qt::Key_Right:
         if (mHandleSelected == 1)
@@ -103,14 +103,22 @@ void OutputLevelsSlider::paintHandle(QPainter & p, const QPoint & pos, const QCo
     path.lineTo(-4, 8);
     path.closeSubpath();
     path.translate(0.5, 0.5);
+    // shadow
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor(0, 0, 0, 32));
+    p.drawPath(path.translated(3., 1.));
+    p.setBrush(QColor(0, 0, 0, 64));
+    p.drawPath(path.translated(1., 1.));
+    // handle
     p.setBrush(c);
     p.setPen(QColor(0, 0, 0, 128));
     p.drawPath(path);
+    // selection
     if (selected && this->hasFocus())
     {
         QColor h = palette().highlight().color();
         h.setAlpha(192);
-        p.setPen(Qt::transparent);
+        p.setPen(Qt::NoPen);
         p.setBrush(h);
         p.drawPath(path);
     }
@@ -122,12 +130,7 @@ void OutputLevelsSlider::paintEvent(QPaintEvent *e)
     Q_UNUSED(e)
 
     QPainter p(this);
-
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
-
-    QLinearGradient grd(r.topLeft(), r.topRight());
-    grd.setColorAt(0.0, QColor(0, 0, 0));
-    grd.setColorAt(1.0, QColor(255, 255, 255));
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
 
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
@@ -137,32 +140,27 @@ void OutputLevelsSlider::paintEvent(QPaintEvent *e)
     p.drawRoundedRect(r.adjusted(-2, -1, 2, 3), 3, 3);
     p.drawRoundedRect(r.adjusted(-1, 0, 1, 2), 2, 2);
     p.drawRoundedRect(r.adjusted(0, 1, 0, 1), 1, 1);
+    // clipping
+    QPainterPath clippingPath;
+    clippingPath.addRoundedRect(r, 1, 1);
+    p.setClipPath(clippingPath);
     // paint identity function
-    p.setClipRect(r.adjusted(0, 0, 0, -r.center().y() + 1));
+    QLinearGradient grd(r.topLeft(), r.topRight());
+    grd.setColorAt(0.0, QColor(0, 0, 0));
+    grd.setColorAt(1.0, QColor(255, 255, 255));
     p.setBrush(grd);
-    p.drawRoundedRect(r, 1, 1);
+    p.drawRect(r.adjusted(0, 0, 0, -1));
     // paint function
-    p.setClipRect(r.adjusted(0, r.center().y(), 0, 0));
-    p.setBrushOrigin(LEFT_MARGIN - 1, TOP_MARGIN - 1);
-    QBrush b(mFunction);
-    b.setTransform(QTransform(r.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
-    p.setBrush(b);
-    p.drawRoundedRect(r, 1, 1);
-
+    p.drawImage(r.adjusted(0, r.center().y(), 0, 0), mFunction);
+    //handles
     p.setClipping(false);
     p.setRenderHint(QPainter::Antialiasing, false);
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-/*
-    p.setBrush(Qt::transparent);
-    p.setPen(QColor(0, 0, 0, 128));
-    p.drawRect(r.adjusted(0, 0, -1, -1));
-    p.setPen(QColor(255, 255, 255, 128));
-    p.drawRect(r.adjusted(1, 1, -2, -2));
-*/
+
     double y, xB, xW;
-    y = this->rect().bottom() - HANDLE_HEIGHT;
-    xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;
-    xW = (r.width() - 1) * mWhitePoint + LEFT_MARGIN;
+    y = r.bottom() - 2;
+    xB = (r.width() - 1) * mBlackPoint + kLeftMargin;
+    xW = (r.width() - 1) * mWhitePoint + kLeftMargin;
 
     p.setRenderHint(QPainter::Antialiasing);
     paintHandle(p, QPoint(xB, y), QColor(64, 64, 64), mHandleSelected == 1);
@@ -174,10 +172,10 @@ void OutputLevelsSlider::mousePressEvent(QMouseEvent *e)
     if (mHandlePressed != 0 || !(e->buttons() & Qt::LeftButton))
         return;
 
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
     double xB, xW, xE;
-    xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;
-    xW = (r.width() - 1) * mWhitePoint + LEFT_MARGIN;
+    xB = (r.width() - 1) * mBlackPoint + kLeftMargin;
+    xW = (r.width() - 1) * mWhitePoint + kLeftMargin;
     xE = e->x();
 
     double dB = fabs(xE - xB);
@@ -186,18 +184,18 @@ void OutputLevelsSlider::mousePressEvent(QMouseEvent *e)
     int handle = dB < dW ? 1 : 2;
     if (handle == 1)
     {
-        setBlackPoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setBlackPoint((xE - kLeftMargin) / (r.width() - 1));
     }
     else
     {
-        setWhitePoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setWhitePoint((xE - kLeftMargin) / (r.width() - 1));
     }
 
     mHandlePressed = handle;
     if (mHandlePressed != mHandleSelected)
     {
         mHandleSelected = mHandlePressed;
-        repaint();
+        update();
     }
 }
 void OutputLevelsSlider::mouseReleaseEvent(QMouseEvent *e)
@@ -212,17 +210,17 @@ void OutputLevelsSlider::mouseMoveEvent(QMouseEvent *e)
     if (mHandlePressed == 0 || !(e->buttons() & Qt::LeftButton))
         return;
 
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
     double xE;
     xE = e->x();
 
     if (mHandlePressed == 1)
     {
-        setBlackPoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setBlackPoint((xE - kLeftMargin) / (r.width() - 1));
     }
     else
     {
-        setWhitePoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setWhitePoint((xE - kLeftMargin) / (r.width() - 1));
     }
 }
 
@@ -242,7 +240,7 @@ void OutputLevelsSlider::setBlackPoint(double v)
     if (v > 1.0) v = 1.0;
     mBlackPoint = v;
     makeFunction();
-    repaint();
+    update();
     emit blackPointChanged(v);
 }
 void OutputLevelsSlider::setWhitePoint(double v)
@@ -252,7 +250,7 @@ void OutputLevelsSlider::setWhitePoint(double v)
     if (v > 1.0) v = 1.0;
     mWhitePoint = v;
     makeFunction();
-    repaint();
+    update();
     emit whitePointChanged(v);
 }
 
@@ -266,7 +264,7 @@ void OutputLevelsSlider::setValues(double b, double w)
     mBlackPoint = b;
     mWhitePoint = w;
     makeFunction();
-    repaint();
+    update();
     emit blackPointChanged(b);
     emit whitePointChanged(w);
 }

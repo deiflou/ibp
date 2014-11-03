@@ -26,6 +26,7 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"
+#include "../imgproc/intensitymapping.h"
 
 Filter::Filter() :
     mWorkingChannel(RGB)
@@ -295,25 +296,8 @@ void Filter::setOutputWhitePoint(double v)
 
 void Filter::makeLUT(WorkingChannel c)
 {
-    double gammaCorrection, mIn, bIn, mOut, bOut, value;
-    unsigned char * lut = mLuts[c];
-
-    gammaCorrection = 1.0 / mInputLevels[c][InputGamma];
-    mIn = 1.0 / (mInputLevels[c][InputWhitePoint] - mInputLevels[c][InputBlackPoint]);
-    bIn = mIn * mInputLevels[c][InputBlackPoint];
-    mOut = mOutputLevels[c][OutputWhitePoint] - mOutputLevels[c][OutputBlackPoint];
-    bOut = mOutputLevels[c][OutputBlackPoint];
-
-    for (int i = 0; i < 256; i++)
-    {
-        // Shadows & Highights
-        value = qBound(0.0, mIn * (i / 255.0) - bIn, 1.0);
-        // Midtones
-        value = pow(value, gammaCorrection);
-        // output levels
-        value = mOut * value + bOut;
-
-        lut[i] = qBound(0, (int)round(value * 255.0), 255);
-    }
+    generateLevelsLUT(mLuts[c],
+                      mInputLevels[c][InputGamma], mInputLevels[c][InputBlackPoint], mInputLevels[c][InputWhitePoint],
+                      mOutputLevels[c][OutputBlackPoint], mOutputLevels[c][OutputWhitePoint]);
 }
 

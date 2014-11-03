@@ -44,7 +44,7 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setKnots(const SplineInterpolatorKnots & k)
+void FilterWidget::setKnots(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetCurves->knots() == k)
         return;
@@ -144,7 +144,7 @@ void FilterWidget::on_mButtonInterpolationModeSmooth_toggled(bool v)
         emit interpolationModeChanged(Filter::Smooth);
 }
 
-void FilterWidget::on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots & k)
+void FilterWidget::on_mWidgetCurves_knotsChanged(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
     {
@@ -153,7 +153,7 @@ void FilterWidget::on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots &
     }
     else
     {
-        SplineInterpolatorKnot kn = k.at(ui->mWidgetCurves->selectedKnotIndex());
+        Interpolator1DKnot kn = k.at(ui->mWidgetCurves->selectedKnotIndex());
         ui->mSpinLumaValue->setValue(round(kn.x() * 255.0));
         ui->mSpinOpacityValue->setValue(round(kn.y() * 255.0));
         ui->mSpinLumaValue->setEnabled(true);
@@ -175,7 +175,7 @@ void FilterWidget::on_mWidgetCurves_selectedKnotChanged(int i)
     }
     else
     {
-        SplineInterpolatorKnot kn = ui->mWidgetCurves->selectedKnot();
+        Interpolator1DKnot kn = ui->mWidgetCurves->selectedKnot();
         ui->mSpinLumaValue->setValue(round(kn.x() * 255.0));
         ui->mSpinOpacityValue->setValue(round(kn.y() * 255.0));
         ui->mSpinLumaValue->setEnabled(true);
@@ -188,7 +188,7 @@ void FilterWidget::on_mSpinLumaValue_valueChanged(double v)
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetCurves->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetCurves->selectedKnot();
     v = v / 255.0;
     if (v == k.x()) return;
     ui->mWidgetCurves->setSelectedKnot(v, k.y());
@@ -202,7 +202,7 @@ void FilterWidget::on_mSpinOpacityValue_valueChanged(double v)
     if (ui->mWidgetCurves->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetCurves->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetCurves->selectedKnot();
     v = v / 255.0;
     if (v == k.y()) return;
     ui->mWidgetCurves->setSelectedKnot(k.x(), v);

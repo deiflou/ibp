@@ -30,15 +30,15 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR_H
-#define ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR_H
+#ifndef ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR1D_H
+#define ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR1D_H
 
-#include "basesplineinterpolator.h"
+#include "basesplineinterpolator1D.h"
 
 namespace anitools {
 namespace misc {
 
-class CubicSplineInterpolator : public BaseSplineInterpolator
+class CubicSplineInterpolator1D : public BaseSplineInterpolator1D
 {
 public:
     enum BoundaryConditions
@@ -75,26 +75,29 @@ public:
         BoundaryConditions_Periodic
     };
 
-    CubicSplineInterpolator();
-    SplineInterpolator * clone() const;
+    CubicSplineInterpolator1D();
+    Interpolator1D * clone() const;
 
-    bool setKnots(const SplineInterpolatorKnots &k);
-    bool setKnot(int i, const SplineInterpolatorKnot &k);
+    bool setKnots(const Interpolator1DKnots &k);
+    bool setKnot(int i, const Interpolator1DKnot &k);
     bool setKnot(int i, double nx, double ny);
-    bool setKnot(double x, const SplineInterpolatorKnot &k);
+    bool setKnot(double x, const Interpolator1DKnot &k);
     bool setKnot(double x, double nx, double ny);
-    bool addKnot(const SplineInterpolatorKnot &k, bool replace = false, int * index = 0);
+    bool addKnot(const Interpolator1DKnot &k, bool replace = false, int * index = 0);
     bool addKnot(double nx, double ny, bool replace = false, int * index = 0);
     bool removeKnot(double x);
     bool removeKnot(int i);
-
-    double f(double x);
 
     BoundaryConditions floorBoundaryConditions() const;
     BoundaryConditions ceilBoundaryConditions() const;
     double floorBoundaryConditionsValue() const;
     double ceilBoundaryConditionsValue() const;
     void setBoundaryConditions(BoundaryConditions f, BoundaryConditions c, double fv = 0., double cv = 0.);
+
+protected:
+    double F(double x);
+    double floorExtrapolate(double x);
+    double ceilExtrapolate(double x);
 
 private:
     struct Coefficients
@@ -110,9 +113,8 @@ private:
     bool mIsDirty;
     QVector<Coefficients> mCoefficients;
 
-    int getPiece(double x) const;
     void calculateCoefficients();
 };
 
 }}
-#endif // ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR_H
+#endif // ANITOOLS_MISC_CUBICSPLINEINTERPOLATOR1D_H

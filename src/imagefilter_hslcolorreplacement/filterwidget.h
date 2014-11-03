@@ -52,13 +52,13 @@ private:
     int mHueZoomFactorIndex, mSaturationZoomFactorIndex, mLightnessZoomFactorIndex;
 
 signals:
-    void hueKnotsChanged(const SplineInterpolatorKnots & k);
+    void hueKnotsChanged(const Interpolator1DKnots & k);
     void hueInterpolationModeChanged(Filter::InterpolationMode im);
     void hueInvertedChanged(bool i);
-    void saturationKnotsChanged(const SplineInterpolatorKnots & k);
+    void saturationKnotsChanged(const Interpolator1DKnots & k);
     void saturationInterpolationModeChanged(Filter::InterpolationMode im);
     void saturationInvertedChanged(bool i);
-    void lightnessKnotsChanged(const SplineInterpolatorKnots & k);
+    void lightnessKnotsChanged(const Interpolator1DKnots & k);
     void lightnessInterpolationModeChanged(Filter::InterpolationMode im);
     void lightnessInvertedChanged(bool i);
     void outputModeChanged(Filter::OutputMode om);
@@ -71,13 +71,13 @@ signals:
     void absSaturationChanged(int v);
 
 public slots:
-    void setHueKnots(const SplineInterpolatorKnots & k);
+    void setHueKnots(const Interpolator1DKnots & k);
     void setHueInterpolationMode(Filter::InterpolationMode im);
     void setHueInverted(bool i);
-    void setSaturationKnots(const SplineInterpolatorKnots & k);
+    void setSaturationKnots(const Interpolator1DKnots & k);
     void setSaturationInterpolationMode(Filter::InterpolationMode im);
     void setSaturationInverted(bool i);
-    void setLightnessKnots(const SplineInterpolatorKnots & k);
+    void setLightnessKnots(const Interpolator1DKnots & k);
     void setLightnessInterpolationMode(Filter::InterpolationMode im);
     void setLightnessInverted(bool i);
     void setOutputMode(Filter::OutputMode om);
@@ -93,7 +93,7 @@ private slots:
     void on_mButtonHueInterpolationModeFlat_toggled(bool v);
     void on_mButtonHueInterpolationModeLinear_toggled(bool v);
     void on_mButtonHueInterpolationModeSmooth_toggled(bool v);
-    void on_mWidgetHueCurve_knotsChanged(const SplineInterpolatorKnots & k);
+    void on_mWidgetHueCurve_knotsChanged(const Interpolator1DKnots & k);
     void on_mWidgetHueCurve_selectedKnotChanged(int i);
     void on_mSpinHueInValue_valueChanged(double v);
     void on_mSpinHueOutValue_valueChanged(double v);
@@ -105,7 +105,7 @@ private slots:
     void on_mButtonSaturationInterpolationModeFlat_toggled(bool v);
     void on_mButtonSaturationInterpolationModeLinear_toggled(bool v);
     void on_mButtonSaturationInterpolationModeSmooth_toggled(bool v);
-    void on_mWidgetSaturationCurve_knotsChanged(const SplineInterpolatorKnots & k);
+    void on_mWidgetSaturationCurve_knotsChanged(const Interpolator1DKnots & k);
     void on_mWidgetSaturationCurve_selectedKnotChanged(int i);
     void on_mSpinSaturationInValue_valueChanged(double v);
     void on_mSpinSaturationOutValue_valueChanged(double v);
@@ -117,7 +117,7 @@ private slots:
     void on_mButtonLightnessInterpolationModeFlat_toggled(bool v);
     void on_mButtonLightnessInterpolationModeLinear_toggled(bool v);
     void on_mButtonLightnessInterpolationModeSmooth_toggled(bool v);
-    void on_mWidgetLightnessCurve_knotsChanged(const SplineInterpolatorKnots & k);
+    void on_mWidgetLightnessCurve_knotsChanged(const Interpolator1DKnots & k);
     void on_mWidgetLightnessCurve_selectedKnotChanged(int i);
     void on_mSpinLightnessInValue_valueChanged(double v);
     void on_mSpinLightnessOutValue_valueChanged(double v);

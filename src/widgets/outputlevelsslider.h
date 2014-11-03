@@ -32,12 +32,12 @@ class OutputLevelsSlider : public QWidget
     Q_OBJECT
 
 private:
-    static const int LEFT_MARGIN = 4;
-    static const int TOP_MARGIN = 1;
-    static const int RIGHT_MARGIN = 4;
-    static const int BOTTOM_MARGIN = 6;
-    static const int HANDLE_HEIGHT = 8;
-    static const int HANDLE_WIDTH = 8;
+    static const int kLeftMargin = 4;
+    static const int kTopMargin = 1;
+    static const int kRightMargin = 4;
+    static const int kBottomMargin = 7;
+    static const int kHandleHeight = 8;
+    static const int kHandleWidth = 8;
 
     double mBlackPoint, mWhitePoint;
     QImage mFunction;

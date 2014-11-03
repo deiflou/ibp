@@ -308,7 +308,7 @@ void ColorBox::updateImageData()
 void ColorBox::updateImageDataAndPaint()
 {
     updateImageData();
-    repaint();
+    update();
 }
 
 void ColorBox::paintEvent(QPaintEvent *e)

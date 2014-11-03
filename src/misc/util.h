@@ -33,11 +33,13 @@ namespace misc {
 #define AT_PI 3.1415926536
 #define AT_2PI (AT_PI * 2.)
 #define AT_PIOVER2 (AT_PI / 2)
-#define AT_DegToRad(deg) ((deg) * AT_PI / 180.0)
-#define AT_RadToDeg(rad) ((rad) * 180.0 / AT_PI)
+#define AT_DegToRad(deg) ((deg) * AT_PI / 180.)
+#define AT_RadToDeg(rad) ((rad) * 180. / AT_PI)
 #define AT_SQRT2 1.4142135623730950488016887242097
 #define AT_1OVERSQRT2 (1. / AT_SQRT2)
 #define AT_X_CUBE_MINUS_X(x) ((x) * (x) * (x) - (x))
+#define AT_1OVER255 (1. / 255.)
+#define AT_1OVER256 (1. / 256.)
 #define AT_minimum(a, b) ((a) < (b) ? (a) : (b))
 #define AT_minimum3(a, b, c) AT_minimum((a), AT_minimum((b), (c)))
 #define AT_maximum(a, b) ((a) > (b) ? (a) : (b))

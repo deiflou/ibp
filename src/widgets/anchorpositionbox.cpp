@@ -35,12 +35,12 @@ AnchorPositionBox::AnchorPositionBox(QWidget* parent) :
 
 void AnchorPositionBox::focusInEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusInEvent(e);
 }
 void AnchorPositionBox::focusOutEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusOutEvent(e);
 }
 
@@ -54,7 +54,7 @@ void AnchorPositionBox::setAnchorPosition(anitools::misc::Alignment ap)
     if (ap == mAnchorPosition)
         return;
     mAnchorPosition = ap;
-    repaint();
+    update();
     emit anchorPositionChanged(ap);
 }
 
@@ -258,7 +258,7 @@ void AnchorPositionBox::mousePressEvent(QMouseEvent * e)
     if (index < 0 || index > 8)
         return;
     mAnchorPosition = (anitools::misc::Alignment)index;
-    repaint();
+    update();
     emit anchorPositionChanged(mAnchorPosition);
 }
 
@@ -284,7 +284,7 @@ void AnchorPositionBox::keyPressEvent(QKeyEvent * e)
     if ((anitools::misc::Alignment)index == mAnchorPosition)
         return;
     mAnchorPosition = (anitools::misc::Alignment)index;
-    repaint();
+    update();
     emit anchorPositionChanged(mAnchorPosition);
 }
 

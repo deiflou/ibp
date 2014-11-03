@@ -25,6 +25,9 @@
 #include <math.h>
 
 #include "inputlevelsslider.h"
+#include "../imgproc/intensitymapping.h"
+
+using namespace anitools::imgproc;
 
 namespace anitools {
 namespace widgets {
@@ -55,12 +58,12 @@ InputLevelsSlider::InputLevelsSlider(QWidget *parent) :
 
 void InputLevelsSlider::focusInEvent(QFocusEvent * e)
 {
-    repaint();
+    update();
     QWidget::focusInEvent(e);
 }
 void InputLevelsSlider::focusOutEvent(QFocusEvent *e)
 {
-    repaint();
+    update();
     QWidget::focusOutEvent(e);
 }
 
@@ -71,12 +74,12 @@ void InputLevelsSlider::keyPressEvent(QKeyEvent * e)
     case Qt::Key_Up:
         mHandleSelected++;
         if (mHandleSelected > 3) mHandleSelected = 3;
-        repaint();
+        update();
         break;
     case Qt::Key_Down:
         mHandleSelected--;
         if (mHandleSelected < 1) mHandleSelected = 1;
-        repaint();
+        update();
         break;
     case Qt::Key_Right:
         if (mHandleSelected == 1)
@@ -108,14 +111,22 @@ void InputLevelsSlider::paintHandle(QPainter & p, const QPoint & pos, const QCol
     path.lineTo(-4, 8);
     path.closeSubpath();
     path.translate(0.5, 0.5);
+    // shadow
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor(0, 0, 0, 32));
+    p.drawPath(path.translated(3., 1.));
+    p.setBrush(QColor(0, 0, 0, 64));
+    p.drawPath(path.translated(1., 1.));
+    // handle
     p.setBrush(c);
     p.setPen(QColor(0, 0, 0, 128));
     p.drawPath(path);
+    // selection
     if (selected && this->hasFocus())
     {
         QColor h = palette().highlight().color();
         h.setAlpha(192);
-        p.setPen(Qt::transparent);
+        p.setPen(Qt::NoPen);
         p.setBrush(h);
         p.drawPath(path);
     }
@@ -127,12 +138,7 @@ void InputLevelsSlider::paintEvent(QPaintEvent *e)
     Q_UNUSED(e)
 
     QPainter p(this);
-
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
-
-    QLinearGradient grd(r.topLeft(), r.topRight());
-    grd.setColorAt(0.0, QColor(0, 0, 0));
-    grd.setColorAt(1.0, QColor(255, 255, 255));
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
 
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
@@ -142,32 +148,27 @@ void InputLevelsSlider::paintEvent(QPaintEvent *e)
     p.drawRoundedRect(r.adjusted(-2, -1, 2, 3), 3, 3);
     p.drawRoundedRect(r.adjusted(-1, 0, 1, 2), 2, 2);
     p.drawRoundedRect(r.adjusted(0, 1, 0, 1), 1, 1);
+    // clipping
+    QPainterPath clippingPath;
+    clippingPath.addRoundedRect(r, 1, 1);
+    p.setClipPath(clippingPath);
     // paint identity function
-    p.setClipRect(r.adjusted(0, 0, 0, -r.center().y() + 1));
+    QLinearGradient grd(r.topLeft(), r.topRight());
+    grd.setColorAt(0.0, QColor(0, 0, 0));
+    grd.setColorAt(1.0, QColor(255, 255, 255));
     p.setBrush(grd);
-    p.drawRoundedRect(r, 1, 1);
+    p.drawRect(r.adjusted(0, 0, 0, -1));
     // paint function
-    p.setClipRect(r.adjusted(0, r.center().y(), 0, 0));
-    p.setBrushOrigin(LEFT_MARGIN - 1, TOP_MARGIN - 1);
-    QBrush b(mFunction);
-    b.setTransform(QTransform(r.width() / 255., 0, 0, 0, 1, 0, 0, 0, 1));
-    p.setBrush(b);
-    p.drawRoundedRect(r, 1, 1);
-
+    p.drawImage(r.adjusted(0, r.center().y(), 0, 0), mFunction);
+    //handles
     p.setClipping(false);
     p.setRenderHint(QPainter::Antialiasing, false);
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-/*
-    p.setBrush(Qt::transparent);
-    p.setPen(QColor(0, 0, 0, 128));
-    p.drawRect(r.adjusted(0, 0, -1, -1));
-    p.setPen(QColor(255, 255, 255, 128));
-    p.drawRect(r.adjusted(1, 1, -2, -2));
-*/
+
     double y, xB, xW, xG;
-    y = this->rect().bottom() - HANDLE_HEIGHT;
-    xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;
-    xW = (r.width() - 1) * mWhitePoint + LEFT_MARGIN;
+    y = r.bottom() - 2;
+    xB = (r.width() - 1) * mBlackPoint + kLeftMargin;
+    xW = (r.width() - 1) * mWhitePoint + kLeftMargin;
     xG = (xW - xB - 2) * pow(0.5, mGammaCorrection) + xB + 1;
 
     p.setRenderHint(QPainter::Antialiasing);
@@ -181,10 +182,10 @@ void InputLevelsSlider::mousePressEvent(QMouseEvent *e)
     if (mHandlePressed != 0 || !(e->buttons() & Qt::LeftButton))
         return;
 
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
     double xB, xW, xG, xE;
-    xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;
-    xW = (r.width() - 1) * mWhitePoint + LEFT_MARGIN;
+    xB = (r.width() - 1) * mBlackPoint + kLeftMargin;
+    xW = (r.width() - 1) * mWhitePoint + kLeftMargin;
     xG = (xW - xB - 2) * pow(0.5, mGammaCorrection) + xB + 1;
     xE = e->x();
 
@@ -195,24 +196,24 @@ void InputLevelsSlider::mousePressEvent(QMouseEvent *e)
     int handle = dB < dW ? (dB < dG ? 1 : 2) : (dW < dG ? 3 : 2);
     if (handle == 1)
     {
-        setBlackPoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setBlackPoint((xE - kLeftMargin) / (r.width() - 1));
     }
     else if (handle == 2)
     {
         xG = (xE - xB - 1) / (xW - xB - 2);
-        if (xG <= POW_1OVER2_TEN) xG = POW_1OVER2_TEN;
-        setGammaCorrection(log(xG) / LOG_1OVER2);
+        if (xG <= kPow1Over2ToThe10) xG = kPow1Over2ToThe10;
+        setGammaCorrection(log(xG) / kLog1Over2);
     }
     else
     {
-        setWhitePoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setWhitePoint((xE - kLeftMargin) / (r.width() - 1));
     }
 
     mHandlePressed = handle;
     if (mHandlePressed != mHandleSelected)
     {
         mHandleSelected = mHandlePressed;
-        repaint();
+        update();
     }
 }
 void InputLevelsSlider::mouseReleaseEvent(QMouseEvent *e)
@@ -227,25 +228,25 @@ void InputLevelsSlider::mouseMoveEvent(QMouseEvent *e)
     if (mHandlePressed == 0 || !(e->buttons() & Qt::LeftButton))
         return;
 
-    QRect r = this->rect().adjusted(LEFT_MARGIN, TOP_MARGIN, -RIGHT_MARGIN, -BOTTOM_MARGIN);
+    QRect r = this->rect().adjusted(kLeftMargin, kTopMargin, -kRightMargin, -kBottomMargin);
     double xB, xW, xG, xE;
-    xB = (r.width() - 1) * mBlackPoint + LEFT_MARGIN;
-    xW = (r.width() - 1) * mWhitePoint + LEFT_MARGIN;
+    xB = (r.width() - 1) * mBlackPoint + kLeftMargin;
+    xW = (r.width() - 1) * mWhitePoint + kLeftMargin;
     xE = e->x();
 
     if (mHandlePressed == 1)
     {
-        setBlackPoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setBlackPoint((xE - kLeftMargin) / (r.width() - 1));
     }
     else if (mHandlePressed == 2)
     {
         xG = (xE - xB - 1) / (xW - xB - 2);
-        if (xG <= POW_1OVER2_TEN) xG = POW_1OVER2_TEN;
-        setGammaCorrection(log(xG) / LOG_1OVER2);
+        if (xG <= kPow1Over2ToThe10) xG = kPow1Over2ToThe10;
+        setGammaCorrection(log(xG) / kLog1Over2);
     }
     else
     {
-        setWhitePoint((xE - LEFT_MARGIN) / (r.width() - 1));
+        setWhitePoint((xE - kLeftMargin) / (r.width() - 1));
     }
 }
 
@@ -269,7 +270,7 @@ void InputLevelsSlider::setBlackPoint(double v)
     if (v < 0.0) v = 0.0;
     mBlackPoint = v;
     makeFunction();
-    repaint();
+    update();
     emit blackPointChanged(v);
 }
 void InputLevelsSlider::setWhitePoint(double v)
@@ -279,7 +280,7 @@ void InputLevelsSlider::setWhitePoint(double v)
     if (v > 1.0) v = 1.0;
     mWhitePoint = v;
     makeFunction();
-    repaint();
+    update();
     emit whitePointChanged(v);
 }
 void InputLevelsSlider::setGammaCorrection(double v)
@@ -289,7 +290,7 @@ void InputLevelsSlider::setGammaCorrection(double v)
     if (v > 10.0) v = 10.0;
     mGammaCorrection = v;
     makeFunction();
-    repaint();
+    update();
     emit gammaCorrectionChanged(v);
 }
 
@@ -306,7 +307,7 @@ void InputLevelsSlider::setValues(double b, double w, double g)
     mWhitePoint = w;
     mGammaCorrection = g;
     makeFunction();
-    repaint();
+    update();
     emit blackPointChanged(b);
     emit whitePointChanged(w);
     emit gammaCorrectionChanged(g);
@@ -314,16 +315,7 @@ void InputLevelsSlider::setValues(double b, double w, double g)
 
 void InputLevelsSlider::makeFunction()
 {
-    double m = 1.0 / (mWhitePoint - mBlackPoint);
-    double a = m * mBlackPoint;
-    double gamma = 1.0 / mGammaCorrection;
-    double value;
-    for (int i = 0; i < 256; i++)
-    {
-        value = m * (i / 255.0) - a;
-        value = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
-        mFunction.setPixel(i, 0, (unsigned char)round(pow(value, gamma) * 255.0));
-    }
+    generateLevelsLUT(mFunction.bits(), mGammaCorrection, mBlackPoint, mWhitePoint);
 }
 
 }}

@@ -28,9 +28,9 @@
 #include "../imgproc/types.h"
 #include "../imgproc/lut.h"
 #include "../imgproc/colorconversion.h"
-#include "../misc/nearestneighborsplineinterpolator.h"
-#include "../misc/linearsplineinterpolator.h"
-#include "../misc/cubicsplineinterpolator.h"
+#include "../misc/nearestneighborsplineinterpolator1D.h"
+#include "../misc/linearsplineinterpolator1D.h"
+#include "../misc/cubicsplineinterpolator1D.h"
 #include "../misc/util.h"
 
 Filter::Filter() :
@@ -46,16 +46,21 @@ Filter::Filter() :
     mOutputMode(KeyedImage),
     mPreblurRadius(0.)
 {
-    mSplineInterpolatorHue = new CubicSplineInterpolator();
+    mSplineInterpolatorHue = new CubicSplineInterpolator1D();
     mSplineInterpolatorHue->addKnot(.0, 0.);
     mSplineInterpolatorHue->addKnot(.33, 1.);
     mSplineInterpolatorHue->addKnot(.66, 0.);
+    mSplineInterpolatorHue->setExtrapolationMode(Interpolator1D::ExtrapolationMode_Repeat,
+                                                 Interpolator1D::ExtrapolationMode_Repeat);
+    ((CubicSplineInterpolator1D*)mSplineInterpolatorHue)->setBoundaryConditions(
+                                                          CubicSplineInterpolator1D::BoundaryConditions_Periodic,
+                                                          CubicSplineInterpolator1D::BoundaryConditions_Periodic);
     makeLUT(ColorChannel_Hue);
-    mSplineInterpolatorSaturation = new CubicSplineInterpolator();
+    mSplineInterpolatorSaturation = new CubicSplineInterpolator1D();
     mSplineInterpolatorSaturation->addKnot(0., 0.);
     mSplineInterpolatorSaturation->addKnot(1., 1.);
     makeLUT(ColorChannel_Saturation);
-    mSplineInterpolatorLightness = new CubicSplineInterpolator();
+    mSplineInterpolatorLightness = new CubicSplineInterpolator1D();
     mSplineInterpolatorLightness->addKnot(0., 0.);
     mSplineInterpolatorLightness->addKnot(.5, 1.);
     mSplineInterpolatorLightness->addKnot(1., 0.);
@@ -172,7 +177,7 @@ bool Filter::loadParameters(QSettings &s)
     QStringList knotsList;
     QStringList knotList;
     double x, y;
-    SplineInterpolatorKnots knotsHue, knotsSaturation, knotsLightness;
+    Interpolator1DKnots knotsHue, knotsSaturation, knotsLightness;
     bool isInvertedHue, isInvertedSaturation, isInvertedLightness;
     QString outputModeStr;
     OutputMode outputMode;
@@ -222,10 +227,10 @@ bool Filter::loadParameters(QSettings &s)
         y = knotList.at(1).toDouble(&ok);
         if (!ok || y < 0. || y > 1.)
             return false;
-        knotsHue.append(SplineInterpolatorKnot(x, y));
+        knotsHue.append(Interpolator1DKnot(x, y));
     }
     // append last knot to make it periodic
-    knotsHue.append(SplineInterpolatorKnot(AT_maximum(1.001, knotsHue.first().x() + 1.), knotsHue.first().y()));
+    knotsHue.append(Interpolator1DKnot(AT_maximum(1.001, knotsHue.first().x() + 1.), knotsHue.first().y()));
     knotsStr = s.value("saturationknots", "0.0 0.0, 1.0 1.0").toString();
     knotsList = knotsStr.split(QRegularExpression("\\s*,\\s*"), QString::SkipEmptyParts);
     if (knotsList.size() < 2)
@@ -241,7 +246,7 @@ bool Filter::loadParameters(QSettings &s)
         y = knotList.at(1).toDouble(&ok);
         if (!ok || y < 0. || y > 1.)
             return false;
-        knotsSaturation.append(SplineInterpolatorKnot(x, y));
+        knotsSaturation.append(Interpolator1DKnot(x, y));
     }
     knotsStr = s.value("lightnessknots", "0.0 0.0, 1.0 1.0").toString();
     knotsList = knotsStr.split(QRegularExpression("\\s*,\\s*"), QString::SkipEmptyParts);
@@ -258,7 +263,7 @@ bool Filter::loadParameters(QSettings &s)
         y = knotList.at(1).toDouble(&ok);
         if (!ok || y < 0. || y > 1.)
             return false;
-        knotsLightness.append(SplineInterpolatorKnot(x, y));
+        knotsLightness.append(Interpolator1DKnot(x, y));
     }
 
     isInvertedHue = s.value("hueisinverted", false).toBool();
@@ -301,7 +306,7 @@ bool Filter::saveParameters(QSettings &s)
     s.setValue("lightnessinterpolationmode", mInterpolationModeLightness == Flat ? "flat" :
                                              mInterpolationModeLightness == Linear ? "linear" : "smooth");
 
-    SplineInterpolatorKnots knots = mSplineInterpolatorHue->knots();
+    Interpolator1DKnots knots = mSplineInterpolatorHue->knots();
     QString knotsStr = "";
     for (int i = 0; i < knots.size() - 1; i++)
     {
@@ -360,20 +365,20 @@ QWidget *Filter::widget(QWidget *parent)
 
     connect(this, SIGNAL(hueInterpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setHueInterpolationMode(Filter::InterpolationMode)));
-    connect(this, SIGNAL(hueKnotsChanged(SplineInterpolatorKnots)),
-            fw, SLOT(setHueKnots(SplineInterpolatorKnots)));
+    connect(this, SIGNAL(hueKnotsChanged(Interpolator1DKnots)),
+            fw, SLOT(setHueKnots(Interpolator1DKnots)));
     connect(this, SIGNAL(hueInvertedChanged(bool)),
             fw, SLOT(setHueInverted(bool)));
     connect(this, SIGNAL(saturationInterpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setSaturationInterpolationMode(Filter::InterpolationMode)));
-    connect(this, SIGNAL(saturationKnotsChanged(SplineInterpolatorKnots)),
-            fw, SLOT(setSaturationKnots(SplineInterpolatorKnots)));
+    connect(this, SIGNAL(saturationKnotsChanged(Interpolator1DKnots)),
+            fw, SLOT(setSaturationKnots(Interpolator1DKnots)));
     connect(this, SIGNAL(saturationInvertedChanged(bool)),
             fw, SLOT(setSaturationInverted(bool)));
     connect(this, SIGNAL(lightnessInterpolationModeChanged(Filter::InterpolationMode)),
             fw, SLOT(setLightnessInterpolationMode(Filter::InterpolationMode)));
-    connect(this, SIGNAL(lightnessKnotsChanged(SplineInterpolatorKnots)),
-            fw, SLOT(setLightnessKnots(SplineInterpolatorKnots)));
+    connect(this, SIGNAL(lightnessKnotsChanged(Interpolator1DKnots)),
+            fw, SLOT(setLightnessKnots(Interpolator1DKnots)));
     connect(this, SIGNAL(lightnessInvertedChanged(bool)),
             fw, SLOT(setLightnessInverted(bool)));
     connect(this, SIGNAL(outputModeChanged(Filter::OutputMode)),
@@ -383,20 +388,20 @@ QWidget *Filter::widget(QWidget *parent)
 
     connect(fw, SIGNAL(hueInterpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setHueInterpolationMode(Filter::InterpolationMode)));
-    connect(fw, SIGNAL(hueKnotsChanged(SplineInterpolatorKnots)),
-            this, SLOT(setHueKnots(SplineInterpolatorKnots)));
+    connect(fw, SIGNAL(hueKnotsChanged(Interpolator1DKnots)),
+            this, SLOT(setHueKnots(Interpolator1DKnots)));
     connect(fw, SIGNAL(hueInvertedChanged(bool)),
             this, SLOT(setHueInverted(bool)));
     connect(fw, SIGNAL(saturationInterpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setSaturationInterpolationMode(Filter::InterpolationMode)));
-    connect(fw, SIGNAL(saturationKnotsChanged(SplineInterpolatorKnots)),
-            this, SLOT(setSaturationKnots(SplineInterpolatorKnots)));
+    connect(fw, SIGNAL(saturationKnotsChanged(Interpolator1DKnots)),
+            this, SLOT(setSaturationKnots(Interpolator1DKnots)));
     connect(fw, SIGNAL(saturationInvertedChanged(bool)),
             this, SLOT(setSaturationInverted(bool)));
     connect(fw, SIGNAL(lightnessInterpolationModeChanged(Filter::InterpolationMode)),
             this, SLOT(setLightnessInterpolationMode(Filter::InterpolationMode)));
-    connect(fw, SIGNAL(lightnessKnotsChanged(SplineInterpolatorKnots)),
-            this, SLOT(setLightnessKnots(SplineInterpolatorKnots)));
+    connect(fw, SIGNAL(lightnessKnotsChanged(Interpolator1DKnots)),
+            this, SLOT(setLightnessKnots(Interpolator1DKnots)));
     connect(fw, SIGNAL(lightnessInvertedChanged(bool)),
             this, SLOT(setLightnessInverted(bool)));
     connect(fw, SIGNAL(outputModeChanged(Filter::OutputMode)),
@@ -407,7 +412,7 @@ QWidget *Filter::widget(QWidget *parent)
     return fw;
 }
 
-void Filter::setHueKnots(const SplineInterpolatorKnots &k)
+void Filter::setHueKnots(const Interpolator1DKnots &k)
 {
     if (mSplineInterpolatorHue->knots() == k)
         return;
@@ -424,14 +429,14 @@ void Filter::setHueInterpolationMode(Filter::InterpolationMode im)
 
     mInterpolationModeHue = im;
 
-    SplineInterpolator * tmp = mSplineInterpolatorHue;
+    Interpolator1D * tmp = mSplineInterpolatorHue;
 
     if (im == Flat)
-        mSplineInterpolatorHue = new NearestNeighborSplineInterpolator();
+        mSplineInterpolatorHue = new NearestNeighborSplineInterpolator1D();
     else if (im == Linear)
-        mSplineInterpolatorHue = new LinearSplineInterpolator();
+        mSplineInterpolatorHue = new LinearSplineInterpolator1D();
     else
-        mSplineInterpolatorHue = new CubicSplineInterpolator();
+        mSplineInterpolatorHue = new CubicSplineInterpolator1D();
 
     mSplineInterpolatorHue->setKnots(tmp->knots());
 
@@ -456,7 +461,7 @@ void Filter::setHueInverted(bool i)
     emit parametersChanged();
 }
 
-void Filter::setSaturationKnots(const SplineInterpolatorKnots &k)
+void Filter::setSaturationKnots(const Interpolator1DKnots &k)
 {
     if (mSplineInterpolatorSaturation->knots() == k)
         return;
@@ -473,14 +478,14 @@ void Filter::setSaturationInterpolationMode(Filter::InterpolationMode im)
 
     mInterpolationModeSaturation = im;
 
-    SplineInterpolator * tmp = mSplineInterpolatorSaturation;
+    Interpolator1D * tmp = mSplineInterpolatorSaturation;
 
     if (im == Flat)
-        mSplineInterpolatorSaturation = new NearestNeighborSplineInterpolator();
+        mSplineInterpolatorSaturation = new NearestNeighborSplineInterpolator1D();
     else if (im == Linear)
-        mSplineInterpolatorSaturation = new LinearSplineInterpolator();
+        mSplineInterpolatorSaturation = new LinearSplineInterpolator1D();
     else
-        mSplineInterpolatorSaturation = new CubicSplineInterpolator();
+        mSplineInterpolatorSaturation = new CubicSplineInterpolator1D();
 
     mSplineInterpolatorSaturation->setKnots(tmp->knots());
 
@@ -505,7 +510,7 @@ void Filter::setSaturationInverted(bool i)
     emit parametersChanged();
 }
 
-void Filter::setLightnessKnots(const SplineInterpolatorKnots &k)
+void Filter::setLightnessKnots(const Interpolator1DKnots &k)
 {
     if (mSplineInterpolatorLightness->knots() == k)
         return;
@@ -522,14 +527,14 @@ void Filter::setLightnessInterpolationMode(Filter::InterpolationMode im)
 
     mInterpolationModeLightness = im;
 
-    SplineInterpolator * tmp = mSplineInterpolatorLightness;
+    Interpolator1D * tmp = mSplineInterpolatorLightness;
 
     if (im == Flat)
-        mSplineInterpolatorLightness = new NearestNeighborSplineInterpolator();
+        mSplineInterpolatorLightness = new NearestNeighborSplineInterpolator1D();
     else if (im == Linear)
-        mSplineInterpolatorLightness = new LinearSplineInterpolator();
+        mSplineInterpolatorLightness = new LinearSplineInterpolator1D();
     else
-        mSplineInterpolatorLightness = new CubicSplineInterpolator();
+        mSplineInterpolatorLightness = new CubicSplineInterpolator1D();
 
     mSplineInterpolatorLightness->setKnots(tmp->knots());
 
@@ -580,7 +585,7 @@ void Filter::makeLUT(ColorChannel c)
 {
     unsigned char * lut = c == ColorChannel_Hue ? mLutHue :
                           c == ColorChannel_Saturation ? mLutSaturation : mLutLightness;
-    SplineInterpolator * splineInterpolator = c == ColorChannel_Hue ? mSplineInterpolatorHue :
+    Interpolator1D * splineInterpolator = c == ColorChannel_Hue ? mSplineInterpolatorHue :
                                               c == ColorChannel_Saturation ? mSplineInterpolatorSaturation :
                                               mSplineInterpolatorLightness;
     bool inverted = c == ColorChannel_Hue ? mIsInvertedHue :

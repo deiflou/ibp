@@ -69,7 +69,7 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setHueKnots(const SplineInterpolatorKnots & k)
+void FilterWidget::setHueKnots(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetHueCurve->knots() == k)
         return;
@@ -112,7 +112,7 @@ void FilterWidget::setHueInverted(bool i)
     emit hueInvertedChanged(i);
 }
 
-void FilterWidget::setSaturationKnots(const SplineInterpolatorKnots & k)
+void FilterWidget::setSaturationKnots(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetSaturationCurve->knots() == k)
         return;
@@ -155,7 +155,7 @@ void FilterWidget::setSaturationInverted(bool i)
     emit saturationInvertedChanged(i);
 }
 
-void FilterWidget::setLightnessKnots(const SplineInterpolatorKnots & k)
+void FilterWidget::setLightnessKnots(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetLightnessCurve->knots() == k)
         return;
@@ -315,7 +315,7 @@ void FilterWidget::on_mButtonHueInterpolationModeSmooth_toggled(bool v)
         emit hueInterpolationModeChanged(Filter::Smooth);
 }
 
-void FilterWidget::on_mWidgetHueCurve_knotsChanged(const SplineInterpolatorKnots & k)
+void FilterWidget::on_mWidgetHueCurve_knotsChanged(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetHueCurve->selectedKnotIndex() == -1)
     {
@@ -324,7 +324,7 @@ void FilterWidget::on_mWidgetHueCurve_knotsChanged(const SplineInterpolatorKnots
     }
     else
     {
-        SplineInterpolatorKnot kn = k.at(ui->mWidgetHueCurve->selectedKnotIndex());
+        Interpolator1DKnot kn = k.at(ui->mWidgetHueCurve->selectedKnotIndex());
         ui->mSpinHueInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinHueOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinHueInValue->setEnabled(true);
@@ -353,7 +353,7 @@ void FilterWidget::on_mWidgetHueCurve_selectedKnotChanged(int i)
     }
     else
     {
-        SplineInterpolatorKnot kn = ui->mWidgetHueCurve->selectedKnot();
+        Interpolator1DKnot kn = ui->mWidgetHueCurve->selectedKnot();
         ui->mSpinHueInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinHueOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinHueInValue->setEnabled(true);
@@ -373,7 +373,7 @@ void FilterWidget::on_mSpinHueInValue_valueChanged(double v)
     if (ui->mWidgetHueCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetHueCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetHueCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.x()) return;
     ui->mWidgetHueCurve->setSelectedKnot(v, k.y());
@@ -387,7 +387,7 @@ void FilterWidget::on_mSpinHueOutValue_valueChanged(double v)
     if (ui->mWidgetHueCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetHueCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetHueCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.y()) return;
     ui->mWidgetHueCurve->setSelectedKnot(k.x(), v);
@@ -457,7 +457,7 @@ void FilterWidget::on_mButtonSaturationInterpolationModeSmooth_toggled(bool v)
         emit saturationInterpolationModeChanged(Filter::Smooth);
 }
 
-void FilterWidget::on_mWidgetSaturationCurve_knotsChanged(const SplineInterpolatorKnots & k)
+void FilterWidget::on_mWidgetSaturationCurve_knotsChanged(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetSaturationCurve->selectedKnotIndex() == -1)
     {
@@ -466,7 +466,7 @@ void FilterWidget::on_mWidgetSaturationCurve_knotsChanged(const SplineInterpolat
     }
     else
     {
-        SplineInterpolatorKnot kn = k.at(ui->mWidgetSaturationCurve->selectedKnotIndex());
+        Interpolator1DKnot kn = k.at(ui->mWidgetSaturationCurve->selectedKnotIndex());
         ui->mSpinSaturationInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinSaturationOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinSaturationInValue->setEnabled(true);
@@ -488,7 +488,7 @@ void FilterWidget::on_mWidgetSaturationCurve_selectedKnotChanged(int i)
     }
     else
     {
-        SplineInterpolatorKnot kn = ui->mWidgetSaturationCurve->selectedKnot();
+        Interpolator1DKnot kn = ui->mWidgetSaturationCurve->selectedKnot();
         ui->mSpinSaturationInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinSaturationOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinSaturationInValue->setEnabled(true);
@@ -501,7 +501,7 @@ void FilterWidget::on_mSpinSaturationInValue_valueChanged(double v)
     if (ui->mWidgetSaturationCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetSaturationCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetSaturationCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.x()) return;
     ui->mWidgetSaturationCurve->setSelectedKnot(v, k.y());
@@ -515,7 +515,7 @@ void FilterWidget::on_mSpinSaturationOutValue_valueChanged(double v)
     if (ui->mWidgetSaturationCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetSaturationCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetSaturationCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.y()) return;
     ui->mWidgetSaturationCurve->setSelectedKnot(k.x(), v);
@@ -585,7 +585,7 @@ void FilterWidget::on_mButtonLightnessInterpolationModeSmooth_toggled(bool v)
         emit lightnessInterpolationModeChanged(Filter::Smooth);
 }
 
-void FilterWidget::on_mWidgetLightnessCurve_knotsChanged(const SplineInterpolatorKnots & k)
+void FilterWidget::on_mWidgetLightnessCurve_knotsChanged(const Interpolator1DKnots & k)
 {
     if (ui->mWidgetLightnessCurve->selectedKnotIndex() == -1)
     {
@@ -594,7 +594,7 @@ void FilterWidget::on_mWidgetLightnessCurve_knotsChanged(const SplineInterpolato
     }
     else
     {
-        SplineInterpolatorKnot kn = k.at(ui->mWidgetLightnessCurve->selectedKnotIndex());
+        Interpolator1DKnot kn = k.at(ui->mWidgetLightnessCurve->selectedKnotIndex());
         ui->mSpinLightnessInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinLightnessOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinLightnessInValue->setEnabled(true);
@@ -616,7 +616,7 @@ void FilterWidget::on_mWidgetLightnessCurve_selectedKnotChanged(int i)
     }
     else
     {
-        SplineInterpolatorKnot kn = ui->mWidgetLightnessCurve->selectedKnot();
+        Interpolator1DKnot kn = ui->mWidgetLightnessCurve->selectedKnot();
         ui->mSpinLightnessInValue->setValue(round(kn.x() * 255.0));
         ui->mSpinLightnessOutValue->setValue(round(kn.y() * 255.0));
         ui->mSpinLightnessInValue->setEnabled(true);
@@ -629,7 +629,7 @@ void FilterWidget::on_mSpinLightnessInValue_valueChanged(double v)
     if (ui->mWidgetLightnessCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetLightnessCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetLightnessCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.x()) return;
     ui->mWidgetLightnessCurve->setSelectedKnot(v, k.y());
@@ -643,7 +643,7 @@ void FilterWidget::on_mSpinLightnessOutValue_valueChanged(double v)
     if (ui->mWidgetLightnessCurve->selectedKnotIndex() == -1)
         return;
 
-    SplineInterpolatorKnot k = ui->mWidgetLightnessCurve->selectedKnot();
+    Interpolator1DKnot k = ui->mWidgetLightnessCurve->selectedKnot();
     v = v / 255.0;
     if (v == k.y()) return;
     ui->mWidgetLightnessCurve->setSelectedKnot(k.x(), v);

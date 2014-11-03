@@ -30,27 +30,14 @@
 #include <QWidget>
 
 #include "../imgproc/imagefilter.h"
-#include "../misc/interpolator1D.h"
 
 using namespace anitools::imgproc;
-using namespace anitools::misc;
 
 class Filter : public ImageFilter
 {
     Q_OBJECT
 
 public:
-    enum WorkingChannel
-    {
-        RGB, Red, Green, Blue, Alpha
-    };
-    enum InterpolationMode
-    {
-        Flat,
-        Linear,
-        Smooth
-    };
-
     Filter();
     ~Filter();
     ImageFilter * clone();
@@ -61,22 +48,38 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    WorkingChannel mWorkingChannel;
-    Interpolator1D * mSplineInterpolator[5];
-    InterpolationMode mInterpolationMode[5];
-    unsigned char mLuts[5][256];
+    int mShadowsRed, mShadowsGreen, mShadowsBlue,
+        mMidtonesRed, mMidtonesGreen, mMidtonesBlue,
+        mHighlightsRed, mHighlightsGreen, mHighlightsBlue;
+    bool mPreserveLuminosity;
 
-    void makeLUT(WorkingChannel c);
+    unsigned char mLuts[3][256];
+
+    void makeLUTs();
 
 signals:
-    void workingChannelChanged(Filter::WorkingChannel s);
-    void knotsChanged(const Interpolator1DKnots & k);
-    void interpolationModeChanged(Filter::InterpolationMode im);
+    void shadowsRedChanged(int v);
+    void shadowsGreenChanged(int v);
+    void shadowsBlueChanged(int v);
+    void midtonesRedChanged(int v);
+    void midtonesGreenChanged(int v);
+    void midtonesBlueChanged(int v);
+    void highlightsRedChanged(int v);
+    void highlightsGreenChanged(int v);
+    void highlightsBlueChanged(int v);
+    void preserveLuminosityChanged(bool v);
 
 public slots:
-    void setWorkingChannel(Filter::WorkingChannel s);
-    void setKnots(const Interpolator1DKnots & k);
-    void setInterpolationMode(Filter::InterpolationMode im);
+    void setShadowsRed(int v);
+    void setShadowsGreen(int v);
+    void setShadowsBlue(int v);
+    void setMidtonesRed(int v);
+    void setMidtonesGreen(int v);
+    void setMidtonesBlue(int v);
+    void setHighlightsRed(int v);
+    void setHighlightsGreen(int v);
+    void setHighlightsBlue(int v);
+    void setPreserveLuminosity(bool v);
 };
 
 #endif // FILTER_H

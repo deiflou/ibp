@@ -27,9 +27,9 @@
 
 #include "curves.h"
 #include "../misc/util.h"
-#include "../misc/nearestneighborsplineinterpolator.h"
-#include "../misc/linearsplineinterpolator.h"
-#include "../misc/cubicsplineinterpolator.h"
+#include "../misc/nearestneighborsplineinterpolator1D.h"
+#include "../misc/linearsplineinterpolator1D.h"
+#include "../misc/cubicsplineinterpolator1D.h"
 
 namespace anitools {
 namespace widgets {
@@ -55,7 +55,7 @@ Curves::Curves(QWidget *parent) :
     this->setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
 
-    mSplineInterpolator = new CubicSplineInterpolator();
+    mSplineInterpolator = new CubicSplineInterpolator1D();
     mSplineInterpolator->addKnot(0., 0.);
     mSplineInterpolator->addKnot(1., 1.);
 
@@ -375,7 +375,7 @@ void Curves::keyPressEvent(QKeyEvent *e)
     if (mKnotIndex == -1)
         return;
 
-    SplineInterpolatorKnot k = mSplineInterpolator->knot(mKnotIndex);
+    Interpolator1DKnot k = mSplineInterpolator->knot(mKnotIndex);
     const double min = mKnotIndex > 0 ?
                 mSplineInterpolator->knot(mKnotIndex - 1).x() + kMinimumDistanceBetweenKnots : 0.;
     const double max = AT_minimum(1., mKnotIndex < mSplineInterpolator->size() - 1 ?
@@ -487,7 +487,7 @@ bool Curves::isInputEnabled() const
     return mIsInputEnabled;
 }
 
-const SplineInterpolatorKnots & Curves::knots() const
+const Interpolator1DKnots & Curves::knots() const
 {
     return mSplineInterpolator->knots();
 }
@@ -497,9 +497,9 @@ int Curves::selectedKnotIndex() const
     return mKnotIndex;
 }
 
-const SplineInterpolatorKnot & Curves::selectedKnot() const
+const Interpolator1DKnot & Curves::selectedKnot() const
 {
-    static const SplineInterpolatorKnot nullSplineInterpolatorKnot;
+    static const Interpolator1DKnot nullSplineInterpolatorKnot;
 
     if (mKnotIndex == -1)
         return nullSplineInterpolatorKnot;
@@ -588,21 +588,21 @@ void Curves::setPeriodic(bool v)
     {
         mSplineInterpolator->addKnot(AT_maximum(1.001, mSplineInterpolator->knot(0).x() + 1.),
                                      mSplineInterpolator->knot(0).y());
-        mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Repeat,
-                                                  SplineInterpolator::ExtrapolationMode_Repeat);
+        mSplineInterpolator->setExtrapolationMode(Interpolator1D::ExtrapolationMode_Repeat,
+                                                  Interpolator1D::ExtrapolationMode_Repeat);
         if (mInterpolationMode == Cubic)
-            ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
-                                                    CubicSplineInterpolator::BoundaryConditions_Periodic,
-                                                    CubicSplineInterpolator::BoundaryConditions_Periodic);
+            ((CubicSplineInterpolator1D *)mSplineInterpolator)->setBoundaryConditions(
+                                                    CubicSplineInterpolator1D::BoundaryConditions_Periodic,
+                                                    CubicSplineInterpolator1D::BoundaryConditions_Periodic);
     }
     else
     {
         mSplineInterpolator->removeKnot(mSplineInterpolator->size() - 1);
-        mSplineInterpolator->setExtrapolationMode(SplineInterpolator::ExtrapolationMode_Clamp,
-                                                  SplineInterpolator::ExtrapolationMode_Clamp);
-        ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
-                                                  CubicSplineInterpolator::BoundaryConditions_Natural,
-                                                  CubicSplineInterpolator::BoundaryConditions_Natural);
+        mSplineInterpolator->setExtrapolationMode(Interpolator1D::ExtrapolationMode_Clamp,
+                                                  Interpolator1D::ExtrapolationMode_Clamp);
+        ((CubicSplineInterpolator1D *)mSplineInterpolator)->setBoundaryConditions(
+                                                  CubicSplineInterpolator1D::BoundaryConditions_Natural,
+                                                  CubicSplineInterpolator1D::BoundaryConditions_Natural);
     }
     if (mPaintDelegate)
         mPaintDelegate->update(CurvesPaintDelegate::PeriodicChanged, this, rectWithoutMargins());
@@ -622,7 +622,7 @@ void Curves::setInputEnabled(bool v)
     emit inputEnabledChanged(v);
 }
 
-void Curves::setKnots(const SplineInterpolatorKnots &k)
+void Curves::setKnots(const Interpolator1DKnots &k)
 {
     mSplineInterpolator->setKnots(k);
     mKnotStates = QVector<QStyle::State>(k.size(), QStyle::State_None);
@@ -651,7 +651,7 @@ void Curves::setSelectedKnot(double x, double y)
     emit knotsChanged(mSplineInterpolator->knots());
 }
 
-void Curves::setSelectedKnot(const SplineInterpolatorKnot &k)
+void Curves::setSelectedKnot(const Interpolator1DKnot &k)
 {
     setSelectedKnot(k.x(), k.y());
 }
@@ -663,20 +663,20 @@ void Curves::setInterpolationMode(Curves::InterpolationMode m)
 
     mInterpolationMode = m;
 
-    SplineInterpolator * tmpSplineInterpolator = mSplineInterpolator;
+    Interpolator1D * tmpSplineInterpolator = mSplineInterpolator;
 
     if (mInterpolationMode == NearestNeighbor)
-        mSplineInterpolator = new NearestNeighborSplineInterpolator();
+        mSplineInterpolator = new NearestNeighborSplineInterpolator1D();
     else if (mInterpolationMode == Linear)
-        mSplineInterpolator = new LinearSplineInterpolator();
+        mSplineInterpolator = new LinearSplineInterpolator1D();
     else
     {
-        mSplineInterpolator = new CubicSplineInterpolator();
-        ((CubicSplineInterpolator *)mSplineInterpolator)->setBoundaryConditions(
-                    mIsPeriodic ? CubicSplineInterpolator::BoundaryConditions_Periodic :
-                                  CubicSplineInterpolator::BoundaryConditions_Natural,
-                    mIsPeriodic ? CubicSplineInterpolator::BoundaryConditions_Periodic :
-                                  CubicSplineInterpolator::BoundaryConditions_Natural);
+        mSplineInterpolator = new CubicSplineInterpolator1D();
+        ((CubicSplineInterpolator1D *)mSplineInterpolator)->setBoundaryConditions(
+                    mIsPeriodic ? CubicSplineInterpolator1D::BoundaryConditions_Periodic :
+                                  CubicSplineInterpolator1D::BoundaryConditions_Natural,
+                    mIsPeriodic ? CubicSplineInterpolator1D::BoundaryConditions_Periodic :
+                                  CubicSplineInterpolator1D::BoundaryConditions_Natural);
     }
 
     mSplineInterpolator->setKnots(tmpSplineInterpolator->knots());

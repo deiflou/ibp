@@ -25,7 +25,7 @@
 #include <QWidget>
 #include <QStyle>
 #include <QScrollBar>
-#include "../misc/splineinterpolator.h"
+#include "../misc/interpolator1D.h"
 
 using namespace anitools::misc;
 
@@ -73,9 +73,9 @@ public:
     double offset() const;
     bool isPeriodic() const;
     bool isInputEnabled() const;
-    const SplineInterpolatorKnots & knots() const;
+    const Interpolator1DKnots & knots() const;
     int selectedKnotIndex() const;
-    const SplineInterpolatorKnot & selectedKnot() const;
+    const Interpolator1DKnot & selectedKnot() const;
     InterpolationMode interpolationMode() const;
     CurvesPaintDelegate * paintDelegate() const;
     double valueAt(double v);
@@ -115,7 +115,7 @@ private:
     bool mIsInputEnabled;
     InputStatus mInputStatus;
     int mKnotIndex;
-    SplineInterpolator * mSplineInterpolator;
+    Interpolator1D * mSplineInterpolator;
     InterpolationMode mInterpolationMode;
     CurvesPaintDelegate * mPaintDelegate;
     QStyle::State mWidgetState;
@@ -134,7 +134,7 @@ signals:
     void offsetChanged(double v);
     void periodicChanged(bool v);
     void inputEnabledChanged(bool v);
-    void knotsChanged(const SplineInterpolatorKnots & k);
+    void knotsChanged(const Interpolator1DKnots & k);
     void selectedKnotChanged(int i);
     void interpolationModeChanged(InterpolationMode m);
     void paintDelegateChanged(CurvesPaintDelegate * pd);
@@ -146,9 +146,9 @@ public slots:
     void fit();
     void setPeriodic(bool v);
     void setInputEnabled(bool v);
-    void setKnots(const SplineInterpolatorKnots & k);
+    void setKnots(const Interpolator1DKnots & k);
     void setSelectedKnot(double x, double y);
-    void setSelectedKnot(const SplineInterpolatorKnot &k);
+    void setSelectedKnot(const Interpolator1DKnot &k);
     void setInterpolationMode(InterpolationMode m);
     void setPaintDelegate(CurvesPaintDelegate * pd);
 

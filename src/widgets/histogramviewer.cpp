@@ -107,7 +107,7 @@ void HistogramViewer::mousePressEvent(QMouseEvent *e)
     {
         mSelStartPos = mSelEndPos = qBound<int>(2, e->pos().x(), this->rect().right() - 2);
         mIsMoving = true;
-        repaint();
+        update();
         e->accept();
     }
 }
@@ -117,7 +117,7 @@ void HistogramViewer::mouseReleaseEvent(QMouseEvent *e)
     {
         mSelStartPos = mSelEndPos = -1;
         mIsMoving = false;
-        repaint();
+        update();
         e->accept();
     }
 }
@@ -126,7 +126,7 @@ void HistogramViewer::mouseMoveEvent(QMouseEvent *e)
     if ((e->buttons() & Qt::LeftButton) && mIsMoving && mHasHistogram)
     {
         mSelEndPos = qBound<int>(2, e->pos().x(), this->rect().right() - 2);
-        repaint();
+        update();
         e->accept();
     }
 }
@@ -136,7 +136,7 @@ void HistogramViewer::setImage(const QImage & newImage)
     if (newImage.isNull())
     {
         mHasHistogram = false;
-        repaint();
+        update();
         return;
     }
 
@@ -158,7 +158,7 @@ void HistogramViewer::setImage(const QImage & newImage)
     }
 
     mHasHistogram = true;
-    repaint();
+    update();
 }
 
 void HistogramViewer::setHistogram(const QVector<unsigned int> &newHistogram)
@@ -166,7 +166,7 @@ void HistogramViewer::setHistogram(const QVector<unsigned int> &newHistogram)
     if (newHistogram.isEmpty() || newHistogram.size() != 256)
     {
         mHasHistogram = false;
-        repaint();
+        update();
         return;
     }
     mHistMax = 0;
@@ -177,7 +177,7 @@ void HistogramViewer::setHistogram(const QVector<unsigned int> &newHistogram)
             mHistMax = mHistogram[i];
     }
     mHasHistogram = true;
-    repaint();
+    update();
 }
 
 }}

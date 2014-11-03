@@ -19,25 +19,25 @@
 **
 ****************************************************************************/
 
-#ifndef ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
-#define ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
+#ifndef ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR1D_H
+#define ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR1D_H
 
-#include "basesplineinterpolator.h"
+#include "basesplineinterpolator1D.h"
 
 namespace anitools {
 namespace misc {
 
-class LinearSplineInterpolator : public BaseSplineInterpolator
+class NearestNeighborSplineInterpolator1D : public BaseSplineInterpolator1D
 {
 public:
-    LinearSplineInterpolator();
-    SplineInterpolator * clone() const;
+    NearestNeighborSplineInterpolator1D();
+    Interpolator1D * clone() const;
 
-    double f(double x);
-
-private:
-    int getPiece(double x);
+protected:
+    double F(double x);
+    double floorExtrapolate(double x);
+    double ceilExtrapolate(double x);
 };
 
 }}
-#endif // ANITOOLS_MISC_LINEARSPLINEINTERPOLATOR_H
+#endif // ANITOOLS_MISC_NEARESTNEIGHBORSPLINEINTERPOLATOR1D_H

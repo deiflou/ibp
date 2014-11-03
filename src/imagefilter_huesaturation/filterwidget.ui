@@ -58,9 +58,6 @@
        </item>
        <item row="5" column="1">
         <widget class="QSpinBox" name="mSpinAbsSaturation">
-         <property name="minimum">
-          <number>-100</number>
-         </property>
          <property name="maximum">
           <number>100</number>
          </property>

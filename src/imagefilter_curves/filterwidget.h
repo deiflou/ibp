@@ -48,12 +48,12 @@ private:
 
 signals:
     void workingChannelChanged(Filter::WorkingChannel s);
-    void knotsChanged(const SplineInterpolatorKnots & k);
+    void knotsChanged(const Interpolator1DKnots & k);
     void interpolationModeChanged(Filter::InterpolationMode im);
 
 public slots:
     void setWorkingChannel(Filter::WorkingChannel s);
-    void setKnots(const SplineInterpolatorKnots & k);
+    void setKnots(const Interpolator1DKnots & k);
     void setInterpolationMode(Filter::InterpolationMode im);
 
 private slots:
@@ -65,7 +65,7 @@ private slots:
     void on_mButtonInterpolationModeFlat_toggled(bool v);
     void on_mButtonInterpolationModeLinear_toggled(bool v);
     void on_mButtonInterpolationModeSmooth_toggled(bool v);
-    void on_mWidgetCurves_knotsChanged(const SplineInterpolatorKnots & k);
+    void on_mWidgetCurves_knotsChanged(const Interpolator1DKnots & k);
     void on_mWidgetCurves_selectedKnotChanged(int i);
     void on_mSpinInputValue_valueChanged(double v);
     void on_mSpinOutputValue_valueChanged(double v);
