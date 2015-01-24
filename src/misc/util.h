@@ -44,6 +44,7 @@ namespace misc {
 #define AT_minimum3(a, b, c) AT_minimum((a), AT_minimum((b), (c)))
 #define AT_maximum(a, b) ((a) > (b) ? (a) : (b))
 #define AT_maximum3(a, b, c) AT_maximum((a), AT_maximum((b), (c)))
+#define AT_round(a) ((int)(a + .5))
 #define AT_clamp(a, b, c) AT_maximum(a, AT_minimum(b, c))
 
 enum Alignment

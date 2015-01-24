@@ -34,7 +34,7 @@ win32 {
 }
 
 include(3rdparty.pri)
-LIBS += -lFreeImage -llcms2
+LIBS += -lFreeImage -llcms2 -lopencv_core300 -lopencv_imgproc300
 
 SOURCES += \
     ../../src/imgproc/colorconversion.cpp \
@@ -45,7 +45,8 @@ SOURCES += \
     ../../src/imgproc/lut03.cpp \
     ../../src/imgproc/util.cpp \
     ../../src/imgproc/pixelblending.cpp \
-    ../../src/imgproc/intensitymapping.cpp
+    ../../src/imgproc/intensitymapping.cpp \
+    ../../src/imgproc/thresholding.cpp
 
 HEADERS += \
     ../../src/imgproc/colorconversion.h \
@@ -56,4 +57,5 @@ HEADERS += \
     ../../src/imgproc/types.h \
     ../../src/imgproc/util.h \
     ../../src/imgproc/pixelblending.h \
-    ../../src/imgproc/intensitymapping.h
+    ../../src/imgproc/intensitymapping.h \
+    ../../src/imgproc/thresholding.h

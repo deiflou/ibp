@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include <opencv2/imgproc.hpp>
-
+#include <QDebug>
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"

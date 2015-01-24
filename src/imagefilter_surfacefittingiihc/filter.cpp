@@ -101,6 +101,9 @@ QImage Filter::process(const QImage &inputImage)
             sh = MAX_IMAGE_SIZE;
             sw = w * MAX_IMAGE_SIZE / h;
         }
+        sw = sw < 1 ? 1 : sw;
+        sh = sh < 1 ? 1 : sh;
+
         cv::Mat mresized(sh, sw, CV_8UC1);
         cv::resize(mlchannel, mresized, cv::Size(sw, sh), 0, 0, cv::INTER_CUBIC);
         mInitial = mresized;

@@ -25,6 +25,7 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"
+#include "../imgproc/thresholding.h"
 
 Filter::Filter() :
     mThresholdMode(0),
@@ -61,8 +62,10 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage i = inputImage.copy();
-    cv::Mat srcMat(i.height(), i.width(), CV_8UC4, i.bits(), i.bytesPerLine());
-    std::vector<cv::Mat> channels(4);
+    cv::Mat dstMat(i.height(), i.width(), CV_8UC4, i.bits(), i.bytesPerLine());
+    const int radius = 10;
+    const int windowSize = radius * 2 + 1;
+    const double k = .05;
 
     if (mRGBMode == 0)
     {
@@ -71,39 +74,58 @@ QImage Filter::process(const QImage &inputImage)
 
         if (mAffectedChannel[0])
         {
-            register unsigned short gR = .2126 * 0x10000;
-            register unsigned short gG = .7152 * 0x10000;
-            register unsigned short gB = .0722 * 0x10000;
-            register BGRA * bits = (BGRA *)i.bits();
+            const unsigned short gR = .2126 * 0x10000;
+            const unsigned short gG = .7152 * 0x10000;
+            const unsigned short gB = .0722 * 0x10000;
+            register BGRA * bitsSrc = (BGRA *)inputImage.bits();
+            register BGRA * bitsDst = (BGRA *)i.bits();
             register int totalPixels = i.width() * i.height();
             while (totalPixels--)
             {
-                bits->r = bits->g = bits->b = (bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16);
-                bits++;
+                bitsDst->b = (bitsSrc->r * gR >> 16) + (bitsSrc->g * gG >> 16) + (bitsSrc->b * gB >> 16);
+                bitsSrc++;
+                bitsDst++;
             }
         }
 
-        cv::split(srcMat, channels);
+        cv::Mat mSrcGray, mSrcAlpha;
+        if (mAffectedChannel[0])
+        {
+            mSrcGray = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 0,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcGray, 1, from_to, 1);
+        }
+        if (mAffectedChannel[4])
+        {
+            mSrcAlpha = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 3,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcAlpha, 1, from_to, 1);
+        }
+
         if (mThresholdMode == 0)
         {
             if (mAffectedChannel[0])
-            {
-                cv::threshold(channels.at(0), channels.at(0), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-                cv::threshold(channels.at(1), channels.at(1), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-                cv::threshold(channels.at(2), channels.at(2), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-            }
+                cv::threshold(mSrcGray, mSrcGray, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+            if (mAffectedChannel[4])
+                cv::threshold(mSrcAlpha, mSrcAlpha, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
         }
         else
         {
             if (mAffectedChannel[0])
-            {
-                cv::adaptiveThreshold(channels.at(0), channels.at(0), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
-                cv::adaptiveThreshold(channels.at(1), channels.at(1), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
-                cv::adaptiveThreshold(channels.at(2), channels.at(2), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
-            }
+                adaptiveThresholdIntegral(mSrcGray, mSrcGray, windowSize, k);
+            if (mAffectedChannel[4])
+                adaptiveThresholdIntegral(mSrcAlpha, mSrcAlpha, windowSize, k);
+        }
+
+        if (mAffectedChannel[0])
+        {
+            int from_to[] = { 0,0, 0,1, 0,2 };
+            cv::mixChannels(&mSrcGray, 1, &dstMat, 1, from_to, 3);
+        }
+        if (mAffectedChannel[4])
+        {
+            int from_to[] = { 0,3 };
+            cv::mixChannels(&mSrcAlpha, 1, &dstMat, 1, from_to, 1);
         }
     }
     else
@@ -111,42 +133,77 @@ QImage Filter::process(const QImage &inputImage)
         if (!mAffectedChannel[1] && !mAffectedChannel[2] &&
             !mAffectedChannel[3] && !mAffectedChannel[4])
             return i;
-        cv::split(srcMat, channels);
+
+        cv::Mat mSrcRed, mSrcGreen, mSrcBlue, mSrcAlpha;
+        if (mAffectedChannel[1])
+        {
+            mSrcBlue = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 0,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcBlue, 1, from_to, 1);
+        }
+        if (mAffectedChannel[2])
+        {
+            mSrcGreen = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 1,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcGreen, 1, from_to, 1);
+        }
+        if (mAffectedChannel[3])
+        {
+            mSrcRed = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 2,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcRed, 1, from_to, 1);
+        }
+        if (mAffectedChannel[4])
+        {
+            mSrcAlpha = cv::Mat(dstMat.rows, dstMat.cols, CV_8UC1);
+            int from_to[] = { 3,0 };
+            cv::mixChannels(&dstMat, 1, &mSrcAlpha, 1, from_to, 1);
+        }
+
         if (mThresholdMode == 0)
         {
             if (mAffectedChannel[1])
-                cv::threshold(channels.at(0), channels.at(0), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+                cv::threshold(mSrcBlue, mSrcBlue, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
             if (mAffectedChannel[2])
-                cv::threshold(channels.at(1), channels.at(1), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+                cv::threshold(mSrcGreen, mSrcGreen, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
             if (mAffectedChannel[3])
-                cv::threshold(channels.at(2), channels.at(2), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+                cv::threshold(mSrcRed, mSrcRed, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+            if (mAffectedChannel[4])
+                cv::threshold(mSrcAlpha, mSrcAlpha, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
         }
         else
         {
             if (mAffectedChannel[1])
-                cv::adaptiveThreshold(channels.at(0), channels.at(0), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
+                adaptiveThresholdIntegral(mSrcBlue, mSrcBlue, windowSize, k);
             if (mAffectedChannel[2])
-                cv::adaptiveThreshold(channels.at(1), channels.at(1), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
+                adaptiveThresholdIntegral(mSrcGreen, mSrcGreen, windowSize, k);
             if (mAffectedChannel[3])
-                cv::adaptiveThreshold(channels.at(2), channels.at(2), 255,
-                                      cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
+                adaptiveThresholdIntegral(mSrcRed, mSrcRed, windowSize, k);
+            if (mAffectedChannel[4])
+                adaptiveThresholdIntegral(mSrcAlpha, mSrcAlpha, windowSize, k);
+        }
+
+        if (mAffectedChannel[1])
+        {
+            int from_to[] = { 0,0 };
+            cv::mixChannels(&mSrcBlue, 1, &dstMat, 1, from_to, 1);
+        }
+        if (mAffectedChannel[2])
+        {
+            int from_to[] = { 0,1 };
+            cv::mixChannels(&mSrcGreen, 1, &dstMat, 1, from_to, 1);
+        }
+        if (mAffectedChannel[3])
+        {
+            int from_to[] = { 0,2 };
+            cv::mixChannels(&mSrcRed, 1, &dstMat, 1, from_to, 1);
+        }
+        if (mAffectedChannel[4])
+        {
+            int from_to[] = { 0,3 };
+            cv::mixChannels(&mSrcAlpha, 1, &dstMat, 1, from_to, 1);
         }
     }
-    if (mThresholdMode == 0)
-    {
-        if (mAffectedChannel[4])
-            cv::threshold(channels.at(3), channels.at(3), 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    }
-    else
-    {
-        if (mAffectedChannel[4])
-            cv::adaptiveThreshold(channels.at(3), channels.at(3), 255,
-                                  cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 5);
-    }
-
-    cv::merge(channels, srcMat);
 
     return i;
 }
