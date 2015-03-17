@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -23,6 +23,8 @@
 
 #include "filter.h"
 #include "../imgproc/types.h"
+#include "../imgproc/util.h"
+#include "../imgproc/imagehistogram.h"
 
 Filter::Filter()
 {
@@ -48,50 +50,22 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    double histogram[256];
-    register int totalPixels;
-    register double totalWeightedPixels;
-    register double cumulatedPixels;
-    double weightedLUT[256];
-    register int gray;
-    register BGRA * srcBits;
-    register BGRA * dstBits;
-    register unsigned int gR = .2126 * 0x10000;
-    register unsigned int gG = .7152 * 0x10000;
-    register unsigned int gB = .0722 * 0x10000;
     QImage i(inputImage.width(), inputImage.height(), QImage::Format_ARGB32);
-    unsigned char mLut[256];
-
-    memset(histogram, 0, 256 * sizeof(double));
-    totalPixels = inputImage.width() * inputImage.height();
-    totalWeightedPixels = 0.0;
-    srcBits = (BGRA*)inputImage.bits();
-
-    // Make Weighted alpha LUT
-    for (int i = 0; i < 256; i++)
-        weightedLUT[i] = pow(i / 255.0, 4);
 
     // Make histogram
-    for (int i = 0; i < totalPixels; i++)
-    {
-        gray = (srcBits->r * gR >> 16) + (srcBits->g * gG >> 16) + (srcBits->b * gB >> 16);
-        histogram[gray] += weightedLUT[srcBits->a];
-        totalWeightedPixels += weightedLUT[srcBits->a];
-        srcBits++;
-    }
+    ImageHistogram ih;
+    ih.computeHistogram(inputImage.bits(), inputImage.width(), inputImage.height(),
+                        ImageHistogram::Luma, inputImage.bytesPerLine(), 4, true);
 
     // Calculate cumulative function
-    cumulatedPixels = 0.0;
-    for (int i = 0; i < 256; i++)
-    {
-        cumulatedPixels += histogram[i];
-        mLut[i] = round(cumulatedPixels * 255.0 / totalWeightedPixels);
-    }
+    unsigned char mLut[256];
+    ih.cumulativeFunction(ImageHistogram::Luma, mLut);
 
     // Apply cumulative function
-    srcBits = (BGRA*)inputImage.bits();
-    dstBits = (BGRA*)i.bits();
-    for (int i = 0; i < totalPixels; i++)
+    register BGRA * srcBits = (BGRA*)inputImage.bits();
+    register BGRA * dstBits = (BGRA*)i.bits();
+    register int totalPixels = inputImage.width() * inputImage.height();
+    while (totalPixels--)
     {
         dstBits->r = mLut[srcBits->r];
         dstBits->g = mLut[srcBits->g];

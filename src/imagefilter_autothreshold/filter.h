@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -49,17 +49,17 @@ public:
 
 private:
     int mThresholdMode;
-    int mRGBMode;
+    int mColorMode;
     bool mAffectedChannel[5];
 
 signals:
     void thresholdModeChanged(int m);
-    void rgbModeChanged(int m);
+    void colorModeChanged(int m);
     void affectedChannelChanged(int c, bool a);
 
 public slots:
     void setThresholdMode(int m);
-    void setRGBMode(int m);
+    void setColorMode(int m);
     void setAffectedChannel(int c, bool a);
 };
 

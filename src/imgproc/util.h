@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -45,8 +45,17 @@ namespace imgproc {
 (src).g = lut02[(src).g][(src).a]; \
 (src).r = lut02[(src).r][(src).a];
 
-#define AT_pixelIntensity(src) \
-    (lut01[(src).r][54] + lut01[(src).g][183] + lut02[(src).b][18])
+#define AT_pixelIntensity1(src) \
+    (lut01[(src).r][54] + lut01[(src).g][183] + lut01[(src).b][18])
+
+#define AT_pixelIntensity2(red, green, blue) \
+    (lut01[red][54] + lut01[green][183] + lut01[blue][18])
+
+#define AT_pixelIntensity3(src) \
+    ((int)(((src).r * .2126) + ((src).g * .7152) + ((src).b * .0722) + .5))
+
+#define AT_pixelIntensity4(red, green, blue) \
+    ((int)(((red) * .2126) + ((green) * .7152) + ((blue) * .0722) + .5))
 
 extern QStringList colorCompositionModeStrings;
 inline ColorCompositionMode colorCompositionModeStringToEnum(const QString & mode)

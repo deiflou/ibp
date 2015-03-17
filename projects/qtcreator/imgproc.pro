@@ -1,4 +1,4 @@
-# Copyright (C) 2014  Deif Lou
+# Copyright (C) 2014 - 2015 Deif Lou
 #
 # This file is part of Anitools
 #
@@ -26,10 +26,12 @@ win32 {
         DESTDIR = ../../lib/win32/imgproc/debug
         DLLDESTDIR = ../../bin/win32/debug
         LIBS += -L../../lib/win32/plugins/debug -lanitools.plugins
+        LIBS += -L../../lib/win32/misc/debug -lanitools.misc
     } else {
         DESTDIR = ../../lib/win32/imgproc/release
         DLLDESTDIR = ../../bin/win32/release
         LIBS += -L../../lib/win32/plugins/release -lanitools.plugins
+        LIBS += -L../../lib/win32/misc/release -lanitools.misc
     }
 }
 
@@ -46,7 +48,8 @@ SOURCES += \
     ../../src/imgproc/util.cpp \
     ../../src/imgproc/pixelblending.cpp \
     ../../src/imgproc/intensitymapping.cpp \
-    ../../src/imgproc/thresholding.cpp
+    ../../src/imgproc/thresholding.cpp \
+    ../../src/imgproc/imagehistogram.cpp
 
 HEADERS += \
     ../../src/imgproc/colorconversion.h \
@@ -58,4 +61,5 @@ HEADERS += \
     ../../src/imgproc/util.h \
     ../../src/imgproc/pixelblending.h \
     ../../src/imgproc/intensitymapping.h \
-    ../../src/imgproc/thresholding.h
+    ../../src/imgproc/thresholding.h \
+    ../../src/imgproc/imagehistogram.h

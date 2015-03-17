@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -35,19 +35,19 @@ FilterWidget::FilterWidget(QWidget *parent) :
     ui->mButtonAffectedChannelsGreen->hide();
     ui->mButtonAffectedChannelsBlue->hide();
 
-    ui->mContainerRGB->hide();
+    ui->mContainerLuma->hide();
     ui->mContainerRed->hide();
     ui->mContainerGreen->hide();
     ui->mContainerBlue->hide();
     ui->mContainerAlpha->hide();
 
-    mButtonAffectedChannel[0] = ui->mButtonAffectedChannelsRGB;
+    mButtonAffectedChannel[0] = ui->mButtonAffectedChannelsLuma;
     mButtonAffectedChannel[1] = ui->mButtonAffectedChannelsRed;
     mButtonAffectedChannel[2] = ui->mButtonAffectedChannelsGreen;
     mButtonAffectedChannel[3] = ui->mButtonAffectedChannelsBlue;
     mButtonAffectedChannel[4] = ui->mButtonAffectedChannelsAlpha;
 
-    mSpinThreshold[0] = ui->mSpinRGB;
+    mSpinThreshold[0] = ui->mSpinLuma;
     mSpinThreshold[1] = ui->mSpinRed;
     mSpinThreshold[2] = ui->mSpinGreen;
     mSpinThreshold[3] = ui->mSpinBlue;
@@ -59,20 +59,20 @@ FilterWidget::~FilterWidget()
     delete ui;
 }
 
-void FilterWidget::setRGBMode(int m)
+void FilterWidget::setColorMode(int m)
 {
-    if ((m == 0 && ui->mButtonRGBModeTight->isChecked()) ||
-        (m == 1 && ui->mButtonRGBModeIndependent->isChecked()))
+    if ((m == 0 && ui->mButtonColorModeLuma->isChecked()) ||
+        (m == 1 && ui->mButtonColorModeRGB->isChecked()))
         return;
 
     mEmitSignals = false;
     if (m == 0)
-        ui->mButtonRGBModeTight->setChecked(true);
+        ui->mButtonColorModeLuma->setChecked(true);
     else
-        ui->mButtonRGBModeIndependent->setChecked(true);
+        ui->mButtonColorModeRGB->setChecked(true);
     mEmitSignals = true;
 
-    emit rgbModeChanged(m);
+    emit colorModeChanged(m);
 }
 
 void FilterWidget::setAffectedChannel(int c, bool a)
@@ -99,62 +99,62 @@ void FilterWidget::setThreshold(int c, int t)
     emit thresholdChanged(c, t);
 }
 
-void FilterWidget::on_mButtonRGBModeTight_toggled(bool checked)
+void FilterWidget::on_mButtonColorModeLuma_toggled(bool checked)
 {
     if (!checked)
         return;
-    ui->mButtonAffectedChannelsRGB->show();
+    ui->mButtonAffectedChannelsLuma->show();
     ui->mButtonAffectedChannelsRed->hide();
     ui->mButtonAffectedChannelsGreen->hide();
     ui->mButtonAffectedChannelsBlue->hide();
-    ui->mContainerRGB->setVisible(ui->mButtonAffectedChannelsRGB->isChecked());
+    ui->mContainerLuma->setVisible(ui->mButtonAffectedChannelsLuma->isChecked());
     ui->mContainerRed->hide();
     ui->mContainerGreen->hide();
     ui->mContainerBlue->hide();
     if (mEmitSignals)
-        emit rgbModeChanged(0);
+        emit colorModeChanged(0);
 }
 
-void FilterWidget::on_mButtonRGBModeIndependent_toggled(bool checked)
+void FilterWidget::on_mButtonColorModeRGB_toggled(bool checked)
 {
     if (!checked)
         return;
-    ui->mButtonAffectedChannelsRGB->hide();
+    ui->mButtonAffectedChannelsLuma->hide();
     ui->mButtonAffectedChannelsRed->show();
     ui->mButtonAffectedChannelsGreen->show();
     ui->mButtonAffectedChannelsBlue->show();
-    ui->mContainerRGB->hide();
+    ui->mContainerLuma->hide();
     ui->mContainerRed->setVisible(ui->mButtonAffectedChannelsRed->isChecked());
     ui->mContainerGreen->setVisible(ui->mButtonAffectedChannelsGreen->isChecked());
     ui->mContainerBlue->setVisible(ui->mButtonAffectedChannelsBlue->isChecked());
     if (mEmitSignals)
-        emit rgbModeChanged(1);
+        emit colorModeChanged(1);
 }
 
-void FilterWidget::on_mButtonAffectedChannelsRGB_toggled(bool checked)
+void FilterWidget::on_mButtonAffectedChannelsLuma_toggled(bool checked)
 {
-    ui->mContainerRGB->setVisible(checked && ui->mButtonRGBModeTight->isChecked());
+    ui->mContainerLuma->setVisible(checked && ui->mButtonColorModeLuma->isChecked());
     if (mEmitSignals)
         emit affectedChannelChanged(0, checked);
 }
 
 void FilterWidget::on_mButtonAffectedChannelsRed_toggled(bool checked)
 {
-    ui->mContainerRed->setVisible(checked && ui->mButtonRGBModeIndependent->isChecked());
+    ui->mContainerRed->setVisible(checked && ui->mButtonColorModeRGB->isChecked());
     if (mEmitSignals)
         emit affectedChannelChanged(1, checked);
 }
 
 void FilterWidget::on_mButtonAffectedChannelsGreen_toggled(bool checked)
 {
-    ui->mContainerGreen->setVisible(checked && ui->mButtonRGBModeIndependent->isChecked());
+    ui->mContainerGreen->setVisible(checked && ui->mButtonColorModeRGB->isChecked());
     if (mEmitSignals)
         emit affectedChannelChanged(2, checked);
 }
 
 void FilterWidget::on_mButtonAffectedChannelsBlue_toggled(bool checked)
 {
-    ui->mContainerBlue->setVisible(checked && ui->mButtonRGBModeIndependent->isChecked());
+    ui->mContainerBlue->setVisible(checked && ui->mButtonColorModeRGB->isChecked());
     if (mEmitSignals)
         emit affectedChannelChanged(3, checked);
 }
@@ -166,16 +166,16 @@ void FilterWidget::on_mButtonAffectedChannelsAlpha_toggled(bool checked)
         emit affectedChannelChanged(4, checked);
 }
 
-void FilterWidget::on_mSliderRGB_valueChanged(int value)
+void FilterWidget::on_mSliderLuma_valueChanged(int value)
 {
-    ui->mSpinRGB->setValue(value);
+    ui->mSpinLuma->setValue(value);
     if (mEmitSignals)
         emit thresholdChanged(0, value);
 }
 
-void FilterWidget::on_mSpinRGB_valueChanged(int arg1)
+void FilterWidget::on_mSpinLuma_valueChanged(int arg1)
 {
-    ui->mSliderRGB->setValue(arg1);
+    ui->mSliderLuma->setValue(arg1);
     if (mEmitSignals)
         emit thresholdChanged(0, arg1);
 }

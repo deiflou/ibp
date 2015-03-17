@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -48,19 +48,19 @@ public:
     QWidget * widget(QWidget *parent = 0);
 
 private:
-    int mRGBMode;
+    int mColorMode;
     bool mAffectedChannel[5];
     int mThreshold[5];
     unsigned char mLUT[5][256];
     unsigned char mIdLUT[256];
 
 signals:
-    void rgbModeChanged(int m);
+    void colorModeChanged(int m);
     void affectedChannelChanged(int c, bool a);
     void thresholdChanged(int c, int t);
 
 public slots:
-    void setRGBMode(int m);
+    void setColorMode(int m);
     void setAffectedChannel(int c, bool a);
     void setThreshold(int c, int t);
 };

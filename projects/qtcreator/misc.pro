@@ -1,4 +1,4 @@
-# Copyright (C) 2014  Deif Lou
+# Copyright (C) 2014 - 2015 Deif Lou
 #
 # This file is part of Anitools
 #
@@ -40,7 +40,8 @@ SOURCES += \
     ../../src/misc/basesplineinterpolator1D.cpp \
     ../../src/misc/cubicsplineinterpolator1D.cpp \
     ../../src/misc/linearsplineinterpolator1D.cpp \
-    ../../src/misc/nearestneighborsplineinterpolator1D.cpp
+    ../../src/misc/nearestneighborsplineinterpolator1D.cpp \
+    ../../src/misc/probabilitymassfunction.cpp
 
 HEADERS += \
     ../../src/misc/util.h \
@@ -50,4 +51,5 @@ HEADERS += \
     ../../src/misc/basesplineinterpolator1D.h \
     ../../src/misc/cubicsplineinterpolator1D.h \
     ../../src/misc/linearsplineinterpolator1D.h \
-    ../../src/misc/nearestneighborsplineinterpolator1D.h
+    ../../src/misc/nearestneighborsplineinterpolator1D.h \
+    ../../src/misc/probabilitymassfunction.h

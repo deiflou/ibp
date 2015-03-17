@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -292,7 +292,7 @@ void blendDarkerColor(BGRA src, BGRA dst, BGRA & blend)
 {
     AT_PRE_BLEND
 
-    if (AT_pixelIntensity(src) < AT_pixelIntensity(dst))
+    if (AT_pixelIntensity1(src) < AT_pixelIntensity1(dst))
     {
         blend.r = lut01[src.r][dst.a];
         blend.g = lut01[src.g][dst.a];
@@ -385,7 +385,7 @@ void blendLighterColor(BGRA src, BGRA dst, BGRA & blend)
 {
     AT_PRE_BLEND
 
-    if (AT_pixelIntensity(src) > AT_pixelIntensity(dst))
+    if (AT_pixelIntensity1(src) > AT_pixelIntensity1(dst))
     {
         blend.r = lut01[src.r][dst.a];
         blend.g = lut01[src.g][dst.a];

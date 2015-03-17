@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -43,7 +43,7 @@ FilterWidget::~FilterWidget()
 
 void FilterWidget::setWorkingChannel(Filter::WorkingChannel s)
 {
-    if ((s == Filter::RGB && ui->mButtonWorkingChannelRGB->isChecked()) ||
+    if ((s == Filter::Luma && ui->mButtonWorkingChannelLuma->isChecked()) ||
         (s == Filter::Red && ui->mButtonWorkingChannelRed->isChecked()) ||
         (s == Filter::Green && ui->mButtonWorkingChannelGreen->isChecked()) ||
         (s == Filter::Blue && ui->mButtonWorkingChannelBlue->isChecked()) ||
@@ -51,8 +51,8 @@ void FilterWidget::setWorkingChannel(Filter::WorkingChannel s)
         return;
 
     mEmitSignals = false;
-    if (s == Filter::RGB)
-        ui->mButtonWorkingChannelRGB->setChecked(true);
+    if (s == Filter::Luma)
+        ui->mButtonWorkingChannelLuma->setChecked(true);
     else if (s == Filter::Red)
         ui->mButtonWorkingChannelRed->setChecked(true);
     else if (s == Filter::Green)
@@ -96,13 +96,13 @@ void FilterWidget::setInterpolationMode(Filter::InterpolationMode im)
     emit interpolationModeChanged(im);
 }
 
-void FilterWidget::on_mButtonWorkingChannelRGB_toggled(bool v)
+void FilterWidget::on_mButtonWorkingChannelLuma_toggled(bool v)
 {
     if (!v)
         return;
 
     if (mEmitSignals)
-        emit workingChannelChanged(Filter::RGB);
+        emit workingChannelChanged(Filter::Luma);
 }
 void FilterWidget::on_mButtonWorkingChannelRed_toggled(bool v)
 {

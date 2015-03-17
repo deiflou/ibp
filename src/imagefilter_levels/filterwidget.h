@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -59,7 +59,7 @@ public slots:
     void setOutputWhitePoint(double v);
 
 private slots:
-    void on_mButtonWorkingChannelRGB_toggled(bool c);
+    void on_mButtonWorkingChannelLuma_toggled(bool c);
     void on_mButtonWorkingChannelRed_toggled(bool c);
     void on_mButtonWorkingChannelGreen_toggled(bool c);
     void on_mButtonWorkingChannelBlue_toggled(bool c);

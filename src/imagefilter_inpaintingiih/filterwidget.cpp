@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -59,13 +59,16 @@ void FilterWidget::setMaskExpansion(int v)
 
 void FilterWidget::setOutputMode(Filter::OutputMode om)
 {
-    if ((om == Filter::CorrectedImage && ui->mButtonOutputModeCorrectedImage->isChecked()) ||
+    if ((om == Filter::CorrectedImageMode1 && ui->mButtonOutputModeCorrectedImageMode1->isChecked()) ||
+        (om == Filter::CorrectedImageMode2 && ui->mButtonOutputModeCorrectedImageMode2->isChecked()) ||
         (om == Filter::Mask && ui->mButtonOutputModeMask->isChecked()) ||
         (om == Filter::IIHCorrectionModel && ui->mButtonOutputModeIIHCorrectionModel->isChecked()))
         return;
     mEmitSignals = false;
-    if (om == Filter::CorrectedImage)
-        ui->mButtonOutputModeCorrectedImage->setChecked(true);
+    if (om == Filter::CorrectedImageMode1)
+        ui->mButtonOutputModeCorrectedImageMode1->setChecked(true);
+    else if (om == Filter::CorrectedImageMode2)
+        ui->mButtonOutputModeCorrectedImageMode2->setChecked(true);
     else if (om == Filter::Mask)
         ui->mButtonOutputModeMask->setChecked(true);
     else
@@ -102,12 +105,20 @@ void FilterWidget::on_mSpinMaskExpansion_valueChanged(int v)
         emit maskExpansionChanged(v);
 }
 
-void FilterWidget::on_mButtonOutputModeCorrectedImage_toggled(bool v)
+void FilterWidget::on_mButtonOutputModeCorrectedImageMode1_toggled(bool v)
 {
     if (!v)
         return;
     if (mEmitSignals)
-        emit outputModeChanged(Filter::CorrectedImage);
+        emit outputModeChanged(Filter::CorrectedImageMode1);
+}
+
+void FilterWidget::on_mButtonOutputModeCorrectedImageMode2_toggled(bool v)
+{
+    if (!v)
+        return;
+    if (mEmitSignals)
+        emit outputModeChanged(Filter::CorrectedImageMode2);
 }
 
 void FilterWidget::on_mButtonOutputModeMask_toggled(bool v)

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -29,7 +29,7 @@
 #include "../imgproc/intensitymapping.h"
 
 Filter::Filter() :
-    mWorkingChannel(RGB)
+    mWorkingChannel(Luma)
 {
     for (int i = 0; i < 5; i++)
     {
@@ -82,9 +82,9 @@ QImage Filter::process(const QImage &inputImage)
 
     while (totalPixels--)
     {
-        bits2->r = mLuts[RGB][mLuts[Red][bits->r]];
-        bits2->g = mLuts[RGB][mLuts[Green][bits->g]];
-        bits2->b = mLuts[RGB][mLuts[Blue][bits->b]];
+        bits2->r = mLuts[Luma][mLuts[Red][bits->r]];
+        bits2->g = mLuts[Luma][mLuts[Green][bits->g]];
+        bits2->b = mLuts[Luma][mLuts[Blue][bits->b]];
         bits2->a = mLuts[Alpha][bits->a];
         bits++;
         bits2++;
@@ -104,8 +104,8 @@ bool Filter::loadParameters(QSettings &s)
     bool ok;
 
     workingChannelStr = s.value("workingchannel", 0).toString();
-    if (workingChannelStr == "rgb")
-        workingChannel = RGB;
+    if (workingChannelStr == "luma")
+        workingChannel = Luma;
     else if (workingChannelStr == "red")
         workingChannel = Red;
     else if (workingChannelStr == "green")
@@ -117,7 +117,7 @@ bool Filter::loadParameters(QSettings &s)
     else
         return false;
 
-    levelsStr[RGB] = s.value("rgblevels", 0).toString();
+    levelsStr[Luma] = s.value("lumalevels", 0).toString();
     levelsStr[Red] = s.value("redlevels", 0).toString();
     levelsStr[Green] = s.value("greenlevels", 0).toString();
     levelsStr[Blue] = s.value("bluelevels", 0).toString();
@@ -171,7 +171,7 @@ bool Filter::loadParameters(QSettings &s)
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("workingchannel", mWorkingChannel == RGB ? "rgb" :
+    s.setValue("workingchannel", mWorkingChannel == Luma ? "luma" :
                                  mWorkingChannel == Red ? "red" :
                                  mWorkingChannel == Green ? "green" :
                                  mWorkingChannel == Blue ? "blue" :

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -21,6 +21,7 @@
 
 #include "filter.h"
 #include "../imgproc/types.h"
+#include "../imgproc/util.h"
 
 Filter::Filter()
 {
@@ -50,13 +51,10 @@ QImage Filter::process(const QImage &inputImage)
 
     register BGRA * bits = (BGRA*)i.bits();
     register int totalPixels = i.width() * i.height();
-    register unsigned int gR = .2126 * 0x10000;
-    register unsigned int gG = .7152 * 0x10000;
-    register unsigned int gB = .0722 * 0x10000;
 
     while (totalPixels--)
     {
-        bits->r = bits->g = bits->b = (bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16);
+        bits->r = bits->g = bits->b = AT_pixelIntensity4(bits->r, bits->g, bits->b);
         bits++;
     }
 

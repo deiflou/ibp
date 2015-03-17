@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -32,7 +32,7 @@
 
 Filter::Filter() :
     mFeatureSize(10),
-    mOutputMode(CorrectedImage)
+    mOutputMode(CorrectedImageMode1)
 {
 }
 
@@ -59,7 +59,7 @@ QImage Filter::process(const QImage &inputImage)
     if (inputImage.isNull() || inputImage.format() != QImage::Format_ARGB32)
         return inputImage;
 
-    register int x, y, w = inputImage.width(), h = inputImage.height(), mean = 0;
+    register int x, y, w = inputImage.width(), h = inputImage.height();
     register HSL * bitsHSL = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLsl;
     cv::Mat mlchannel(h, w, CV_8UC1);
     register unsigned char * mlchannelsl;
@@ -114,19 +114,19 @@ QImage Filter::process(const QImage &inputImage)
                          cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(size, size)));
     }
 
-    for (y = 0; y < h; y++)
+    if (mOutputMode == CorrectedImageMode1)
     {
-        mlchannelsl = mlchannel.ptr(y);
-        for (x = 0; x < w; x++)
+        register int mean = 0;
+        for (y = 0; y < h; y++)
         {
-            mean += *mlchannelsl;
-            mlchannelsl++;
+            mlchannelsl = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                mean += *mlchannelsl;
+                mlchannelsl++;
+            }
         }
-    }
-    mean /= w * h;
-
-    if (mOutputMode == CorrectedImage)
-    {
+        mean /= w * h;
         for (y = 0; y < h; y++)
         {
             bitsHSLsl = bitsHSL + y * w;
@@ -134,6 +134,20 @@ QImage Filter::process(const QImage &inputImage)
             for (x = 0; x < w; x++)
             {
                 bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mlchannelsl, 255)] * mean / 255, 255);
+                bitsHSLsl++;
+                mlchannelsl++;
+            }
+        }
+    }
+    else if (mOutputMode == CorrectedImageMode2)
+    {
+        for (y = 0; y < h; y++)
+        {
+            bitsHSLsl = bitsHSL + y * w;
+            mlchannelsl = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mlchannelsl, 255)], 255);
                 bitsHSLsl++;
                 mlchannelsl++;
             }
@@ -173,9 +187,11 @@ bool Filter::loadParameters(QSettings &s)
     if (!ok || featureSize > 200)
         return false;
 
-    outputModeStr = s.value("outputmode", "correctedimage").toString();
-    if (outputModeStr == "correctedimage")
-        outputMode = CorrectedImage;
+    outputModeStr = s.value("outputmode", "correctedimagemode1").toString();
+    if (outputModeStr == "correctedimagemode1")
+        outputMode = CorrectedImageMode1;
+    else if (outputModeStr == "correctedimagemode2")
+        outputMode = CorrectedImageMode2;
     else if (outputModeStr == "iihcorrectionmodel")
         outputMode = IIHCorrectionModel;
     else
@@ -190,7 +206,8 @@ bool Filter::loadParameters(QSettings &s)
 bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("featuresize", mFeatureSize);
-    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
+    s.setValue("outputmode", mOutputMode == CorrectedImageMode1 ? "correctedimagemode1" :
+                             mOutputMode == CorrectedImageMode2 ? "correctedimagemode2" : "iihcorrectionmodel");
     return true;
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -22,9 +22,10 @@
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"
+#include "../imgproc/util.h"
 
 Filter::Filter() :
-    mRGBMode(0)
+    mColorMode(0)
 {
     for (int i = 0; i < 5; i++)
     {
@@ -45,7 +46,7 @@ Filter::~Filter()
 ImageFilter *Filter::clone()
 {
     Filter * f = new Filter();
-    f->mRGBMode = mRGBMode;
+    f->mColorMode = mColorMode;
     for (int i = 0; i < 5; i++)
     {
         f->mAffectedChannel[i] = mAffectedChannel[i];
@@ -71,21 +72,16 @@ QImage Filter::process(const QImage &inputImage)
     unsigned char * mLuts[5];
     register int totalPixels = i.width() * i.height();
 
-    if (mRGBMode == 0)
+    if (mColorMode == 0)
     {
         if (!mAffectedChannel[0] && !mAffectedChannel[4])
             return i;
         mLuts[4] = mAffectedChannel[4] ? mLUT[4] : mIdLUT;
         if (mAffectedChannel[0])
         {
-            register int gray;
-            register unsigned int gR = .2126 * 0x10000;
-            register unsigned int gG = .7152 * 0x10000;
-            register unsigned int gB = .0722 * 0x10000;
             while (totalPixels--)
             {
-                gray = (bits->r * gR >> 16) + (bits->g * gG >> 16) + (bits->b * gB >> 16);
-                bits->r = bits->g = bits->b = mLUT[0][gray];
+                bits->r = bits->g = bits->b = mLUT[0][AT_pixelIntensity4(bits->r, bits->g, bits->b)];
                 bits->a = mLuts[4][bits->a];
                 bits++;
             }
@@ -124,18 +120,18 @@ QImage Filter::process(const QImage &inputImage)
 
 bool Filter::loadParameters(QSettings &s)
 {
-    QString rgbModeStr, affectedChannelStr;
-    int rgbMode;
+    QString colorModeStr, affectedChannelStr;
+    int colorMode;
     QStringList affectedChannelList;
     bool affectedChannel[5] =  { false };
     int threshold[5] = { 128 };
     bool ok;
 
-    rgbModeStr = s.value("rgbmode", "tight").toString();
-    if (rgbModeStr == "tight")
-        rgbMode = 0;
-    else if (rgbModeStr == "independent")
-        rgbMode = 1;
+    colorModeStr = s.value("colormode", "luma").toString();
+    if (colorModeStr == "luma")
+        colorMode = 0;
+    else if (colorModeStr == "rgb")
+        colorMode = 1;
     else
         return false;
 
@@ -144,7 +140,7 @@ bool Filter::loadParameters(QSettings &s)
     for (int i = 0; i < affectedChannelList.size(); i++)
     {
         affectedChannelStr = affectedChannelList.at(i);
-        if (affectedChannelList.at(i) == "rgb")
+        if (affectedChannelList.at(i) == "luma")
             affectedChannel[0] = true;
         else if (affectedChannelList.at(i) == "red")
             affectedChannel[1] = true;
@@ -158,7 +154,7 @@ bool Filter::loadParameters(QSettings &s)
             return false;
     }
 
-    threshold[0] = s.value("rgbthreshold", 128).toInt(&ok);
+    threshold[0] = s.value("lumathreshold", 128).toInt(&ok);
     if (!ok || threshold[0] < 0 || threshold[0] > 255)
         return false;
     threshold[1] = s.value("redthreshold", 128).toInt(&ok);
@@ -174,7 +170,7 @@ bool Filter::loadParameters(QSettings &s)
     if (!ok || threshold[4] < 0 || threshold[4] > 255)
         return false;
 
-    setRGBMode(rgbMode);
+    setColorMode(colorMode);
     for (int i = 0; i < 5; i++)
     {
         setAffectedChannel(i, affectedChannel[i]);
@@ -186,11 +182,11 @@ bool Filter::loadParameters(QSettings &s)
 
 bool Filter::saveParameters(QSettings &s)
 {
-    s.setValue("rgbmode", mRGBMode == 0 ? "tight" : "independent");
+    s.setValue("colormode", mColorMode == 0 ? "luma" : "rgb");
 
     QStringList affectedChannelList;
     if (mAffectedChannel[0])
-        affectedChannelList.append("rgb");
+        affectedChannelList.append("luma");
     if (mAffectedChannel[1])
         affectedChannelList.append("red");
     if (mAffectedChannel[2])
@@ -201,7 +197,7 @@ bool Filter::saveParameters(QSettings &s)
         affectedChannelList.append("alpha");
     s.setValue("affectedchannels", affectedChannelList.join(" "));
 
-    s.setValue("rgbthreshold", mThreshold[0]);
+    s.setValue("lumathreshold", mThreshold[0]);
     s.setValue("redthreshold", mThreshold[1]);
     s.setValue("greenthreshold", mThreshold[2]);
     s.setValue("bluethreshold", mThreshold[3]);
@@ -213,27 +209,27 @@ bool Filter::saveParameters(QSettings &s)
 QWidget *Filter::widget(QWidget *parent)
 {
     FilterWidget * fw = new FilterWidget(parent);
-    fw->setRGBMode(mRGBMode);
+    fw->setColorMode(mColorMode);
     for (int i = 0; i < 5; i++)
     {
         fw->setAffectedChannel(i, mAffectedChannel[i]);
         fw->setThreshold(i, mThreshold[i]);
     }
-    connect(this, SIGNAL(rgbModeChanged(int)), fw, SLOT(setRGBMode(int)));
+    connect(this, SIGNAL(colorModeChanged(int)), fw, SLOT(setColorMode(int)));
     connect(this, SIGNAL(affectedChannelChanged(int,bool)), fw, SLOT(setAffectedChannel(int,bool)));
     connect(this, SIGNAL(thresholdChanged(int,int)), fw, SLOT(setThreshold(int,int)));
-    connect(fw, SIGNAL(rgbModeChanged(int)), this, SLOT(setRGBMode(int)));
+    connect(fw, SIGNAL(colorModeChanged(int)), this, SLOT(setColorMode(int)));
     connect(fw, SIGNAL(affectedChannelChanged(int,bool)), this, SLOT(setAffectedChannel(int,bool)));
     connect(fw, SIGNAL(thresholdChanged(int,int)), this, SLOT(setThreshold(int,int)));
     return fw;
 }
 
-void Filter::setRGBMode(int m)
+void Filter::setColorMode(int m)
 {
-    if (m == mRGBMode)
+    if (m == mColorMode)
         return;
-    mRGBMode = m;
-    emit rgbModeChanged(m);
+    mColorMode = m;
+    emit colorModeChanged(m);
     emit parametersChanged();
 }
 

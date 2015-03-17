@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -49,20 +49,20 @@ private:
 
 signals:
     void thresholdModeChanged(int m);
-    void rgbModeChanged(int m);
+    void colorModeChanged(int m);
     void affectedChannelChanged(int c, bool a);
 
 public slots:
     void setThresholdMode(int m);
-    void setRGBMode(int m);
+    void setColorMode(int m);
     void setAffectedChannel(int c, bool a);
 
 private slots:
     void on_mButtonThresholdModeGlobal_toggled(bool checked);
     void on_mButtonThresholdModeLocal_toggled(bool checked);
-    void on_mButtonRGBModeTight_toggled(bool checked);
-    void on_mButtonRGBModeIndependent_toggled(bool checked);
-    void on_mButtonAffectedChannelsRGB_toggled(bool checked);
+    void on_mButtonColorModeLuma_toggled(bool checked);
+    void on_mButtonColorModeRGB_toggled(bool checked);
+    void on_mButtonAffectedChannelsLuma_toggled(bool checked);
     void on_mButtonAffectedChannelsRed_toggled(bool checked);
     void on_mButtonAffectedChannelsGreen_toggled(bool checked);
     void on_mButtonAffectedChannelsBlue_toggled(bool checked);

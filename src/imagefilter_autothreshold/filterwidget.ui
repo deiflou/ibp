@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>197</width>
+    <width>202</width>
     <height>378</height>
    </rect>
   </property>
@@ -101,7 +101,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>RGB Mode:</string>
+        <string>Color Mode:</string>
        </property>
       </widget>
      </item>
@@ -114,7 +114,7 @@
         <number>10</number>
        </property>
        <item>
-        <widget class="QToolButton" name="mButtonRGBModeTight">
+        <widget class="QToolButton" name="mButtonColorModeLuma">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -122,7 +122,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Tight</string>
+          <string>Luma</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -142,7 +142,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="mButtonRGBModeIndependent">
+        <widget class="QToolButton" name="mButtonColorModeRGB">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -150,7 +150,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Independent</string>
+          <string>RGB</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -184,7 +184,7 @@
         <number>10</number>
        </property>
        <item>
-        <widget class="QToolButton" name="mButtonAffectedChannelsRGB">
+        <widget class="QToolButton" name="mButtonAffectedChannelsLuma">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -192,7 +192,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>RGB</string>
+          <string>Luma</string>
          </property>
          <property name="checkable">
           <bool>true</bool>

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -27,6 +27,7 @@
 #include "filterwidget.h"
 #include "../imgproc/types.h"
 #include "../imgproc/lut.h"
+#include "../imgproc/util.h"
 #include "../misc/nearestneighborsplineinterpolator1D.h"
 #include "../misc/linearsplineinterpolator1D.h"
 #include "../misc/cubicsplineinterpolator1D.h"
@@ -84,9 +85,6 @@ QImage Filter::process(const QImage & inputImage)
     register BGRA * bits2 = (BGRA*)i.bits();
     register BGRA * bits3;
     register int totalPixels = i.width() * i.height();
-    register unsigned int gR = .2126 * 0x10000;
-    register unsigned int gG = .7152 * 0x10000;
-    register unsigned int gB = .0722 * 0x10000;
 
     if (qFuzzyIsNull(mPreblurRadius))
         bits3 = bits;
@@ -106,7 +104,7 @@ QImage Filter::process(const QImage & inputImage)
             bits2->r = bits->r;
             bits2->g = bits->g;
             bits2->b = bits->b;
-            bits2->a = lut01[bits->a][mLut[(bits3->r * gR >> 16) + (bits3->g * gG >> 16) + (bits3->b * gB >> 16)]];
+            bits2->a = lut01[bits->a][mLut[AT_pixelIntensity4(bits3->r, bits3->g, bits3->b)]];
             bits++;
             bits2++;
             bits3++;
@@ -115,7 +113,7 @@ QImage Filter::process(const QImage & inputImage)
         while (totalPixels--)
         {
             bits2->r = bits2->g = bits2->b =
-                    lut01[bits->a][mLut[(bits3->r * gR >> 16) + (bits3->g * gG >> 16) + (bits3->b * gB >> 16)]];
+                    lut01[bits->a][mLut[AT_pixelIntensity4(bits3->r, bits3->g, bits3->b)]];
             bits2->a = 255;
             bits++;
             bits2++;

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -49,7 +49,8 @@ public slots:
     void setOutputMode(Filter::OutputMode om);
 
 private slots:
-    void on_mButtonOutputModeCorrectedImage_toggled(bool c);
+    void on_mButtonOutputModeCorrectedImageMode1_toggled(bool c);
+    void on_mButtonOutputModeCorrectedImageMode2_toggled(bool c);
     void on_mButtonOutputModeIIHCorrectionModel_toggled(bool c);
 };
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -22,7 +22,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/ximgproc.hpp>
 #include <opencv2/photo.hpp>
-#include <QDebug>
+
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/lut.h"
@@ -36,7 +36,7 @@
 Filter::Filter() :
     mNoiseReduction(.0),
     mMaskExpansion(0),
-    mOutputMode(CorrectedImage)
+    mOutputMode(CorrectedImageMode1)
 {
 }
 
@@ -65,7 +65,7 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage i;
-    register int x, y, w = inputImage.width(), h = inputImage.height(), mean = 0;
+    register int x, y, w = inputImage.width(), h = inputImage.height();
     register HSL * bitsHSL = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLsl;
     cv::Mat mlchannel(h, w, CV_8UC1);
     cv::Mat mlmask(h, w, CV_8UC1);
@@ -186,17 +186,18 @@ QImage Filter::process(const QImage &inputImage)
         cv::inpaint(mlchannel, mlmask, mliihc, 1, cv::INPAINT_NS);
     }
 
-    // Compute mean
-    for (y = 0; y < h; y++)
+    if (mOutputMode == CorrectedImageMode1)
     {
-        mliihcsl = mliihc.ptr(y);
-        for (x = 0; x < w; x++, mliihcsl++)
-            mean += *mliihcsl;
-    }
-    mean /= w * h;
+        // Compute mean
+        register int mean = 0;
+        for (y = 0; y < h; y++)
+        {
+            mliihcsl = mliihc.ptr(y);
+            for (x = 0; x < w; x++, mliihcsl++)
+                mean += *mliihcsl;
+        }
+        mean /= w * h;
 
-    if (mOutputMode == CorrectedImage)
-    {
         for (y = 0; y < h; y++)
         {
             bitsHSLsl = bitsHSL + y * w;
@@ -204,6 +205,20 @@ QImage Filter::process(const QImage &inputImage)
             for (x = 0; x < w; x++)
             {
                 bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mlchannelsl, 255)] * mean / 255, 255);
+                bitsHSLsl++;
+                mlchannelsl++;
+            }
+        }
+    }
+    else if (mOutputMode == CorrectedImageMode2)
+    {
+        for (y = 0; y < h; y++)
+        {
+            bitsHSLsl = bitsHSL + y * w;
+            mlchannelsl = mliihc.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mlchannelsl, 255)], 255);
                 bitsHSLsl++;
                 mlchannelsl++;
             }
@@ -249,8 +264,10 @@ bool Filter::loadParameters(QSettings &s)
         return false;
 
     outputModeStr = s.value("outputmode", "correctedimage").toString();
-    if (outputModeStr == "correctedimage")
-        outputMode = CorrectedImage;
+    if (outputModeStr == "correctedimagemode1")
+        outputMode = CorrectedImageMode1;
+    else if (outputModeStr == "correctedimagemode2")
+        outputMode = CorrectedImageMode2;
     else if (outputModeStr == "mask")
         outputMode = Mask;
     else if (outputModeStr == "iihcorrectionmodel")
@@ -269,7 +286,8 @@ bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("noisereduction", mNoiseReduction);
     s.setValue("maskexpansion", mMaskExpansion);
-    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" :
+    s.setValue("outputmode", mOutputMode == CorrectedImageMode1 ? "correctedimagemode1" :
+                             mOutputMode == CorrectedImageMode2 ? "correctedimagemode2" :
                              mOutputMode == Mask ? "mask" : "iihcorrectionmodel");
     return true;
 }

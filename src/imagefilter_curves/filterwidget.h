@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -57,7 +57,7 @@ public slots:
     void setInterpolationMode(Filter::InterpolationMode im);
 
 private slots:
-    void on_mButtonWorkingChannelRGB_toggled(bool v);
+    void on_mButtonWorkingChannelLuma_toggled(bool v);
     void on_mButtonWorkingChannelRed_toggled(bool v);
     void on_mButtonWorkingChannelGreen_toggled(bool v);
     void on_mButtonWorkingChannelBlue_toggled(bool v);

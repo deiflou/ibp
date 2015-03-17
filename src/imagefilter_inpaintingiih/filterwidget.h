@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -57,7 +57,8 @@ private slots:
     void on_mSpinNoiseReduction_valueChanged(double v);
     void on_mSliderMaskExpansion_valueChanged(int v);
     void on_mSpinMaskExpansion_valueChanged(int v);
-    void on_mButtonOutputModeCorrectedImage_toggled(bool v);
+    void on_mButtonOutputModeCorrectedImageMode1_toggled(bool v);
+    void on_mButtonOutputModeCorrectedImageMode2_toggled(bool v);
     void on_mButtonOutputModeMask_toggled(bool v);
     void on_mButtonOutputModeIIHCorrectionModel_toggled(bool v);
 };

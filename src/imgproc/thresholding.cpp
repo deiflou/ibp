@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -42,8 +42,8 @@ void adaptiveThresholdIntegral(cv::InputArray _src, cv::OutputArray _dst, int bl
     const int radius = blockSize >> 1;
     const double kappa = k, R = 128.;
     register unsigned char * bitsSrc, * bitsDst;
-    register float * scanlineIntegralTop, * scanlineIntegralBottom, * bitsIntegral;
-    register double * scanlineIntegralSqTop, * scanlineIntegralSqBottom, * bitsIntegralSq;
+    register float * scanlineIntegralTop, * scanlineIntegralBottom;
+    register double * scanlineIntegralSqTop, * scanlineIntegralSqBottom;
     register int x, y, w = src.cols, h = src.rows, rp = w - 1, bp = h - 1, x0, x1, y0, y1, n;
     register int mean, stdDev;
 

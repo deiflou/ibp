@@ -99,7 +99,7 @@
         <number>10</number>
        </property>
        <item>
-        <widget class="QToolButton" name="mButtonOutputModeCorrectedImage">
+        <widget class="QToolButton" name="mButtonOutputModeCorrectedImageMode1">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -107,13 +107,41 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Corrected Image</string>
+          <string>Corrected Image (Mode 1)</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
          </property>
          <property name="checked">
           <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <property name="class" stdset="0">
+          <string>cFlatOptionButton</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="mButtonOutputModeCorrectedImageMode2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Corrected Image (Mode 2)</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
          </property>
          <property name="autoExclusive">
           <bool>true</bool>

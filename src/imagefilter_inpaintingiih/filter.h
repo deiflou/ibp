@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -40,7 +40,8 @@ class Filter : public ImageFilter
 public:
     enum OutputMode
     {
-        CorrectedImage,
+        CorrectedImageMode1,
+        CorrectedImageMode2,
         Mask,
         IIHCorrectionModel
     };

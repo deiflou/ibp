@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -27,8 +27,6 @@
 #include <tina/medical/medDef.h>
 #include <tina/medical/medPro.h>
 #include <Eigen/Dense>
-
-#include <QDebug>
 
 #include "filter.h"
 #include "filterwidget.h"
@@ -68,7 +66,7 @@ Imrect * modified_xy_normf(Imrect *im, double constant, double sigma, double thr
 Filter::Filter() :
     mRefinement(10),
     mSmoothness(10),
-    mOutputMode(CorrectedImage)
+    mOutputMode(CorrectedImageMode1)
 {
 }
 
@@ -241,7 +239,7 @@ QImage Filter::process(const QImage &inputImage)
         mlchannel = mInitial;
 
     // Make output image
-    if (mOutputMode == CorrectedImage)
+    if (mOutputMode == CorrectedImageMode1)
     {
         // Divide lightness channel
         for (y = 0; y < h; y++)
@@ -251,6 +249,21 @@ QImage Filter::process(const QImage &inputImage)
             for (x = 0; x < w; x++)
             {
                 bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mbits8, 255)] * mean / 255, 255);
+                bitsHSLsl++;
+                mbits8++;
+            }
+        }
+    }
+    else if (mOutputMode == CorrectedImageMode2)
+    {
+        // Divide lightness channel
+        for (y = 0; y < h; y++)
+        {
+            bitsHSLsl = bitsHSL + y * w;
+            mbits8 = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mbits8, 255)], 255);
                 bitsHSLsl++;
                 mbits8++;
             }
@@ -295,9 +308,11 @@ bool Filter::loadParameters(QSettings &s)
     if (!ok || smoothness > 100 || smoothness < 1)
         return false;
 
-    outputModeStr = s.value("outputmode", "correctedimage").toString();
-    if (outputModeStr == "correctedimage")
-        outputMode = CorrectedImage;
+    outputModeStr = s.value("outputmode", "correctedimagemode1").toString();
+    if (outputModeStr == "correctedimagemode1")
+        outputMode = CorrectedImageMode2;
+    else if (outputModeStr == "correctedimagemode2")
+        outputMode = CorrectedImageMode1;
     else if (outputModeStr == "iihcorrectionmodel")
         outputMode = IIHCorrectionModel;
     else
@@ -314,7 +329,8 @@ bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("refinement", mRefinement);
     s.setValue("smoothness", mSmoothness);
-    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
+    s.setValue("outputmode", mOutputMode == CorrectedImageMode1 ? "correctedimagemode1" :
+                             mOutputMode == CorrectedImageMode2 ? "correctedimagemode2" : "iihcorrectionmodel");
     return true;
 }
 

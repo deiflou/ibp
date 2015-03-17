@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -26,8 +26,6 @@
 #include <itkBSplineControlPointImageFilter.h>
 #include <Eigen/Dense>
 
-#include <QDebug>
-
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/lut.h"
@@ -39,7 +37,7 @@
 
 Filter::Filter() :
     mGridSize(3),
-    mOutputMode(CorrectedImage)
+    mOutputMode(CorrectedImageMode1)
 {
 }
 
@@ -168,7 +166,6 @@ QImage Filter::process(const QImage &inputImage)
     catch (itk::ExceptionObject &excep)
     {
         Q_UNUSED(excep)
-        qDebug() << "Exception caught !";
         return inputImage;
     }
 
@@ -265,7 +262,7 @@ QImage Filter::process(const QImage &inputImage)
         mlchannel = mInitial;
 
     // Make output image
-    if (mOutputMode == CorrectedImage)
+    if (mOutputMode == CorrectedImageMode1)
     {
         // Divide lightness channel
         for (y = 0; y < h; y++)
@@ -275,6 +272,21 @@ QImage Filter::process(const QImage &inputImage)
             for (x = 0; x < w; x++)
             {
                 bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mbits8, 255)] * mean / 255, 255);
+                bitsHSLsl++;
+                mbits8++;
+            }
+        }
+    }
+    else if (mOutputMode == CorrectedImageMode2)
+    {
+        // Divide lightness channel
+        for (y = 0; y < h; y++)
+        {
+            bitsHSLsl = bitsHSL + y * w;
+            mbits8 = mlchannel.ptr(y);
+            for (x = 0; x < w; x++)
+            {
+                bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, *mbits8, 255)], 255);
                 bitsHSLsl++;
                 mbits8++;
             }
@@ -315,9 +327,11 @@ bool Filter::loadParameters(QSettings &s)
     if (!ok || gridSize > 10 || gridSize < 1)
         return false;
 
-    outputModeStr = s.value("outputmode", "correctedimage").toString();
-    if (outputModeStr == "correctedimage")
-        outputMode = CorrectedImage;
+    outputModeStr = s.value("outputmode", "correctedimagemode1").toString();
+    if (outputModeStr == "correctedimagemode1")
+        outputMode = CorrectedImageMode1;
+    else if (outputModeStr == "correctedimagemode2")
+        outputMode = CorrectedImageMode2;
     else if (outputModeStr == "iihcorrectionmodel")
         outputMode = IIHCorrectionModel;
     else
@@ -332,7 +346,8 @@ bool Filter::loadParameters(QSettings &s)
 bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("gridsize", mGridSize);
-    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
+    s.setValue("outputmode", mOutputMode == CorrectedImageMode1 ? "correctedimagemode1" :
+                             mOutputMode == CorrectedImageMode2 ? "correctedimagemode2" : "iihcorrectionmodel");
     return true;
 }
 

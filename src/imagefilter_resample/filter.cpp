@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include <opencv2/imgproc.hpp>
-#include <QDebug>
+
 #include "filter.h"
 #include "filterwidget.h"
 #include "../imgproc/types.h"

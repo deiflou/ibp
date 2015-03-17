@@ -1,4 +1,4 @@
-# Copyright (C) 2014  Deif Lou
+# Copyright (C) 2014 - 2015 Deif Lou
 #
 # This file is part of Anitools
 #

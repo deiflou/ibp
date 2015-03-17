@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -43,15 +43,15 @@ FilterWidget::~FilterWidget()
 
 void FilterWidget::setWorkingChannel(Filter::WorkingChannel s)
 {
-    if ((s == Filter::RGB && ui->mButtonWorkingChannelRGB->isChecked()) ||
+    if ((s == Filter::Luma && ui->mButtonWorkingChannelLuma->isChecked()) ||
         (s == Filter::Red && ui->mButtonWorkingChannelRed->isChecked()) ||
         (s == Filter::Green && ui->mButtonWorkingChannelGreen->isChecked()) ||
         (s == Filter::Blue && ui->mButtonWorkingChannelBlue->isChecked()) ||
         (s == Filter::Alpha && ui->mButtonWorkingChannelAlpha->isChecked()))
         return;
     mEmitSignals = false;
-    if (s == Filter::RGB)
-        ui->mButtonWorkingChannelRGB->setChecked(true);
+    if (s == Filter::Luma)
+        ui->mButtonWorkingChannelLuma->setChecked(true);
     else if (s == Filter::Red)
         ui->mButtonWorkingChannelRed->setChecked(true);
     else if (s == Filter::Green)
@@ -114,12 +114,12 @@ void FilterWidget::setOutputWhitePoint(double v)
     emit outputWhitePointChanged(v);
 }
 
-void FilterWidget::on_mButtonWorkingChannelRGB_toggled(bool c)
+void FilterWidget::on_mButtonWorkingChannelLuma_toggled(bool c)
 {
     if (!c)
         return;
     if (mEmitSignals)
-        emit workingChannelChanged(Filter::RGB);
+        emit workingChannelChanged(Filter::Luma);
 }
 
 void FilterWidget::on_mButtonWorkingChannelRed_toggled(bool c)

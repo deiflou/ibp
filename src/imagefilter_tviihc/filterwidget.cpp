@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -59,12 +59,15 @@ void FilterWidget::setSmoothness(int v)
 
 void FilterWidget::setOutputMode(Filter::OutputMode om)
 {
-    if ((om == Filter::CorrectedImage && ui->mButtonOutputModeCorrectedImage->isChecked()) ||
+    if ((om == Filter::CorrectedImageMode1 && ui->mButtonOutputModeCorrectedImageMode1->isChecked()) ||
+        (om == Filter::CorrectedImageMode2 && ui->mButtonOutputModeCorrectedImageMode2->isChecked()) ||
         (om == Filter::IIHCorrectionModel && ui->mButtonOutputModeIIHCorrectionModel->isChecked()))
         return;
     mEmitSignals = false;
-    if (om == Filter::CorrectedImage)
-        ui->mButtonOutputModeCorrectedImage->setChecked(true);
+    if (om == Filter::CorrectedImageMode1)
+        ui->mButtonOutputModeCorrectedImageMode1->setChecked(true);
+    else if (om == Filter::CorrectedImageMode2)
+        ui->mButtonOutputModeCorrectedImageMode2->setChecked(true);
     else
         ui->mButtonOutputModeIIHCorrectionModel->setChecked(true);
     mEmitSignals = true;
@@ -99,12 +102,20 @@ void FilterWidget::on_mSpinSmoothness_valueChanged(int arg1)
         emit smoothnessChanged(arg1);
 }
 
-void FilterWidget::on_mButtonOutputModeCorrectedImage_toggled(bool c)
+void FilterWidget::on_mButtonOutputModeCorrectedImageMode1_toggled(bool c)
 {
     if (!c)
         return;
     if (mEmitSignals)
-        emit outputModeChanged(Filter::CorrectedImage);
+        emit outputModeChanged(Filter::CorrectedImageMode1);
+}
+
+void FilterWidget::on_mButtonOutputModeCorrectedImageMode2_toggled(bool c)
+{
+    if (!c)
+        return;
+    if (mEmitSignals)
+        emit outputModeChanged(Filter::CorrectedImageMode2);
 }
 
 void FilterWidget::on_mButtonOutputModeIIHCorrectionModel_toggled(bool c)

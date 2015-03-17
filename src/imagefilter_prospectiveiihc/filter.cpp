@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -28,7 +28,7 @@
 
 Filter::Filter() :
     mImage(),
-    mOutputMode(CorrectedImage)
+    mOutputMode(CorrectedImageMode1)
 {
 }
 
@@ -60,29 +60,50 @@ QImage Filter::process(const QImage &inputImage)
         return inputImage;
 
     QImage bg = mImage.scaled(inputImage.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    register int w = inputImage.width(), h = inputImage.height(), mean = 0, totalPixels = w * h;
-    register HSL * bitsHSL = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLsl;
-    register HSL * bitsHSLbg = (HSL *)malloc(w * h * sizeof(HSL)), * bitsHSLbgsl;
+    register int w = inputImage.width(), h = inputImage.height(), totalPixels = w * h;
+    register HSL * bitsHSL = 0, * bitsHSLsl, * bitsHSLbg = 0, * bitsHSLbgsl;
 
+    bitsHSL = (HSL *)malloc(w * h * sizeof(HSL));
+    if (!bitsHSL)
+        return inputImage;
+    bitsHSLbg = (HSL *)malloc(w * h * sizeof(HSL));
+    if (!bitsHSLbg)
+    {
+        free(bitsHSL);
+        return inputImage;
+    }
     convertBGRToHSL(inputImage.bits(), (unsigned char *)bitsHSL, w * h);
     convertBGRToHSL(bg.bits(), (unsigned char *)bitsHSLbg, w * h);
 
     bitsHSLbgsl = bitsHSLbg;
-    while (totalPixels--)
-    {
-        mean += bitsHSLbgsl->l;
-        bitsHSLbgsl++;
-    }
-    mean /= w * h;
-
     bitsHSLsl = bitsHSL;
-    bitsHSLbgsl = bitsHSLbg;
     totalPixels = w * h;
-    if (mOutputMode == CorrectedImage)
+    if (mOutputMode == CorrectedImageMode1)
     {
+        register int mean = 0;
+        bitsHSLbgsl = bitsHSLbg;
+        totalPixels = w * h;
+        while (totalPixels--)
+        {
+            mean += bitsHSLbgsl->l;
+            bitsHSLbgsl++;
+        }
+        mean /= w * h;
+
+        bitsHSLbgsl = bitsHSLbg;
+        totalPixels = w * h;
         while (totalPixels--)
         {
             bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, bitsHSLbgsl->l, 255)] * mean / 255, 255);
+            bitsHSLsl++;
+            bitsHSLbgsl++;
+        }
+    }
+    else if (mOutputMode == CorrectedImageMode2)
+    {
+        while (totalPixels--)
+        {
+            bitsHSLsl->l = AT_clamp(0, lut02[bitsHSLsl->l][AT_clamp(1, bitsHSLbgsl->l, 255)], 255);
             bitsHSLsl++;
             bitsHSLbgsl++;
         }
@@ -116,9 +137,11 @@ bool Filter::loadParameters(QSettings &s)
     if (!v.isValid() || !v.canConvert<QImage>())
         return false;
 
-    outputModeStr = s.value("outputmode", "correctedimage").toString();
-    if (outputModeStr == "correctedimage")
-        outputMode = CorrectedImage;
+    outputModeStr = s.value("outputmode", "correctedimagemode1").toString();
+    if (outputModeStr == "correctedimagemode1")
+        outputMode = CorrectedImageMode1;
+    else if (outputModeStr == "correctedimagemode2")
+        outputMode = CorrectedImageMode2;
     else if (outputModeStr == "iihcorrectionmodel")
         outputMode = IIHCorrectionModel;
     else
@@ -133,7 +156,8 @@ bool Filter::loadParameters(QSettings &s)
 bool Filter::saveParameters(QSettings &s)
 {
     s.setValue("image", mImage);
-    s.setValue("outputmode", mOutputMode == CorrectedImage ? "correctedimage" : "iihcorrectionmodel");
+    s.setValue("outputmode", mOutputMode == CorrectedImageMode1 ? "correctedimagemode1" :
+                             mOutputMode == CorrectedImageMode2 ? "correctedimagemode2" : "iihcorrectionmodel");
     return true;
 }
 

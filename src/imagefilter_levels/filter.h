@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Deif Lou
+** Copyright (C) 2014 - 2015 Deif Lou
 **
 ** This file is part of Anitools
 **
@@ -40,7 +40,7 @@ class Filter : public ImageFilter
 public:
     enum WorkingChannel
     {
-        RGB, Red, Green, Blue, Alpha
+        Luma, Red, Green, Blue, Alpha
     };
     enum LevelsParameter
     {
