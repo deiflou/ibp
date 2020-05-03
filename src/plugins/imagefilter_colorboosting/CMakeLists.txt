@@ -1,0 +1,43 @@
+option(
+    IBP_BUILD_PLUGIN_IMAGEFILTER_COLORBOOSTING
+    "Build the \"color boosting\" plugin"
+    ON
+)
+
+if(IBP_BUILD_PLUGIN_IMAGEFILTER_COLORBOOSTING)
+    find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
+    add_library(
+        ibp.imagefilter.colorboosting
+        SHARED
+        filter.cpp
+        main.cpp
+        filter.h
+    )
+
+    target_include_directories(
+        ibp.imagefilter.colorboosting
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/ibp/
+    )
+
+    target_link_libraries(
+        ibp.imagefilter.colorboosting
+        PUBLIC
+        ibp.imgproc
+        Qt5::Widgets
+        opencv_photo
+    )
+    
+    set_target_properties(
+        ibp.imagefilter.colorboosting
+        PROPERTIES
+        OUTPUT_NAME ibp.imagefilter.colorboosting
+        VERSION 0.1.0
+        AUTOMOC ON
+        RUNTIME_OUTPUT_DIRECTORY ${IBP_PLUGINS_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY ${IBP_PLUGINS_OUTPUT_DIRECTORY}
+    )
+    
+    install(TARGETS ibp.imagefilter.colorboosting)
+endif()

@@ -1,0 +1,5 @@
+add_subdirectory(misc)
+add_subdirectory(plugins)
+add_subdirectory(imgproc)
+add_subdirectory(widgets)
+add_subdirectory(imagebatchprocessor)
